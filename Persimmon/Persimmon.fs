@@ -10,6 +10,7 @@ type AssertionResult<'T> =
 
 type TestBuilder(description: string) =
   member __.Return(()) = Success ()
+  member __.Return(x) = Success x
   member __.ReturnFrom(x, _) = x
   member __.Source(x: AssertionResult<unit>) = (x, UnitType)
   member __.Source(x: AssertionResult<_>) = (x, ValueType)
