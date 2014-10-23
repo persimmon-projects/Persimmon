@@ -1,0 +1,10 @@
+branches:
+  except:
+    - gh-pages
+
+configuration:
+  - Release
+
+test:
+  assemblies:
+    - '*\*.Tests.dll'
