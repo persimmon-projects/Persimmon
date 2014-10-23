@@ -46,3 +46,39 @@ module PersimmonTest =
       do! assertEquals v 3
     }
     |> shouldFail ("Expect: 1\nActual: 2", [])
+
+  let table = Map.ofList [("x", "y"); ("y", "z"); ("z", "other")]
+
+  let test1 = test "success" {
+    let value = table |> Map.find "x"
+    do! assertEquals "y" value
+    return value
+  }
+
+  let test2 = test "more success" {
+    let! res = test1
+    let value = table |> Map.find res
+    do! assertEquals "z" value
+    return value
+  }
+
+  let test3 = test "failure" {
+    let! res = test2
+    let value = table |> Map.find res
+    do! assertEquals "x" value
+    return value
+  }
+
+  let test4 = test "more failure" {
+    let! res = test3
+    let value = table |> Map.find res
+    do! assertEquals "y" value // not execute
+    return value
+  }
+
+  [<Test>]
+  let ``test should be able to compose`` () =
+    test1 |> shouldSucceed "y"
+    test2 |> shouldSucceed "z"
+    test3 |> shouldFail ("Expect: \"x\"\nActual: \"other\"", [])
+    test4 |> shouldFail ("Expect: \"x\"\nActual: \"other\"", [])
