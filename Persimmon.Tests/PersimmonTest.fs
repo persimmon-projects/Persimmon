@@ -1,4 +1,4 @@
-﻿namespace Parsimmon.Tests
+﻿namespace Persimmon.Tests
 
 open Persimmon
 open NUnit.Framework
