@@ -19,9 +19,8 @@ let runPersimmonTest (output: Writer, error: Writer) (test: obj) =
   if case.Tag = successCase.Tag then
     0
   else
-    let head, tail = value.[0] :?> NonEmptyList<string>
-    output.WriteLine(head)
-    tail |> List.iter (output.WriteLine)
+    let errs = value.[0] :?> NonEmptyList<string>
+    errs |> NonEmptyList.iter (output.WriteLine)
     1
 
 let persimmonTest (m: MemberInfo) =

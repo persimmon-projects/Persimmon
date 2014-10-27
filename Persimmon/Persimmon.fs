@@ -2,6 +2,13 @@
 
 type NonEmptyList<'T> = 'T * 'T list
 
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+module NonEmptyList =
+  let iter action (list: NonEmptyList<'T>) =
+    let head, tail = list
+    action head
+    List.iter action tail
+
 type ReturnType = UnitType | ValueType
 
 type AssertionResult<'T> =
