@@ -21,12 +21,19 @@ type AssertionResult<'T> =
   | Success of 'T
   | Failure of NonEmptyList<string>
 
+type TestResult<'T> = {
+  Name: string
+  AssertionResult: AssertionResult<'T>
+}
+
 type TestBuilder(description: string) =
   member __.Return(()) = Success ()
   member __.Return(x) = Success x
   member __.ReturnFrom(x, _) = x
   member __.Source(x: AssertionResult<unit>) = (x, UnitType)
   member __.Source(x: AssertionResult<_>) = (x, ValueType)
+  member __.Source(x: TestResult<unit>) = (x.AssertionResult, UnitType)
+  member __.Source(x: TestResult<_>) = (x.AssertionResult, ValueType)
   member __.Bind(x, f: 'T -> AssertionResult<_>) =
     match x with
     | (Success x, _) -> f x
@@ -36,7 +43,7 @@ type TestBuilder(description: string) =
       | Failure errs2 -> Failure (NonEmptyList.append errs1 errs2)
     | (Failure xs, ValueType) -> Failure xs
   member __.Delay(f: unit -> AssertionResult<_>) = f
-  member __.Run(f) = f ()
+  member __.Run(f) = { Name = description; AssertionResult = f () }
 
 let test description = TestBuilder(description)
  

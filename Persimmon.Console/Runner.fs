@@ -14,11 +14,23 @@ let successCase, failureCase =
   | [| success; failure |] -> success, failure
   | _ -> failwith "oops!"
 
+let getTestResultFields typeArgs =
+  let typ = typedefof<TestResult<_>>
+  let typ = typ.MakeGenericType(typeArgs)
+  match typ |> FSharpType.GetRecordFields with
+  | [| name; result |] -> name, result
+  | _ -> failwith "oops!"
+
 let runPersimmonTest (output: Writer, error: Writer) (test: obj) =
-  let case, value = FSharpValue.GetUnionFields(test, test.GetType())
+  let typeArgs = test.GetType().GetGenericArguments()
+  let nameField, resultField = getTestResultFields typeArgs
+  let result = FSharpValue.GetRecordField(test, resultField)
+  let case, value = FSharpValue.GetUnionFields(result, result.GetType())
   if case.Tag = successCase.Tag then
     0
   else
+    let name = FSharpValue.GetRecordField(test, nameField)
+    output.WriteLine("Assertion failed: " + string name)
     let errs = value.[0] :?> NonEmptyList<string>
     errs |> NonEmptyList.iter (output.WriteLine)
     1
@@ -27,7 +39,7 @@ let persimmonTest (m: MemberInfo) =
   // todo: プロパティやフィールドも拾う？
   // todo: list, seq, arrayも拾う？
   match m with
-  | :? MethodInfo as m when m.ReturnType.IsGenericType && m.ReturnType.GetGenericTypeDefinition() = typedefof<AssertionResult<_>> ->
+  | :? MethodInfo as m when m.ReturnType.IsGenericType && m.ReturnType.GetGenericTypeDefinition() = typedefof<TestResult<_>> ->
       Some (m.Invoke(null, [||]))
   | _ -> None
 

@@ -8,12 +8,12 @@ open FsUnit
 module PersimmonTest =
 
   let shouldSucceed expected = function
-    | Success actual -> actual |> should equal expected
-    | Failure xs -> Assert.Fail(sprintf "%A" xs)
+    | { AssertionResult = Success actual } -> actual |> should equal expected
+    | { AssertionResult = Failure xs } -> Assert.Fail(sprintf "%A" xs)
 
   let shouldFail (expectedMessage: NonEmptyList<string>) = function
-    | Success x -> Assert.Fail(sprintf "Expect: Failure\nActual: %A" x)
-    | Failure actual -> actual |> should equal expectedMessage
+    | { AssertionResult = Success x } -> Assert.Fail(sprintf "Expect: Failure\nActual: %A" x)
+    | { AssertionResult = Failure actual } -> actual |> should equal expectedMessage
 
   [<Test>]
   let ``simple succes assertion should succceed`` () =
