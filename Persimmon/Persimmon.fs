@@ -18,6 +18,7 @@ type TestBuilder(description: string) =
     match x with
     | (Success x, _) -> f x
     | (Failure (res1, rest1), UnitType) ->
+      assert (typeof<'T> = typeof<unit>) // runtime type is unit. So Unchecked.defaultof<'T> is not used inner f.
       match f (Unchecked.defaultof<'T>) with
       | Success _ -> Failure (res1, rest1)
       | Failure (res2, rest2) -> Failure (res1, rest1@(res2::rest2))
