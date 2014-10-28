@@ -20,10 +20,16 @@ let tests = [
 ]
 
 let tests2 = [|
-  test "success test1(seq)" {
+  test "success test1(array)" {
     do! assertEquals 1 1
   }
-  test "success test2(seq)" {
+  test "success test2(array)" {
     do! assertEquals 1 1
   }
 |]
+
+let tests3 = seq {
+  yield test "failure test(seq)" {
+    do! assertEquals 1 2
+  }
+}

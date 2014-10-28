@@ -35,6 +35,13 @@ let boxRuntime =
   let boxType = FSharpType.MakeFunctionType(typeof<TestResult<unit>>, typeof<obj>)
   FSharpValue.MakeFunction(boxType, id)
 
+module Seq =
+  let mapBoxRuntime (res: obj) : obj seq =
+    let typ = (typeof<_ list>).Assembly.GetType("Microsoft.FSharp.Collections.SeqModule")
+    let map = typ.GetMethod("Map").MakeGenericMethod([| typeof<TestResult<unit>>; typeof<obj> |])
+    let result = map.Invoke(null, [| boxRuntime; res |]) // this line means: let result = res |> Seq.map box
+    result :?> obj seq
+
 module List =
   let mapBoxRuntime (res: obj) : obj list =
     let typ = (typeof<_ list>).Assembly.GetType("Microsoft.FSharp.Collections.ListModule")
@@ -65,6 +72,8 @@ let persimmonTests (m: MemberInfo) =
   match m with
   | :? MethodInfo as m when m |> returnTypeIs<TestResult<_>> ->
       seq { yield m.Invoke(null, [||]) }
+  | :? MethodInfo as m when m |> returnTypeIs<_ seq> && m.ReturnType.GetGenericArguments().[0] = typeof<TestResult<unit>> ->
+      m.Invoke(null, [||]) |> Seq.mapBoxRuntime
   | :? MethodInfo as m when m |> returnTypeIs<_ list> && m.ReturnType.GetGenericArguments().[0] = typeof<TestResult<unit>> ->
       seq { yield! m.Invoke(null, [||]) |> List.mapBoxRuntime }
   | :? MethodInfo as m when m.ReturnType.IsArray && m.ReturnType.GetElementType() = typeof<TestResult<unit>> ->
