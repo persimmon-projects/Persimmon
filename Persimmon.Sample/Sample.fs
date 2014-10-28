@@ -2,10 +2,19 @@
 
 open Persimmon
 
-let test1 = test "success" {
+let test1 = test "success test" {
   do! assertEquals 1 1
 }
 
-let test2 = test "failure" {
+let test2 = test "failure test" {
   do! assertEquals 1 2
 }
+
+let tests = [
+  test "success test(list)" {
+    do! assertEquals 1 1
+  }
+  test "failure test(list)" {
+    do! assertEquals 1 2
+  }
+]

@@ -31,6 +31,16 @@ let mapIgnoreRuntime (typArg: Type) (res: obj) : TestResult<unit> =
   let result = map.Invoke(null, [| ignoreRuntime typArg; res |])
   result :?> TestResult<unit>
 
+let boxRuntime =
+  let boxType = FSharpType.MakeFunctionType(typeof<TestResult<unit>>, typeof<obj>)
+  FSharpValue.MakeFunction(boxType, id)
+
+let mapBoxRuntime (res: obj) : obj list =
+  let typ = (typeof<_ list>).Assembly.GetType("Microsoft.FSharp.Collections.ListModule")
+  let map = typ.GetMethod("Map").MakeGenericMethod([| typeof<TestResult<unit>>; typeof<obj> |])
+  let result = map.Invoke(null, [| boxRuntime; res |]) // this line means: let result = res |> List.map box
+  result :?> obj list
+
 let runPersimmonTest (reporter: Reporter) (test: obj) =
   let typeArgs = test.GetType().GetGenericArguments()
   let _, resultField = getTestResultFields typeArgs
@@ -40,13 +50,16 @@ let runPersimmonTest (reporter: Reporter) (test: obj) =
   reporter.ReportProgress(res)
   if case.Tag = successCase.Tag then 0 else 1
 
+let returnTypeIs<'T>(m: MethodInfo) =
+  m.ReturnType.IsGenericType && m.ReturnType.GetGenericTypeDefinition() = typedefof<'T>
+
 let persimmonTest (m: MemberInfo) =
-  // todo: プロパティやフィールドも拾う？
-  // todo: list, seq, arrayも拾う？
   match m with
-  | :? MethodInfo as m when m.ReturnType.IsGenericType && m.ReturnType.GetGenericTypeDefinition() = typedefof<TestResult<_>> ->
-      Some (m.Invoke(null, [||]))
-  | _ -> None
+  | :? MethodInfo as m when m |> returnTypeIs<TestResult<_>> ->
+      [ m.Invoke(null, [||]) ]
+  | :? MethodInfo as m when m |> returnTypeIs<list<_>> && m.ReturnType.GetGenericArguments().[0] = typeof<TestResult<unit>> ->
+      m.Invoke(null, [||]) |> mapBoxRuntime
+  | _ -> []
 
 let getPublicTypes (asm: Assembly) =
   asm.GetTypes()
@@ -60,7 +73,7 @@ let rec runTests' reporter (rcontext: string list) (typ: Type) : int =
   let nestedTestResults = typ |> getPublicNestedTypes |> Seq.sumBy (runTests' reporter (typ.Name::rcontext))
   let results =
     typ.GetMembers()
-    |> Seq.choose persimmonTest
+    |> Seq.collect persimmonTest
     |> Seq.sumBy (runPersimmonTest reporter)
   nestedTestResults + results
 
