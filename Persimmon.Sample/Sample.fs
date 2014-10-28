@@ -10,6 +10,15 @@ let test2 = test "failure test" {
   do! assertEquals 1 2
 }
 
+exception MyException
+
+let test3 = test "exn test" {
+  let! e = trap { raise MyException }
+  do! assertEquals "" e.Message
+  do! assertEquals typeof<MyException> (e.GetType())
+  do! assertEquals "" (e.StackTrace.Substring(0, 5))
+}
+
 let tests = [
   test "success test(list)" {
     do! assertEquals 1 1

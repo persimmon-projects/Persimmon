@@ -40,6 +40,18 @@ type TestBuilder(description: string) =
   member __.Run(f) = { Name = description; AssertionResult = f () }
 
 let test description = TestBuilder(description)
+
+type TrapBuilder () =
+  member __.Zero () = ()
+  member __.Delay(f: unit -> _) = f
+  member __.Run(f) =
+    try
+      f () |> ignore
+      Failure (NonEmptyList.singleton "Expect thrown exn but not")
+    with
+      e -> Success e
+
+let trap = TrapBuilder ()
  
 let inline checkWith returnValue expected actual =
   if expected = actual then Success returnValue
