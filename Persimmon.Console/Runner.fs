@@ -35,11 +35,19 @@ let boxRuntime =
   let boxType = FSharpType.MakeFunctionType(typeof<TestResult<unit>>, typeof<obj>)
   FSharpValue.MakeFunction(boxType, id)
 
-let mapBoxRuntime (res: obj) : obj list =
-  let typ = (typeof<_ list>).Assembly.GetType("Microsoft.FSharp.Collections.ListModule")
-  let map = typ.GetMethod("Map").MakeGenericMethod([| typeof<TestResult<unit>>; typeof<obj> |])
-  let result = map.Invoke(null, [| boxRuntime; res |]) // this line means: let result = res |> List.map box
-  result :?> obj list
+module List =
+  let mapBoxRuntime (res: obj) : obj list =
+    let typ = (typeof<_ list>).Assembly.GetType("Microsoft.FSharp.Collections.ListModule")
+    let map = typ.GetMethod("Map").MakeGenericMethod([| typeof<TestResult<unit>>; typeof<obj> |])
+    let result = map.Invoke(null, [| boxRuntime; res |]) // this line means: let result = res |> List.map box
+    result :?> obj list
+
+module Array =
+  let mapBoxRuntime (res: obj) : obj[] =
+    let typ = (typeof<_ list>).Assembly.GetType("Microsoft.FSharp.Collections.ArrayModule")
+    let map = typ.GetMethod("Map").MakeGenericMethod([| typeof<TestResult<unit>>; typeof<obj> |])
+    let result = map.Invoke(null, [| boxRuntime; res |]) // this line means: let result = res |> Array.map box
+    result :?> obj[]
 
 let runPersimmonTest (reporter: Reporter) (test: obj) =
   let typeArgs = test.GetType().GetGenericArguments()
@@ -53,13 +61,15 @@ let runPersimmonTest (reporter: Reporter) (test: obj) =
 let returnTypeIs<'T>(m: MethodInfo) =
   m.ReturnType.IsGenericType && m.ReturnType.GetGenericTypeDefinition() = typedefof<'T>
 
-let persimmonTest (m: MemberInfo) =
+let persimmonTests (m: MemberInfo) =
   match m with
   | :? MethodInfo as m when m |> returnTypeIs<TestResult<_>> ->
-      [ m.Invoke(null, [||]) ]
-  | :? MethodInfo as m when m |> returnTypeIs<list<_>> && m.ReturnType.GetGenericArguments().[0] = typeof<TestResult<unit>> ->
-      m.Invoke(null, [||]) |> mapBoxRuntime
-  | _ -> []
+      seq { yield m.Invoke(null, [||]) }
+  | :? MethodInfo as m when m |> returnTypeIs<_ list> && m.ReturnType.GetGenericArguments().[0] = typeof<TestResult<unit>> ->
+      seq { yield! m.Invoke(null, [||]) |> List.mapBoxRuntime }
+  | :? MethodInfo as m when m.ReturnType.IsArray && m.ReturnType.GetElementType() = typeof<TestResult<unit>> ->
+      seq { yield! m.Invoke(null, [||]) |> Array.mapBoxRuntime }
+  | _ -> Seq.empty
 
 let getPublicTypes (asm: Assembly) =
   asm.GetTypes()
@@ -73,7 +83,7 @@ let rec runTests' reporter (rcontext: string list) (typ: Type) : int =
   let nestedTestResults = typ |> getPublicNestedTypes |> Seq.sumBy (runTests' reporter (typ.Name::rcontext))
   let results =
     typ.GetMembers()
-    |> Seq.collect persimmonTest
+    |> Seq.collect persimmonTests
     |> Seq.sumBy (runPersimmonTest reporter)
   nestedTestResults + results
 

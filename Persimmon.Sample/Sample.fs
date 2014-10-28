@@ -18,3 +18,12 @@ let tests = [
     do! assertEquals 1 2
   }
 ]
+
+let tests2 = [|
+  test "success test1(seq)" {
+    do! assertEquals 1 1
+  }
+  test "success test2(seq)" {
+    do! assertEquals 1 1
+  }
+|]
