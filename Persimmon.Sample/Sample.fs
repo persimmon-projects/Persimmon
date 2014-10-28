@@ -47,6 +47,18 @@ let test4 = [
   }
 ]
 
+let tests5 =
+  let parameterizedTest (x, y) = test "parameterized test" {
+    do! assertEquals x y
+  }
+  parameter {
+    yield! [
+      (1, 1)
+      (1, 2)
+    ]
+    do! parameterizedTest
+  }
+
 type MyClass() =
   member __.test() = test "not execute because this is instance method" {
     do! assertEquals 1 2

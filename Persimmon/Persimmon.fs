@@ -50,3 +50,17 @@ let success v = Success v
 
 let check expected actual = checkWith actual expected actual
 let assertEquals expected actual = checkWith () expected actual
+
+type ParameterizedTestBuilder() =
+  member __.Return(()) = { Name = ""; AssertionResult = success () } // This TestResult is never used.
+  member __.YieldFrom(xs: _ seq) = xs
+  member __.ReturnFrom(x: TestResult<_>) = x
+  member __.Combine(xs, rest: unit -> (_ -> _)) =
+    Seq.map (fun x ->
+      let ret = rest () x
+      { ret with Name = sprintf "%s%A" ret.Name x }) xs
+  member __.Bind(x: _ -> TestResult<_>, _) = x
+  member __.Delay(f: unit -> _) = f
+  member __.Run(f) = f ()
+
+let parameter = ParameterizedTestBuilder()
