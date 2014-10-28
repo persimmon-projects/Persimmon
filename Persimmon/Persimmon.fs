@@ -39,7 +39,6 @@ module TestResult =
     { Name = x.Name; AssertionResult = AssertionResult.map f x.AssertionResult }
 
 type TestBuilder(description: string) =
-  member __.Return(()) = Success ()
   member __.Return(x) = Success x
   member __.ReturnFrom(x, _) = x
   member __.Source(x: AssertionResult<unit>) = (x, UnitType)
@@ -50,6 +49,7 @@ type TestBuilder(description: string) =
     match x with
     | (Success x, _) -> f x
     | (Failure errs1, UnitType) ->
+      assert (typeof<'T> = typeof<unit>) // runtime type is unit. So Unchecked.defaultof<'T> is not used inner f.
       match f (Unchecked.defaultof<'T>) with
       | Success _ -> Failure errs1
       | Failure errs2 -> Failure (NonEmptyList.append errs1 errs2)
