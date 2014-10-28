@@ -50,6 +50,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Writer.fs" />
+    <Compile Include="Formatter.fs" />
+    <Compile Include="Printer.fs" />
+    <Compile Include="Reporter.fs" />
     <Compile Include="Args.fs" />
     <Compile Include="Runner.fs" />
     <Compile Include="Program.fs" />

@@ -14,6 +14,9 @@ module NonEmptyList =
     let head, tail = list
     action head
     List.iter action tail
+  let toList (list: NonEmptyList<'T>) =
+    let head, tail = list
+    [ yield head; yield! tail ]
 
 type ReturnType = UnitType | ValueType
 
@@ -21,10 +24,19 @@ type AssertionResult<'T> =
   | Success of 'T
   | Failure of NonEmptyList<string>
 
+module AssertionResult =
+  let map f = function
+  | Success s -> Success (f s)
+  | Failure errs -> Failure errs
+
 type TestResult<'T> = {
   Name: string
   AssertionResult: AssertionResult<'T>
 }
+
+module TestResult =
+  let map f x =
+    { Name = x.Name; AssertionResult = AssertionResult.map f x.AssertionResult }
 
 type TestBuilder(description: string) =
   member __.Return(()) = Success ()

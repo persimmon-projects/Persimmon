@@ -1,18 +1,29 @@
 ﻿open System
 
 let entryPoint (args: Args) =
+  use progress = new Writer(Console.Out)
   use output = new Writer(args.Output, Console.Out)
   use error = new Writer(args.Error, Console.Error)
 
-  let founds, notFounds = args.Inputs |> List.partition (fun file -> file.Exists)
-  if founds |> List.isEmpty then
-    error.WriteLine("input is empty.")
-    -1
-  elif notFounds |> List.isEmpty then
-    Runner.runAllTests (output, error) founds
-  else
-    error.WriteLine("file not found: " + (String.Join(", ", notFounds)))
-    -2
+  use reporter =
+    new Reporter(
+      new Printer<_>(progress, Formatters.ProgressFormatter.dot),
+      new Printer<_>(output, Formatters.SummaryFormatter.normal),
+      new Printer<_>(error, Formatters.ErrorFormatter.normal))
+
+  try
+    let founds, notFounds = args.Inputs |> List.partition (fun file -> file.Exists)
+    if founds |> List.isEmpty then
+      reporter.ReportError("input is empty.")
+      -1
+    elif notFounds |> List.isEmpty then
+      Runner.runAllTests reporter founds
+    else
+      reporter.ReportError("file not found: " + (String.Join(", ", notFounds)))
+      -2
+  finally
+    progress.WriteLine("")
+    reporter.ReportSummary()
 
 type FailedCounter () =
   inherit MarshalByRefObject()
@@ -21,7 +32,7 @@ type FailedCounter () =
 
 [<Serializable>]
 type Callback (args: Args, body: Args -> int, failed: FailedCounter) =
-  member this.Run() =
+  member __.Run() =
     failed.Failed <- body args
 
 let run act =

@@ -21,19 +21,24 @@ let getTestResultFields typeArgs =
   | [| name; result |] -> name, result
   | _ -> failwith "oops!"
 
-let runPersimmonTest (output: Writer, error: Writer) (test: obj) =
+let ignoreRuntime (typArg: Type) =
+  let ignoreType = FSharpType.MakeFunctionType(typArg, typeof<unit>)
+  FSharpValue.MakeFunction(ignoreType, fun _ -> box ())
+
+let mapIgnoreRuntime (typArg: Type) (res: obj) : TestResult<unit> =
+  let typ = (typeof<TestResult<_>>).Assembly.GetType("Persimmon+TestResult")
+  let map = typ.GetMethod("map").MakeGenericMethod([| typArg; typeof<unit> |])
+  let result = map.Invoke(null, [| ignoreRuntime typArg; res |])
+  result :?> TestResult<unit>
+
+let runPersimmonTest (reporter: Reporter) (test: obj) =
   let typeArgs = test.GetType().GetGenericArguments()
-  let nameField, resultField = getTestResultFields typeArgs
+  let _, resultField = getTestResultFields typeArgs
   let result = FSharpValue.GetRecordField(test, resultField)
-  let case, value = FSharpValue.GetUnionFields(result, result.GetType())
-  if case.Tag = successCase.Tag then
-    0
-  else
-    let name = FSharpValue.GetRecordField(test, nameField)
-    output.WriteLine("Assertion failed: " + string name)
-    let errs = value.[0] :?> NonEmptyList<string>
-    errs |> NonEmptyList.iter (output.WriteLine)
-    1
+  let case, _ = FSharpValue.GetUnionFields(result, result.GetType())
+  let res = mapIgnoreRuntime typeArgs.[0] test // this line means: let res = test |> TestResult.map ignore
+  reporter.ReportProgress(res)
+  if case.Tag = successCase.Tag then 0 else 1
 
 let persimmonTest (m: MemberInfo) =
   // todo: プロパティやフィールドも拾う？
@@ -51,21 +56,21 @@ let getPublicNestedTypes (typ: Type) =
   typ.GetNestedTypes()
   |> Seq.filter (fun typ -> typ.IsPublic)
 
-let rec runTests' (output: Writer, error: Writer) (rcontext: string list) (typ: Type) : int =
-  let nestedTestResults = typ |> getPublicNestedTypes |> Seq.sumBy (runTests' (output, error) (typ.Name::rcontext))
+let rec runTests' reporter (rcontext: string list) (typ: Type) : int =
+  let nestedTestResults = typ |> getPublicNestedTypes |> Seq.sumBy (runTests' reporter (typ.Name::rcontext))
   let results =
     typ.GetMembers()
     |> Seq.choose persimmonTest
-    |> Seq.sumBy (runPersimmonTest (output, error))
+    |> Seq.sumBy (runPersimmonTest reporter)
   nestedTestResults + results
 
-let runTests (output: Writer, error: Writer) (typ: Type) =
-  let nestedTestResults = typ |> getPublicNestedTypes |> Seq.sumBy (runTests' (output, error) [typ.FullName])
-  let results = runTests' (output, error) [] typ
+let runTests reporter (typ: Type) =
+  let nestedTestResults = typ |> getPublicNestedTypes |> Seq.sumBy (runTests' reporter [typ.FullName])
+  let results = runTests' reporter [] typ
   nestedTestResults + results
 
-let runAllTests (output: Writer, error: Writer) (files: FileInfo list) =
+let runAllTests reporter (files: FileInfo list) =
   files
   |> Seq.map (fun file -> Assembly.LoadFrom(file.FullName))
   |> Seq.collect getPublicTypes
-  |> Seq.sumBy (runTests (output, error))
+  |> Seq.sumBy (runTests reporter)
