@@ -68,15 +68,20 @@ let runPersimmonTest (reporter: Reporter) (test: obj) =
 let returnTypeIs<'T>(m: MethodInfo) =
   m.ReturnType.IsGenericType && m.ReturnType.GetGenericTypeDefinition() = typedefof<'T>
 
+let (|StaticMethod|_|) (m: MemberInfo) =
+  match m with
+  | :? MethodInfo as m when m.IsStatic -> Some m
+  | _ -> None
+
 let persimmonTests (m: MemberInfo) =
   match m with
-  | :? MethodInfo as m when m |> returnTypeIs<TestResult<_>> ->
+  | StaticMethod m when m |> returnTypeIs<TestResult<_>> ->
       seq { yield m.Invoke(null, [||]) }
-  | :? MethodInfo as m when m |> returnTypeIs<_ seq> && m.ReturnType.GetGenericArguments().[0] = typeof<TestResult<unit>> ->
+  | StaticMethod m when m |> returnTypeIs<_ seq> && m.ReturnType.GetGenericArguments().[0] = typeof<TestResult<unit>> ->
       m.Invoke(null, [||]) |> Seq.mapBoxRuntime
-  | :? MethodInfo as m when m |> returnTypeIs<_ list> && m.ReturnType.GetGenericArguments().[0] = typeof<TestResult<unit>> ->
+  | StaticMethod m when m |> returnTypeIs<_ list> && m.ReturnType.GetGenericArguments().[0] = typeof<TestResult<unit>> ->
       seq { yield! m.Invoke(null, [||]) |> List.mapBoxRuntime }
-  | :? MethodInfo as m when m.ReturnType.IsArray && m.ReturnType.GetElementType() = typeof<TestResult<unit>> ->
+  | StaticMethod m when m.ReturnType.IsArray && m.ReturnType.GetElementType() = typeof<TestResult<unit>> ->
       seq { yield! m.Invoke(null, [||]) |> Array.mapBoxRuntime }
   | _ -> Seq.empty
 

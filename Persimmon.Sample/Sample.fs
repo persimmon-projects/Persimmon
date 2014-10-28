@@ -33,3 +33,8 @@ let tests3 = seq {
     do! assertEquals 1 2
   }
 }
+
+type MyClassInstanceTest() =
+  member __.test() = test "not execute because this is instance method" {
+    do! assertEquals 1 2
+  }
