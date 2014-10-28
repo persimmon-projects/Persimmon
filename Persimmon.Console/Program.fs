@@ -12,6 +12,9 @@ let entryPoint (args: Args) =
       new Printer<_>(error, Formatters.ErrorFormatter.normal))
 
   try
+    if args.Help then
+      error.WriteLine(Args.help)
+
     let founds, notFounds = args.Inputs |> List.partition (fun file -> file.Exists)
     if founds |> List.isEmpty then
       reporter.ReportError("input is empty.")

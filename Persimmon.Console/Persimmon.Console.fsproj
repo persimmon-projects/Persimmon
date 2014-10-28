@@ -25,7 +25,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Debug\Persimmon.Console.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>..\..\..\Persimmon.Sample\bin\Debug\Persimmon.Sample.dll</StartArguments>
+    <StartArguments>..\..\..\Persimmon.Sample\bin\Debug\Persimmon.Sample.dll --help</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
