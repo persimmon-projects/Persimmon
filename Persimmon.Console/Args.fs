@@ -53,7 +53,7 @@ module Args =
 --error:<file>
     config the output file to print the error.
     print to standard error without this option.
---input:<files>
+--inputs:<files>
     comma separated input files.
 --no-progress
     disabled the report of progress.
