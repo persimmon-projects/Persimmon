@@ -1,7 +1,7 @@
 ﻿open System
 
 let entryPoint (args: Args) =
-  use progress = new Writer(Console.Out)
+  use progress = new Writer(if args.NoProgress then IO.TextWriter.Null else Console.Out)
   use output = new Writer(args.Output, Console.Out)
   use error = new Writer(args.Error, Console.Error)
 

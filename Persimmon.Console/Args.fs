@@ -7,11 +7,13 @@ type Args = {
   Inputs: FileInfo list
   Output: FileInfo option
   Error: FileInfo option
+
+  NoProgress: bool
 }
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Args =
-  let empty = { Inputs = []; Output = None; Error = None }
+  let empty = { Inputs = []; Output = None; Error = None; NoProgress = false }
 
   let private (|StartsWith|_|) (prefix: string) (target: string) =
     if target.StartsWith(prefix) then
@@ -29,6 +31,7 @@ module Args =
 
   let rec parse acc = function
   | [] -> acc
+  | "--no-progress"::rest -> parse { acc with NoProgress = true } rest
   | (StartsWith "--" (Split2By ":" (key, value)))::rest ->
       match key with
       | "output" -> parse { acc with Output = Some (FileInfo(value)) } rest
