@@ -61,6 +61,6 @@ type ParameterizedTestBuilder() =
       { ret with Name = sprintf "%s%A" ret.Name x }) xs
   member __.Bind(x: _ -> TestResult<_>, _) = x
   member __.Delay(f: unit -> _) = f
-  member __.Run(f) = f ()
+  member __.Run(f: unit -> seq<TestResult<_>>) = f ()
 
 let parameter = ParameterizedTestBuilder()
