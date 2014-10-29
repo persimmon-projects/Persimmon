@@ -34,6 +34,16 @@ let tests3 = seq {
   }
 }
 
+let test4 = [
+  test "success test(list with value)" {
+    return 10
+  }
+  test "failure test(list with value)" {
+    do! assertEquals 1 2
+    return 20
+  }
+]
+
 type MyClass() =
   member __.test() = test "not execute because this is instance method" {
     do! assertEquals 1 2
