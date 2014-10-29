@@ -52,11 +52,11 @@ let tests5 =
     do! assertEquals x y
   }
   parameter {
-    yield! [
+    source [
       (1, 1)
       (1, 2)
     ]
-    do! parameterizedTest
+    run parameterizedTest
   }
 
 type MyClass() =
