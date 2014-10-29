@@ -48,7 +48,17 @@ let test4 = [
 ]
 
 let tests5 =
-  let parameterizedTest (x, y) = test "parameterized test" {
+  let parameterizedTest (x, y) = test "parameter test" {
+    do! assertEquals x y
+  }
+  parameter {
+    case (1, 1)
+    addCase (1, 2)
+    run parameterizedTest
+  }
+
+let tests6 =
+  let parameterizedTest (x, y) = test "parameters test" {
     do! assertEquals x y
   }
   parameters {
