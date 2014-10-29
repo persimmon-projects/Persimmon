@@ -51,7 +51,7 @@ let tests5 =
   let parameterizedTest (x, y) = test "parameterized test" {
     do! assertEquals x y
   }
-  parameter {
+  parameters {
     source [
       (1, 1)
       (1, 2)

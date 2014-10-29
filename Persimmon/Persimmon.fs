@@ -51,7 +51,7 @@ let success v = Success v
 let check expected actual = checkWith actual expected actual
 let assertEquals expected actual = checkWith () expected actual
 
-type ParameterizedTestBuilder() =
+type ParametersBuilder() =
   member __.Delay(f: unit -> _) = f
   member __.Run(f: unit -> seq<TestResult<_>>) = f ()
   member __.Yield (x) = Seq.singleton x
@@ -65,4 +65,4 @@ type ParameterizedTestBuilder() =
       let ret = f x
       { ret with Name = sprintf "%s%A" ret.Name x }) source
 
-let parameter = ParameterizedTestBuilder()
+let parameters = ParametersBuilder()
