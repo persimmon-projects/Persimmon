@@ -34,36 +34,28 @@ let runPersimmonTest (reporter: Reporter) (test: obj) =
 let typedefis<'T>(typ: Type) =
   typ.IsGenericType && typ.GetGenericTypeDefinition() = typedefof<'T>
 
-let persimmonTestProps (p: PropertyInfo) = seq {
-  let propType = p.PropertyType
-  if propType.IsArray then
-    if typedefis<TestResult<_>>(propType.GetElementType()) then
-      let elemType = propType.GetElementType()
-      yield! (p.GetValue(null), elemType) |> RuntimeArray.map box
-  elif propType.IsGenericType then
-    let genericTypeDef = propType.GetGenericTypeDefinition()
-    if genericTypeDef = typedefof<TestResult<_>> then
-      yield p.GetValue(null)
-    elif genericTypeDef = typedefof<_ seq> && typedefis<TestResult<_>>(propType.GetGenericArguments().[0]) then
-      let elemType = propType.GetGenericArguments().[0]
-      yield! (p.GetValue(null), elemType) |> RuntimeSeq.map box
-    elif genericTypeDef = typedefof<_ list> && typedefis<TestResult<_>>(propType.GetGenericArguments().[0]) then
-      let elemType = propType.GetGenericArguments().[0]
-      yield! (p.GetValue(null), elemType) |> RuntimeList.map box
+let (|ArrayType|_|) (typ: Type) = if typ.IsArray then Some (typ.GetElementType()) else None
+let (|GenericType|_|) (typ: Type) =
+  if typ.IsGenericType then
+    Some (typ.GetGenericTypeDefinition(), typ.GetGenericArguments())
+  else
+    None
+
+let persimmonTests f (typ: Type) = seq {
+  match typ with
+  | ArrayType elemType ->
+      yield! (f (), elemType) |> RuntimeArray.map box
+  | GenericType (genTypeDef, _) when genTypeDef = typedefof<TestResult<_>> ->
+      yield f ()
+  | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ seq> && typedefis<TestResult<_>>(elemType) ->
+      yield! (f (), elemType) |> RuntimeSeq.map box
+  | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ list> && typedefis<TestResult<_>>(elemType) ->
+      yield! (f (), elemType) |> RuntimeList.map box
+  | _ -> ()
 }
 
-let persimmonTestMethods (m: MethodInfo) = seq {
-  if typedefis<TestResult<_>>(m.ReturnType) then yield m.Invoke(null, [||])
-  elif typedefis<_ seq>(m.ReturnType) && typedefis<TestResult<_>>(m.ReturnType.GetGenericArguments().[0]) then
-    let elemType = m.ReturnType.GetGenericArguments().[0]
-    yield! (m.Invoke(null, [||]), elemType) |> RuntimeSeq.map box
-  elif typedefis<_ list>(m.ReturnType) && typedefis<TestResult<_>>(m.ReturnType.GetGenericArguments().[0]) then
-    let elemType = m.ReturnType.GetGenericArguments().[0]
-    yield! (m.Invoke(null, [||]), elemType) |> RuntimeList.map box
-  elif m.ReturnType.IsArray && typedefis<TestResult<_>>(m.ReturnType.GetElementType()) then
-    let elemType = m.ReturnType.GetElementType()
-    yield! (m.Invoke(null, [||]), elemType) |> RuntimeArray.map box
-}
+let persimmonTestProps (p: PropertyInfo) = persimmonTests (fun () -> p.GetValue(null)) p.PropertyType
+let persimmonTestMethods (m: MethodInfo) = persimmonTests (fun () -> m.Invoke(null, [||])) m.ReturnType
 
 let getPublicTypes (asm: Assembly) =
   asm.GetTypes()

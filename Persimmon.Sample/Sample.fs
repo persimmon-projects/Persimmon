@@ -26,6 +26,9 @@ let tests2 = [|
   test "success test2(array)" {
     do! assertEquals 1 1
   }
+  test "failure test(array)" {
+    do! assertEquals 1 2
+  }
 |]
 
 let tests3 = seq {
