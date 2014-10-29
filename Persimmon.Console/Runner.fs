@@ -9,10 +9,10 @@ open Microsoft.FSharp.Reflection
 open Persimmon
 open RuntimeUtil
 
-let successCase, failureCase =
+let successCase, failureCase, errorCase =
   let typ = typedefof<AssertionResult<_>>
   match typ |> FSharpType.GetUnionCases with
-  | [| success; failure |] -> success, failure
+  | [| success; failure; error |] -> success, failure, error
   | _ -> failwith "oops!"
 
 let getTestResultFields typeArgs =
@@ -26,7 +26,10 @@ let runPersimmonTest (reporter: Reporter) (test: obj) =
   let typeArgs = test.GetType().GetGenericArguments()
   let _, resultField = getTestResultFields typeArgs
   let result = FSharpValue.GetRecordField(test, resultField)
-  let case, _ = FSharpValue.GetUnionFields(result, result.GetType())
+  let lazyType = typedefof<Lazy<_>>
+  let assertResultType = typedefof<AssertionResult<_>>.MakeGenericType(typeArgs)
+  let value = lazyType.MakeGenericType([|assertResultType|]).GetProperty("Value").GetValue(result)
+  let case, _ = FSharpValue.GetUnionFields(value, value.GetType())
   let res = (test, typeArgs.[0]) |> RuntimeTestResult.map (fun x -> box ())
   reporter.ReportProgress(res)
   if case.Tag = successCase.Tag then 0 else 1

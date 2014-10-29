@@ -23,20 +23,28 @@ module Formatters =
       { new IFormatter<TestResult<unit>> with
           member __.Format(res: TestResult<unit>) =
             Writables.string begin
-              match res.AssertionResult with
+              match res.AssertionResult.Value with
               | Success _ -> "."
               | Failure _ -> "f"
+              | Error _ -> "E"
             end }
 
   module SummaryFormatter =
     let normal =
       let toStr (res: TestResult<unit>) =
         seq {
-          match res.AssertionResult with
+          match res.AssertionResult.Value with
           | Success _ -> ()
           | Failure errs ->
               yield "Assertion failed: " + res.Name
               yield! errs |> NonEmptyList.toList
+          | Error (e, errs) ->
+              yield "FATAL ERROR: " + res.Name
+              if not (errs.IsEmpty) then
+                yield "------------------- finished assertions --------------------"
+                yield! errs
+              yield "------------------------ exception -------------------------"
+              yield e.ToString()
         }
 
       { new IFormatter<TestResult<unit> seq> with

@@ -5,39 +5,49 @@ type ReturnType = UnitType | ValueType
 type AssertionResult<'T> =
   | Success of 'T
   | Failure of NonEmptyList<string>
+  | Error of exn * string list
 
 module AssertionResult =
   let map f = function
   | Success s -> Success (f s)
   | Failure errs -> Failure errs
+  | Error (e, errs) -> Error (e, errs)
 
 type TestResult<'T> = {
   Name: string
-  AssertionResult: AssertionResult<'T>
+  AssertionResult: Lazy<AssertionResult<'T>>
 }
 
 module TestResult =
   let map f x =
-    { Name = x.Name; AssertionResult = AssertionResult.map f x.AssertionResult }
+    { Name = x.Name; AssertionResult = lazy AssertionResult.map f x.AssertionResult.Value }
 
 type TestBuilder(description: string) =
   member __.Return(x) = Success x
   member __.ReturnFrom(x, _) = x
   member __.Source(x: AssertionResult<unit>) = (x, UnitType)
   member __.Source(x: AssertionResult<_>) = (x, ValueType)
-  member __.Source(x: TestResult<unit>) = (x.AssertionResult, UnitType)
-  member __.Source(x: TestResult<_>) = (x.AssertionResult, ValueType)
+  member __.Source(x: TestResult<unit>) = (x.AssertionResult.Value, UnitType)
+  member __.Source(x: TestResult<_>) = (x.AssertionResult.Value, ValueType)
   member __.Bind(x, f: 'T -> AssertionResult<_>) =
     match x with
     | (Success x, _) -> f x
     | (Failure errs1, UnitType) ->
       assert (typeof<'T> = typeof<unit>) // runtime type is unit. So Unchecked.defaultof<'T> is not used inner f.
-      match f (Unchecked.defaultof<'T>) with
-      | Success _ -> Failure errs1
-      | Failure errs2 -> Failure (NonEmptyList.append errs1 errs2)
+      try
+        match f (Unchecked.defaultof<'T>) with
+        | Success _ -> Failure errs1
+        | Failure errs2 -> Failure (NonEmptyList.append errs1 errs2)
+        | Error (e, errs2) -> Error (e, List.append (errs1 |> NonEmptyList.toList) errs2)
+      with
+        e -> Error (e, errs1 |> NonEmptyList.toList)
     | (Failure xs, ValueType) -> Failure xs
+    | (Error (e, errs), _) -> Error (e, errs)
   member __.Delay(f: unit -> AssertionResult<_>) = f
-  member __.Run(f) = { Name = description; AssertionResult = f () }
+  member __.Run(f) = {
+    Name = description
+    AssertionResult = lazy try f () with e -> Error (e, [])
+  }
 
 let test description = TestBuilder(description)
 

@@ -19,6 +19,13 @@ let test3 = test "exn test" {
   do! assertEquals "" (e.StackTrace.Substring(0, 5))
 }
 
+let err () = failwith "oops!"
+
+let test4 = test "error test" {
+  do! assertEquals 1 2
+  do! assertEquals (err ()) 1
+}
+
 let tests = [
   test "success test(list)" {
     do! assertEquals 1 1
@@ -46,7 +53,7 @@ let tests3 = seq {
   }
 }
 
-let test4 = [
+let tests4 = [
   test "success test(list with value)" {
     return 10
   }

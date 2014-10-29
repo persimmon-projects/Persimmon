@@ -6,14 +6,15 @@ open FsUnit
 
 [<TestFixture>]
 module PersimmonTest =
+  let (|Force|) (x: Lazy<_>) = Force x.Value
 
   let shouldSucceed expected = function
-    | { AssertionResult = Success actual } -> actual |> should equal expected
-    | { AssertionResult = Failure xs } -> Assert.Fail(sprintf "%A" xs)
+    | { AssertionResult = Force(Success actual) } -> actual |> should equal expected
+    | { AssertionResult = Force(Failure xs) } -> Assert.Fail(sprintf "%A" xs)
 
   let shouldFail (expectedMessage: NonEmptyList<string>) = function
-    | { AssertionResult = Success x } -> Assert.Fail(sprintf "Expect: Failure\nActual: %A" x)
-    | { AssertionResult = Failure actual } -> actual |> should equal expectedMessage
+    | { AssertionResult = Force(Success x) } -> Assert.Fail(sprintf "Expect: Failure\nActual: %A" x)
+    | { AssertionResult = Force(Failure actual) } -> actual |> should equal expectedMessage
 
   [<Test>]
   let ``simple succes assertion should succceed`` () =
