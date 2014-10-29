@@ -21,17 +21,9 @@ let getTestResultFields typeArgs =
   | [| name; result |] -> name, result
   | _ -> failwith "oops!"
 
-let ignoreRuntime (typArg: Type) =
-  let ignoreType = FSharpType.MakeFunctionType(typArg, typeof<unit>)
-  FSharpValue.MakeFunction(ignoreType, fun _ -> box ())
-
-let mapIgnoreRuntime (typArg: Type) (res: obj) : TestResult<unit> =
-  let typ = (typeof<TestResult<_>>).Assembly.GetType("Persimmon+TestResult")
-  let map = typ.GetMethod("map").MakeGenericMethod([| typArg; typeof<unit> |])
-  let result = map.Invoke(null, [| ignoreRuntime typArg; res |])
-  result :?> TestResult<unit>
-
 module Runtime =
+  let getModule<'TSameAssemblyType>(name: string) = (typeof<'TSameAssemblyType>).Assembly.GetType(name)
+
   let invoke (m: MethodInfo) typeArgs args =
     let f =
       match typeArgs with
@@ -43,8 +35,17 @@ module Runtime =
     let typ = FSharpType.MakeFunctionType(srcType, dstType)
     FSharpValue.MakeFunction(typ, body)
 
+module RuntimeTestResult =
+  let private typ = Runtime.getModule<TestResult<_>>("Persimmon+TestResult")
+
+  let private mapMethod = typ.GetMethod("map")
+  let map<'TDest> (f: obj -> obj (* 'a -> 'TDest *)) (res: obj (* TestResult<'a> *), elemType: Type (* typeof<'a> *)) =
+    let f = Runtime.lambda (elemType, typeof<'TDest>) f
+    let result = Runtime.invoke mapMethod [| elemType; typeof<'TDest> |] [| f; res |]
+    result :?> TestResult<'TDest>
+
 module RuntimeSeq =
-  let private typ = (typeof<_ list>).Assembly.GetType("Microsoft.FSharp.Collections.SeqModule")
+  let private typ = Runtime.getModule<_ list>("Microsoft.FSharp.Collections.SeqModule")
 
   let private mapMethod = typ.GetMethod("Map")
   let map<'TDest> (f: obj -> obj (* 'a -> 'TDest *)) (xs: obj (* 'a seq *), elemType: Type (* typeof<'a> *)) =
@@ -53,7 +54,7 @@ module RuntimeSeq =
     result :?> 'TDest seq
 
 module RuntimeList =
-  let private typ = (typeof<_ list>).Assembly.GetType("Microsoft.FSharp.Collections.ListModule")
+  let private typ = Runtime.getModule<_ list>("Microsoft.FSharp.Collections.ListModule")
 
   let private mapMethod = typ.GetMethod("Map")
   let map<'TDest> (f: obj -> obj (* 'a -> 'TDest *)) (xs: obj (* 'a list *), elemType: Type (* typeof<'a>*)) =
@@ -62,7 +63,7 @@ module RuntimeList =
     result :?> 'TDest list
 
 module RuntimeArray =
-  let private typ = (typeof<_ list>).Assembly.GetType("Microsoft.FSharp.Collections.ArrayModule")
+  let private typ = Runtime.getModule<_ list>("Microsoft.FSharp.Collections.ArrayModule")
 
   let private mapMethod = typ.GetMethod("Map")
   let map<'TDest> (f: obj -> obj (* 'a -> 'TDest *)) (xs: obj (* 'a[] *), elemType: Type (* typeof<'a>*)) =
@@ -75,7 +76,7 @@ let runPersimmonTest (reporter: Reporter) (test: obj) =
   let _, resultField = getTestResultFields typeArgs
   let result = FSharpValue.GetRecordField(test, resultField)
   let case, _ = FSharpValue.GetUnionFields(result, result.GetType())
-  let res = mapIgnoreRuntime typeArgs.[0] test // this line means: let res = test |> TestResult.map ignore
+  let res = (test, typeArgs.[0]) |> RuntimeTestResult.map (fun x -> box ())
   reporter.ReportProgress(res)
   if case.Tag = successCase.Tag then 0 else 1
 
