@@ -35,26 +35,44 @@ let boxRuntime =
   let boxType = FSharpType.MakeFunctionType(typeof<TestResult<unit>>, typeof<obj>)
   FSharpValue.MakeFunction(boxType, id)
 
-module Seq =
-  let mapBoxRuntime (res: obj) : obj seq =
-    let typ = (typeof<_ list>).Assembly.GetType("Microsoft.FSharp.Collections.SeqModule")
-    let map = typ.GetMethod("Map").MakeGenericMethod([| typeof<TestResult<unit>>; typeof<obj> |])
-    let result = map.Invoke(null, [| boxRuntime; res |]) // this line means: let result = res |> Seq.map box
-    result :?> obj seq
+module Runtime =
+  let invoke (m: MethodInfo) typeArgs args =
+    let f =
+      match typeArgs with
+      | [||] -> m
+      | _ -> m.MakeGenericMethod(typeArgs)
+    f.Invoke(null, args)
 
-module List =
-  let mapBoxRuntime (res: obj) : obj list =
-    let typ = (typeof<_ list>).Assembly.GetType("Microsoft.FSharp.Collections.ListModule")
-    let map = typ.GetMethod("Map").MakeGenericMethod([| typeof<TestResult<unit>>; typeof<obj> |])
-    let result = map.Invoke(null, [| boxRuntime; res |]) // this line means: let result = res |> List.map box
-    result :?> obj list
+  let lambda (srcType, dstType) body =
+    let typ = FSharpType.MakeFunctionType(srcType, dstType)
+    FSharpValue.MakeFunction(typ, body)
 
-module Array =
-  let mapBoxRuntime (res: obj) : obj[] =
-    let typ = (typeof<_ list>).Assembly.GetType("Microsoft.FSharp.Collections.ArrayModule")
-    let map = typ.GetMethod("Map").MakeGenericMethod([| typeof<TestResult<unit>>; typeof<obj> |])
-    let result = map.Invoke(null, [| boxRuntime; res |]) // this line means: let result = res |> Array.map box
-    result :?> obj[]
+module RuntimeSeq =
+  let private typ = (typeof<_ list>).Assembly.GetType("Microsoft.FSharp.Collections.SeqModule")
+
+  let private mapMethod = typ.GetMethod("Map")
+  let map<'TDest> (f: obj -> obj (* 'a -> 'TDest *)) (xs: obj (* 'a seq *), elemType: Type (* typeof<'a> *)) =
+    let f = Runtime.lambda (elemType, typeof<'TDest>) f
+    let result = Runtime.invoke mapMethod [| elemType; typeof<'TDest> |] [| f; xs |]
+    result :?> 'TDest seq
+
+module RuntimeList =
+  let private typ = (typeof<_ list>).Assembly.GetType("Microsoft.FSharp.Collections.ListModule")
+
+  let private mapMethod = typ.GetMethod("Map")
+  let map<'TDest> (f: obj -> obj (* 'a -> 'TDest *)) (xs: obj (* 'a list *), elemType: Type (* typeof<'a>*)) =
+    let f = Runtime.lambda (elemType, typeof<'TDest>) f
+    let result = Runtime.invoke mapMethod [| elemType; typeof<'TDest> |] [| f; xs |]
+    result :?> 'TDest list
+
+module RuntimeArray =
+  let private typ = (typeof<_ list>).Assembly.GetType("Microsoft.FSharp.Collections.ArrayModule")
+
+  let private mapMethod = typ.GetMethod("Map")
+  let map<'TDest> (f: obj -> obj (* 'a -> 'TDest *)) (xs: obj (* 'a[] *), elemType: Type (* typeof<'a>*)) =
+    let f = Runtime.lambda (elemType, typeof<'TDest>) f
+    let result = Runtime.invoke mapMethod [| elemType; typeof<'TDest> |] [| f; xs |]
+    result :?> 'TDest[]
 
 let runPersimmonTest (reporter: Reporter) (test: obj) =
   let typeArgs = test.GetType().GetGenericArguments()
@@ -72,25 +90,25 @@ let persimmonTestProps (p: PropertyInfo) = seq {
   let propType = p.PropertyType
   if propType.IsArray then
     if propType.GetElementType() = typeof<TestResult<unit>> then
-      yield! p.GetValue(null) |> Array.mapBoxRuntime
+      yield! (p.GetValue(null), typeof<TestResult<unit>>) |> RuntimeArray.map box
   elif propType.IsGenericType then
     let genericTypeDef = propType.GetGenericTypeDefinition()
     if genericTypeDef = typedefof<TestResult<_>> then
       yield p.GetValue(null)
     elif genericTypeDef = typedefof<_ seq> && propType.GetGenericArguments().[0] = typeof<TestResult<unit>> then
-      yield! p.GetValue(null) |> Seq.mapBoxRuntime
+      yield! (p.GetValue(null), typeof<TestResult<unit>>) |> RuntimeSeq.map box
     elif genericTypeDef = typedefof<_ list> && propType.GetGenericArguments().[0] = typeof<TestResult<unit>> then
-      yield! p.GetValue(null) |> List.mapBoxRuntime
+      yield! (p.GetValue(null), typeof<TestResult<unit>>) |> RuntimeList.map box
 }
 
 let persimmonTestMethods (m: MethodInfo) = seq {
   if m |> returnTypeIs<TestResult<_>> then yield m.Invoke(null, [||])
   elif m |> returnTypeIs<_ seq> && m.ReturnType.GetGenericArguments().[0] = typeof<TestResult<unit>> then
-    yield! m.Invoke(null, [||]) |> Seq.mapBoxRuntime
+    yield! (m.Invoke(null, [||]), typeof<TestResult<unit>>) |> RuntimeSeq.map box
   elif m |> returnTypeIs<_ list> && m.ReturnType.GetGenericArguments().[0] = typeof<TestResult<unit>> then
-    yield! m.Invoke(null, [||]) |> List.mapBoxRuntime
+    yield! (m.Invoke(null, [||]), typeof<TestResult<unit>>) |> RuntimeList.map box
   elif m.ReturnType.IsArray && m.ReturnType.GetElementType() = typeof<TestResult<unit>> then
-    yield! m.Invoke(null, [||]) |> Array.mapBoxRuntime
+    yield! (m.Invoke(null, [||]), typeof<TestResult<unit>>) |> RuntimeArray.map box
 }
 
 let getPublicTypes (asm: Assembly) =
