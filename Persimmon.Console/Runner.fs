@@ -7,6 +7,7 @@ open System.Reflection
 open Microsoft.FSharp.Reflection
 
 open Persimmon
+open RuntimeUtil
 
 let successCase, failureCase =
   let typ = typedefof<AssertionResult<_>>
@@ -21,69 +22,40 @@ let getTestResultFields typeArgs =
   | [| name; result |] -> name, result
   | _ -> failwith "oops!"
 
-let ignoreRuntime (typArg: Type) =
-  let ignoreType = FSharpType.MakeFunctionType(typArg, typeof<unit>)
-  FSharpValue.MakeFunction(ignoreType, fun _ -> box ())
-
-let mapIgnoreRuntime (typArg: Type) (res: obj) : TestResult<unit> =
-  let typ = (typeof<TestResult<_>>).Assembly.GetType("Persimmon+TestResult")
-  let map = typ.GetMethod("map").MakeGenericMethod([| typArg; typeof<unit> |])
-  let result = map.Invoke(null, [| ignoreRuntime typArg; res |])
-  result :?> TestResult<unit>
-
-let boxRuntime =
-  let boxType = FSharpType.MakeFunctionType(typeof<TestResult<unit>>, typeof<obj>)
-  FSharpValue.MakeFunction(boxType, id)
-
-module Seq =
-  let mapBoxRuntime (res: obj) : obj seq =
-    let typ = (typeof<_ list>).Assembly.GetType("Microsoft.FSharp.Collections.SeqModule")
-    let map = typ.GetMethod("Map").MakeGenericMethod([| typeof<TestResult<unit>>; typeof<obj> |])
-    let result = map.Invoke(null, [| boxRuntime; res |]) // this line means: let result = res |> Seq.map box
-    result :?> obj seq
-
-module List =
-  let mapBoxRuntime (res: obj) : obj list =
-    let typ = (typeof<_ list>).Assembly.GetType("Microsoft.FSharp.Collections.ListModule")
-    let map = typ.GetMethod("Map").MakeGenericMethod([| typeof<TestResult<unit>>; typeof<obj> |])
-    let result = map.Invoke(null, [| boxRuntime; res |]) // this line means: let result = res |> List.map box
-    result :?> obj list
-
-module Array =
-  let mapBoxRuntime (res: obj) : obj[] =
-    let typ = (typeof<_ list>).Assembly.GetType("Microsoft.FSharp.Collections.ArrayModule")
-    let map = typ.GetMethod("Map").MakeGenericMethod([| typeof<TestResult<unit>>; typeof<obj> |])
-    let result = map.Invoke(null, [| boxRuntime; res |]) // this line means: let result = res |> Array.map box
-    result :?> obj[]
-
 let runPersimmonTest (reporter: Reporter) (test: obj) =
   let typeArgs = test.GetType().GetGenericArguments()
   let _, resultField = getTestResultFields typeArgs
   let result = FSharpValue.GetRecordField(test, resultField)
   let case, _ = FSharpValue.GetUnionFields(result, result.GetType())
-  let res = mapIgnoreRuntime typeArgs.[0] test // this line means: let res = test |> TestResult.map ignore
+  let res = (test, typeArgs.[0]) |> RuntimeTestResult.map (fun x -> box ())
   reporter.ReportProgress(res)
   if case.Tag = successCase.Tag then 0 else 1
 
-let returnTypeIs<'T>(m: MethodInfo) =
-  m.ReturnType.IsGenericType && m.ReturnType.GetGenericTypeDefinition() = typedefof<'T>
+let typedefis<'T>(typ: Type) =
+  typ.IsGenericType && typ.GetGenericTypeDefinition() = typedefof<'T>
 
-let (|StaticMethod|_|) (m: MemberInfo) =
-  match m with
-  | :? MethodInfo as m when m.IsStatic -> Some m
-  | _ -> None
+let (|ArrayType|_|) (typ: Type) = if typ.IsArray then Some (typ.GetElementType()) else None
+let (|GenericType|_|) (typ: Type) =
+  if typ.IsGenericType then
+    Some (typ.GetGenericTypeDefinition(), typ.GetGenericArguments())
+  else
+    None
 
-let persimmonTests (m: MemberInfo) =
-  match m with
-  | StaticMethod m when m |> returnTypeIs<TestResult<_>> ->
-      seq { yield m.Invoke(null, [||]) }
-  | StaticMethod m when m |> returnTypeIs<_ seq> && m.ReturnType.GetGenericArguments().[0] = typeof<TestResult<unit>> ->
-      m.Invoke(null, [||]) |> Seq.mapBoxRuntime
-  | StaticMethod m when m |> returnTypeIs<_ list> && m.ReturnType.GetGenericArguments().[0] = typeof<TestResult<unit>> ->
-      seq { yield! m.Invoke(null, [||]) |> List.mapBoxRuntime }
-  | StaticMethod m when m.ReturnType.IsArray && m.ReturnType.GetElementType() = typeof<TestResult<unit>> ->
-      seq { yield! m.Invoke(null, [||]) |> Array.mapBoxRuntime }
-  | _ -> Seq.empty
+let persimmonTests f (typ: Type) = seq {
+  match typ with
+  | ArrayType elemType ->
+      yield! (f (), elemType) |> RuntimeArray.map box
+  | GenericType (genTypeDef, _) when genTypeDef = typedefof<TestResult<_>> ->
+      yield f ()
+  | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ seq> && typedefis<TestResult<_>>(elemType) ->
+      yield! (f (), elemType) |> RuntimeSeq.map box
+  | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ list> && typedefis<TestResult<_>>(elemType) ->
+      yield! (f (), elemType) |> RuntimeList.map box
+  | _ -> ()
+}
+
+let persimmonTestProps (p: PropertyInfo) = persimmonTests (fun () -> p.GetValue(null)) p.PropertyType
+let persimmonTestMethods (m: MethodInfo) = persimmonTests (fun () -> m.Invoke(null, [||])) m.ReturnType
 
 let getPublicTypes (asm: Assembly) =
   asm.GetTypes()
@@ -91,20 +63,24 @@ let getPublicTypes (asm: Assembly) =
 
 let getPublicNestedTypes (typ: Type) =
   typ.GetNestedTypes()
-  |> Seq.filter (fun typ -> typ.IsPublic)
+  |> Seq.filter (fun typ -> typ.IsNestedPublic)
 
 let rec runTests' reporter (rcontext: string list) (typ: Type) : int =
-  let nestedTestResults = typ |> getPublicNestedTypes |> Seq.sumBy (runTests' reporter (typ.Name::rcontext))
-  let results =
-    typ.GetMembers()
-    |> Seq.collect persimmonTests
+  let nestedTestFailures = typ |> getPublicNestedTypes |> Seq.sumBy (runTests' reporter (typ.Name::rcontext))
+  let failures =
+    seq {
+      yield!
+        typ.GetProperties(BindingFlags.Static ||| BindingFlags.Public)
+        |> Seq.collect persimmonTestProps
+      yield!
+        typ.GetMethods(BindingFlags.Static ||| BindingFlags.Public)
+        |> Seq.filter (fun m -> not m.IsSpecialName) // ignore getter methods
+        |> Seq.collect persimmonTestMethods
+    }
     |> Seq.sumBy (runPersimmonTest reporter)
-  nestedTestResults + results
+  nestedTestFailures + failures
 
-let runTests reporter (typ: Type) =
-  let nestedTestResults = typ |> getPublicNestedTypes |> Seq.sumBy (runTests' reporter [typ.FullName])
-  let results = runTests' reporter [] typ
-  nestedTestResults + results
+let runTests reporter (typ: Type) = runTests' reporter [] typ
 
 let runAllTests reporter (files: FileInfo list) =
   files

@@ -54,6 +54,7 @@
     <Compile Include="Printer.fs" />
     <Compile Include="Reporter.fs" />
     <Compile Include="Args.fs" />
+    <Compile Include="RuntimeUtil.fs" />
     <Compile Include="Runner.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
