@@ -31,10 +31,6 @@ let mapIgnoreRuntime (typArg: Type) (res: obj) : TestResult<unit> =
   let result = map.Invoke(null, [| ignoreRuntime typArg; res |])
   result :?> TestResult<unit>
 
-let boxRuntime =
-  let boxType = FSharpType.MakeFunctionType(typeof<TestResult<unit>>, typeof<obj>)
-  FSharpValue.MakeFunction(boxType, id)
-
 module Runtime =
   let invoke (m: MethodInfo) typeArgs args =
     let f =
