@@ -34,7 +34,10 @@ let tests3 = seq {
   }
 }
 
-type MyClassInstanceTest() =
+type MyClass() =
   member __.test() = test "not execute because this is instance method" {
+    do! assertEquals 1 2
+  }
+  static member test2 = test "failure test(static property)" {
     do! assertEquals 1 2
   }

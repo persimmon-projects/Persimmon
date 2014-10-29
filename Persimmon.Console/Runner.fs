@@ -68,22 +68,30 @@ let runPersimmonTest (reporter: Reporter) (test: obj) =
 let returnTypeIs<'T>(m: MethodInfo) =
   m.ReturnType.IsGenericType && m.ReturnType.GetGenericTypeDefinition() = typedefof<'T>
 
-let (|StaticMethod|_|) (m: MemberInfo) =
-  match m with
-  | :? MethodInfo as m when m.IsStatic -> Some m
-  | _ -> None
+let persimmonTestProps (p: PropertyInfo) = seq {
+  let propType = p.PropertyType
+  if propType.IsArray then
+    if propType.GetElementType() = typeof<TestResult<unit>> then
+      yield! p.GetValue(null) |> Array.mapBoxRuntime
+  elif propType.IsGenericType then
+    let genericTypeDef = propType.GetGenericTypeDefinition()
+    if genericTypeDef = typedefof<TestResult<_>> then
+      yield p.GetValue(null)
+    elif genericTypeDef = typedefof<_ seq> && propType.GetGenericArguments().[0] = typeof<TestResult<unit>> then
+      yield! p.GetValue(null) |> Seq.mapBoxRuntime
+    elif genericTypeDef = typedefof<_ list> && propType.GetGenericArguments().[0] = typeof<TestResult<unit>> then
+      yield! p.GetValue(null) |> List.mapBoxRuntime
+}
 
-let persimmonTests (m: MemberInfo) =
-  match m with
-  | StaticMethod m when m |> returnTypeIs<TestResult<_>> ->
-      seq { yield m.Invoke(null, [||]) }
-  | StaticMethod m when m |> returnTypeIs<_ seq> && m.ReturnType.GetGenericArguments().[0] = typeof<TestResult<unit>> ->
-      m.Invoke(null, [||]) |> Seq.mapBoxRuntime
-  | StaticMethod m when m |> returnTypeIs<_ list> && m.ReturnType.GetGenericArguments().[0] = typeof<TestResult<unit>> ->
-      seq { yield! m.Invoke(null, [||]) |> List.mapBoxRuntime }
-  | StaticMethod m when m.ReturnType.IsArray && m.ReturnType.GetElementType() = typeof<TestResult<unit>> ->
-      seq { yield! m.Invoke(null, [||]) |> Array.mapBoxRuntime }
-  | _ -> Seq.empty
+let persimmonTestMethods (m: MethodInfo) = seq {
+  if m |> returnTypeIs<TestResult<_>> then yield m.Invoke(null, [||])
+  elif m |> returnTypeIs<_ seq> && m.ReturnType.GetGenericArguments().[0] = typeof<TestResult<unit>> then
+    yield! m.Invoke(null, [||]) |> Seq.mapBoxRuntime
+  elif m |> returnTypeIs<_ list> && m.ReturnType.GetGenericArguments().[0] = typeof<TestResult<unit>> then
+    yield! m.Invoke(null, [||]) |> List.mapBoxRuntime
+  elif m.ReturnType.IsArray && m.ReturnType.GetElementType() = typeof<TestResult<unit>> then
+    yield! m.Invoke(null, [||]) |> Array.mapBoxRuntime
+}
 
 let getPublicTypes (asm: Assembly) =
   asm.GetTypes()
@@ -91,20 +99,24 @@ let getPublicTypes (asm: Assembly) =
 
 let getPublicNestedTypes (typ: Type) =
   typ.GetNestedTypes()
-  |> Seq.filter (fun typ -> typ.IsPublic)
+  |> Seq.filter (fun typ -> typ.IsNestedPublic)
 
 let rec runTests' reporter (rcontext: string list) (typ: Type) : int =
-  let nestedTestResults = typ |> getPublicNestedTypes |> Seq.sumBy (runTests' reporter (typ.Name::rcontext))
-  let results =
-    typ.GetMembers()
-    |> Seq.collect persimmonTests
+  let nestedTestFailures = typ |> getPublicNestedTypes |> Seq.sumBy (runTests' reporter (typ.Name::rcontext))
+  let failures =
+    seq {
+      yield!
+        typ.GetProperties(BindingFlags.Static ||| BindingFlags.Public)
+        |> Seq.collect persimmonTestProps
+      yield!
+        typ.GetMethods(BindingFlags.Static ||| BindingFlags.Public)
+        |> Seq.filter (fun m -> not m.IsSpecialName) // ignore getter methods
+        |> Seq.collect persimmonTestMethods
+    }
     |> Seq.sumBy (runPersimmonTest reporter)
-  nestedTestResults + results
+  nestedTestFailures + failures
 
-let runTests reporter (typ: Type) =
-  let nestedTestResults = typ |> getPublicNestedTypes |> Seq.sumBy (runTests' reporter [typ.FullName])
-  let results = runTests' reporter [] typ
-  nestedTestResults + results
+let runTests reporter (typ: Type) = runTests' reporter [] typ
 
 let runAllTests reporter (files: FileInfo list) =
   files
