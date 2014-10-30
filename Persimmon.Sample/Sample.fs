@@ -56,6 +56,28 @@ let test4 = [
   }
 ]
 
+let tests5 =
+  let parameterizeTest (x, y) = test "case parameterize test" {
+    do! assertEquals x y
+  }
+  parameterize {
+    case (1, 1)
+    case (1, 2)
+    run parameterizeTest
+  }
+
+let tests6 =
+  let parameterizeTest (x, y) = test "source parameterize test" {
+    do! assertEquals x y
+  }
+  parameterize {
+    source [
+      (1, 1)
+      (1, 2)
+    ]
+    run parameterizeTest
+  }
+
 type MyClass() =
   member __.test() = test "not execute because this is instance method" {
     do! assertEquals 1 2
