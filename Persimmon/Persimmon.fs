@@ -3,14 +3,14 @@
 type ReturnType = UnitType | ValueType
 
 type AssertionResult<'T> =
-  | Success of 'T
-  | Failure of NonEmptyList<string>
+  | Passed of 'T
+  | Failed of NonEmptyList<string>
   | Error of exn * string list
 
 module AssertionResult =
   let map f = function
-  | Success s -> Success (f s)
-  | Failure errs -> Failure errs
+  | Passed s -> Passed (f s)
+  | Failed errs -> Failed errs
   | Error (e, errs) -> Error (e, errs)
 
 type TestResult<'T> = {
@@ -23,7 +23,7 @@ module TestResult =
     { Name = x.Name; AssertionResult = AssertionResult.map f x.AssertionResult }
 
 type TestBuilder(description: string) =
-  member __.Return(x) = Success x
+  member __.Return(x) = Passed x
   member __.ReturnFrom(x, _) = x
   member __.Source(x: AssertionResult<unit>) = (x, UnitType)
   member __.Source(x: AssertionResult<_>) = (x, ValueType)
@@ -31,17 +31,17 @@ type TestBuilder(description: string) =
   member __.Source(x: TestResult<_>) = (x.AssertionResult, ValueType)
   member __.Bind(x, f: 'T -> AssertionResult<_>) =
     match x with
-    | (Success x, _) -> f x
-    | (Failure errs1, UnitType) ->
+    | (Passed x, _) -> f x
+    | (Failed errs1, UnitType) ->
       assert (typeof<'T> = typeof<unit>) // runtime type is unit. So Unchecked.defaultof<'T> is not used inner f.
       try
         match f (Unchecked.defaultof<'T>) with
-        | Success _ -> Failure errs1
-        | Failure errs2 -> Failure (NonEmptyList.append errs1 errs2)
+        | Passed _ -> Failed errs1
+        | Failed errs2 -> Failed (NonEmptyList.append errs1 errs2)
         | Error (e, errs2) -> Error (e, List.append (errs1 |> NonEmptyList.toList) errs2)
       with
         e -> Error (e, errs1 |> NonEmptyList.toList)
-    | (Failure xs, ValueType) -> Failure xs
+    | (Failed xs, ValueType) -> Failed xs
     | (Error (e, errs), _) -> Error (e, errs)
   member __.Delay(f: unit -> AssertionResult<_>) = f
   member __.Run(f) = {
@@ -57,18 +57,18 @@ type TrapBuilder () =
   member __.Run(f) =
     try
       f () |> ignore
-      Failure (NonEmptyList.singleton "Expect thrown exn but not")
+      Failed (NonEmptyList.singleton "Expect thrown exn but not")
     with
-      e -> Success e
+      e -> Passed e
 
 let trap = TrapBuilder ()
  
 let inline checkWith returnValue expected actual =
-  if expected = actual then Success returnValue
-  else Failure (NonEmptyList.singleton (sprintf "Expect: %A\nActual: %A" expected actual))
+  if expected = actual then Passed returnValue
+  else Failed (NonEmptyList.singleton (sprintf "Expect: %A\nActual: %A" expected actual))
 
-let failure msg = Failure (NonEmptyList.singleton msg)
-let success v = Success v
+let fail msg = Failed (NonEmptyList.singleton msg)
+let pass v = Passed v
 
 let check expected actual = checkWith actual expected actual
 let assertEquals expected actual = checkWith () expected actual

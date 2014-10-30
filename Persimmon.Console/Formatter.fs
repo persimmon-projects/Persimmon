@@ -24,8 +24,8 @@ module Formatters =
           member __.Format(res: TestResult<unit>) =
             Writables.string begin
               match res.AssertionResult with
-              | Success _ -> "."
-              | Failure _ -> "f"
+              | Passed _ -> "."
+              | Failed _ -> "f"
               | Error _ -> "E"
             end }
 
@@ -34,8 +34,8 @@ module Formatters =
       let toStr (res: TestResult<unit>) =
         seq {
           match res.AssertionResult with
-          | Success _ -> ()
-          | Failure errs ->
+          | Passed _ -> ()
+          | Failed errs ->
               yield "Assertion failed: " + res.Name
               yield! errs |> NonEmptyList.toList
           | Error (e, errs) ->
