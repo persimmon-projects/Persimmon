@@ -51,21 +51,26 @@ let success v = Success v
 let check expected actual = checkWith actual expected actual
 let assertEquals expected actual = checkWith () expected actual
 
+type Append =
+  | Append
+  static member (?<-) (_: unit seq, Append, _: 'a seq) = fun (y: 'a) -> Seq.singleton y
+  static member (?<-) (xs: ('a * 'b) seq, Append, _: ('a * 'b) seq) = fun (y: 'a * 'b) -> seq { yield! xs; yield y }
+
+let inline append xs ys =
+  (xs ? (Append) <- Seq.empty) ys
+
 type ParameterizeBuilder() =
   member __.Delay(f: unit -> _) = f
   member __.Run(f) = f ()
   member __.Yield(x) = Seq.singleton x
-  member __.For(source : seq<_>, body : _ -> seq<_>) =
-    seq { for v in source do yield! body v }
+  member __.YieldFrom(xs: _ seq) = xs
+  member __.For(source : _ seq, body : _ -> _ seq) = source |> Seq.collect body
   [<CustomOperation("case")>]
-  member __.Case(_, case) = Seq.singleton case
-  [<CustomOperation("addCase")>]
-  member __.AddCase(source, case) = seq { yield! source; yield case }
+  member inline __.Case(source, case) = append source case
   [<CustomOperation("run")>]
-  member __.RunTests(source: seq<_>, f: _ -> TestResult<_>) =
-    Seq.map (fun x ->
-      let ret = f x
-      { ret with Name = sprintf "%s%A" ret.Name x }) source
+  member __.RunTests(source: _ seq, f: _ -> TestResult<_>) =
+    source
+    |> Seq.map (fun x -> let ret = f x in { ret with Name = sprintf "%s%A" ret.Name x })
   [<CustomOperation("source")>]
   member __.Source (_, source: seq<_>) = source
 

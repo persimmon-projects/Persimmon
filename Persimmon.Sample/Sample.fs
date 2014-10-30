@@ -53,7 +53,7 @@ let tests5 =
   }
   parameterize {
     case (1, 1)
-    addCase (1, 2)
+    case (1, 2)
     run parameterizeTest
   }
 
