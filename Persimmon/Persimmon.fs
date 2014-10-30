@@ -51,7 +51,7 @@ let success v = Success v
 let check expected actual = checkWith actual expected actual
 let assertEquals expected actual = checkWith () expected actual
 
-type ParameterBuilder() =
+type ParameterizeBuilder() =
   member __.Delay(f: unit -> _) = f
   member __.Run(f) = f ()
   member __.Yield(x) = Seq.singleton x
@@ -66,21 +66,7 @@ type ParameterBuilder() =
     Seq.map (fun x ->
       let ret = f x
       { ret with Name = sprintf "%s%A" ret.Name x }) source
-
-let parameter = ParameterBuilder()
-
-type ParametersBuilder() =
-  member __.Delay(f: unit -> _) = f
-  member __.Run(f: unit -> seq<TestResult<_>>) = f ()
-  member __.Yield (x) = Seq.singleton x
-  member __.For (source : seq<_>, body : _ -> seq<_>) =
-    seq { for v in source do yield! body v }
   [<CustomOperation("source")>]
   member __.Source (_, source: seq<_>) = source
-  [<CustomOperation("run")>]
-  member __.RunTests (source: seq<_>, f: _ -> TestResult<_>) =
-    Seq.map (fun x ->
-      let ret = f x
-      { ret with Name = sprintf "%s%A" ret.Name x }) source
 
-let parameters = ParametersBuilder()
+let parameterize = ParameterizeBuilder()

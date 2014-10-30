@@ -48,25 +48,25 @@ let test4 = [
 ]
 
 let tests5 =
-  let parameterizedTest (x, y) = test "parameter test" {
+  let parameterizeTest (x, y) = test "case parameterize test" {
     do! assertEquals x y
   }
-  parameter {
+  parameterize {
     case (1, 1)
     addCase (1, 2)
-    run parameterizedTest
+    run parameterizeTest
   }
 
 let tests6 =
-  let parameterizedTest (x, y) = test "parameters test" {
+  let parameterizeTest (x, y) = test "source parameterize test" {
     do! assertEquals x y
   }
-  parameters {
+  parameterize {
     source [
       (1, 1)
       (1, 2)
     ]
-    run parameterizedTest
+    run parameterizeTest
   }
 
 type MyClass() =
