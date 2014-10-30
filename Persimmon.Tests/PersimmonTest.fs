@@ -8,17 +8,19 @@ open FsUnit
 module PersimmonTest =
 
   let shouldSucceed expected = function
-    | { AssertionResult = Success actual } -> actual |> should equal expected
-    | { AssertionResult = Failure xs } -> Assert.Fail(sprintf "%A" xs)
+    | { AssertionResult = Passed actual } -> actual |> should equal expected
+    | { AssertionResult = Failed xs } -> Assert.Fail(sprintf "%A" xs)
+    | { AssertionResult = Error (e, xs) } -> Assert.Fail(sprintf "%A\n%A" e xs)
 
   let shouldFail (expectedMessage: NonEmptyList<string>) = function
-    | { AssertionResult = Success x } -> Assert.Fail(sprintf "Expect: Failure\nActual: %A" x)
-    | { AssertionResult = Failure actual } -> actual |> should equal expectedMessage
+    | { AssertionResult = Passed x } -> Assert.Fail(sprintf "Expect: Failure\nActual: %A" x)
+    | { AssertionResult = Failed actual } -> actual |> should equal expectedMessage
+    | { AssertionResult = Error (e, xs) } -> Assert.Fail(sprintf "%A\n%A" e xs)
 
   [<Test>]
   let ``simple succes assertion should succceed`` () =
     test "simple success assertion should succee" {
-      return! success 1
+      return! pass 1
     }
     |> shouldSucceed 1
 
@@ -26,7 +28,7 @@ module PersimmonTest =
   let ``simple failure asseertion should fail`` () =
     let msg = "always fail"
     test "simple failure assertion should fail" {
-      return! failure msg
+      return! fail msg
     }
     |> shouldFail (msg, [])
 
