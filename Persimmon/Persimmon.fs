@@ -63,27 +63,48 @@ let success v = Success v
 let check expected actual = checkWith actual expected actual
 let assertEquals expected actual = checkWith () expected actual
 
-type Append =
-  | Append
-  static member (?<-) (_: unit seq, Append, _: 'a seq) = fun (y: 'a) -> Seq.singleton y
-  static member (?<-) (xs: ('a * 'b) seq, Append, _: ('a * 'b) seq) = fun (y: 'a * 'b) -> seq { yield! xs; yield y }
+type AppendValue =
+  | AppendValue
+  static member (?<-) (_: unit seq, AppendValue, _: 'a seq) = fun (y: 'a) -> Seq.singleton y
+  static member (?<-) (xs: ('a * 'b) seq, AppendValue, _: ('a * 'b) seq) = fun (y: 'a * 'b) -> seq { yield! xs; yield y }
 
-let inline append xs ys =
-  (xs ? (Append) <- Seq.empty) ys
+let inline append xs y =
+  (xs ? (AppendValue) <- Seq.empty) y
+
+type TestCases<'T, 'U> = {
+  Parameters: 'T seq
+  Tests: ('T -> TestResult<'U>) seq
+}
+
+type MakeTests =
+  | MakeTests
+  static member (?<-) (source: 'a seq, MakeTests, _: TestCases<'a, 'b>) = fun (f: 'a -> TestResult<'b>) ->
+    { Parameters = source
+      Tests = Seq.singleton (fun args -> let ret = f args in { ret with Name = sprintf "%s%A" ret.Name args }) }
+  static member (?<-) (testCases: TestCases<'a, 'b>, MakeTests, _: TestCases<'a, 'b>) = fun (f: 'a -> TestResult<'b>) ->
+    { testCases with
+        Tests = seq {
+          yield! testCases.Tests
+          yield fun args -> let ret = f args in { ret with Name = sprintf "%s%A" ret.Name args } } }
+
+let inline private makeTests source f =
+  (source ? (MakeTests) <- Unchecked.defaultof<TestCases<_, _>>) f
 
 type ParameterizeBuilder() =
   member __.Delay(f: unit -> _) = f
-  member __.Run(f) = f ()
+  member __.Run(f) =
+    let testCases = f ()
+    testCases.Tests
+    |> Seq.collect (fun test -> testCases.Parameters |> Seq.map test )
   member __.Yield(x) = Seq.singleton x
   member __.YieldFrom(xs: _ seq) = xs
   member __.For(source : _ seq, body : _ -> _ seq) = source |> Seq.collect body
   [<CustomOperation("case")>]
   member inline __.Case(source, case) = append source case
-  [<CustomOperation("run")>]
-  member __.RunTests(source: _ seq, f: _ -> TestResult<_>) =
-    source
-    |> Seq.map (fun x -> let ret = f x in { ret with Name = sprintf "%s%A" ret.Name x })
   [<CustomOperation("source")>]
-  member __.Source (_, source: seq<_>) = source
+  member __.Source (_, source: _ seq) = source
+  [<CustomOperation("run")>]
+  member inline __.RunTests(source, f: _ -> TestResult<_>) =
+    makeTests source f
 
 let parameterize = ParameterizeBuilder()
