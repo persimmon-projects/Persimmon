@@ -77,12 +77,16 @@ let tests6 =
   let parameterizeTest (x, y) = test "source parameterize test" {
     do! assertEquals x y
   }
+  let parameterizeTest2 (x, y) = test "source parameterize test2" {
+    do! assertEquals (x + 1) y
+  }
   parameterize {
     source [
       (1, 1)
       (1, 2)
     ]
     run parameterizeTest
+    run parameterizeTest2
   }
 
 type MyClass() =
