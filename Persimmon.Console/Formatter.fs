@@ -23,7 +23,7 @@ module Formatters =
       { new IFormatter<TestResult<unit>> with
           member __.Format(res: TestResult<unit>) =
             Writables.string begin
-              match res.AssertionResult.Value with
+              match res.AssertionResult with
               | Success _ -> "."
               | Failure _ -> "f"
               | Error _ -> "E"
@@ -33,7 +33,7 @@ module Formatters =
     let normal =
       let toStr (res: TestResult<unit>) =
         seq {
-          match res.AssertionResult.Value with
+          match res.AssertionResult with
           | Success _ -> ()
           | Failure errs ->
               yield "Assertion failed: " + res.Name

@@ -15,20 +15,20 @@ module AssertionResult =
 
 type TestResult<'T> = {
   Name: string
-  AssertionResult: Lazy<AssertionResult<'T>>
+  AssertionResult: AssertionResult<'T>
 }
 
 module TestResult =
   let map f x =
-    { Name = x.Name; AssertionResult = lazy AssertionResult.map f x.AssertionResult.Value }
+    { Name = x.Name; AssertionResult = AssertionResult.map f x.AssertionResult }
 
 type TestBuilder(description: string) =
   member __.Return(x) = Success x
   member __.ReturnFrom(x, _) = x
   member __.Source(x: AssertionResult<unit>) = (x, UnitType)
   member __.Source(x: AssertionResult<_>) = (x, ValueType)
-  member __.Source(x: TestResult<unit>) = (x.AssertionResult.Value, UnitType)
-  member __.Source(x: TestResult<_>) = (x.AssertionResult.Value, ValueType)
+  member __.Source(x: TestResult<unit>) = (x.AssertionResult, UnitType)
+  member __.Source(x: TestResult<_>) = (x.AssertionResult, ValueType)
   member __.Bind(x, f: 'T -> AssertionResult<_>) =
     match x with
     | (Success x, _) -> f x
@@ -46,7 +46,7 @@ type TestBuilder(description: string) =
   member __.Delay(f: unit -> AssertionResult<_>) = f
   member __.Run(f) = {
     Name = description
-    AssertionResult = lazy try f () with e -> Error (e, [])
+    AssertionResult = try f () with e -> Error (e, [])
   }
 
 let test description = TestBuilder(description)
