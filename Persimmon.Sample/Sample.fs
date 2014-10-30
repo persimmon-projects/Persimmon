@@ -26,6 +26,12 @@ let test4 = test "error test" {
   do! assertEquals (err ()) 1
 }
 
+let test5 =
+  test "skip test" {
+    do! assertEquals 1 2
+  }
+  |> skip "skip example"
+
 let tests = [
   test "success test(list)" {
     do! assertEquals 1 1
