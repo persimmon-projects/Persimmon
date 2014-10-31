@@ -36,10 +36,10 @@ module Formatters =
           match res.AssertionResult with
           | Passed _ -> ()
           | Failed errs ->
-              yield "Assertion failed: " + res.Name
+              yield "Assertion failed: " + res.FullName
               yield! errs |> NonEmptyList.toList
           | Error (e, errs) ->
-              yield "FATAL ERROR: " + res.Name
+              yield "FATAL ERROR: " + res.FullName
               if not (errs.IsEmpty) then
                 yield "------------------- finished assertions --------------------"
                 yield! errs

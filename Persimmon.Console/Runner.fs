@@ -19,12 +19,12 @@ let getTestResultFields typeArgs =
   let typ = typedefof<TestResult<_>>
   let typ = typ.MakeGenericType(typeArgs)
   match typ |> FSharpType.GetRecordFields with
-  | [| name; result |] -> name, result
+  | [| name; parameters; result |] -> name, parameters, result
   | _ -> failwith "oops!"
 
 let runPersimmonTest (reporter: Reporter) (test: obj) =
   let typeArgs = test.GetType().GetGenericArguments()
-  let _, resultField = getTestResultFields typeArgs
+  let _, _, resultField = getTestResultFields typeArgs
   let result = FSharpValue.GetRecordField(test, resultField)
   let case, _ = FSharpValue.GetUnionFields(result, result.GetType())
   let res = (test, typeArgs.[0]) |> RuntimeTestResult.map (fun x -> box ())

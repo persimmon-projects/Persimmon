@@ -4,6 +4,7 @@ type NonEmptyList<'T> = 'T * 'T list
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module NonEmptyList =
+  let head (xs: NonEmptyList<_>) = let head, _ = xs in head
   let cons head tail : NonEmptyList<_> = (head, tail)
   let singleton head : NonEmptyList<_> = (head, [])
   let append (xs: NonEmptyList<_>) (ys: NonEmptyList<_>) : NonEmptyList<_> =
