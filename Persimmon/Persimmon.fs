@@ -15,12 +15,17 @@ module AssertionResult =
 
 type TestResult<'T> = {
   Name: string
+  Parameters: obj list
   AssertionResult: AssertionResult<'T>
 }
+with
+  member this.FullName =
+    if this.Parameters.IsEmpty then this.Name
+    else this.Name + "(" + (String.concat ", " (this.Parameters |> List.map string)) + ")"
 
 module TestResult =
   let map f x =
-    { Name = x.Name; AssertionResult = AssertionResult.map f x.AssertionResult }
+    { Name = x.Name; Parameters = x.Parameters; AssertionResult = AssertionResult.map f x.AssertionResult }
 
 type TestBuilder(description: string) =
   member __.Return(x) = Passed x
@@ -46,6 +51,7 @@ type TestBuilder(description: string) =
   member __.Delay(f: unit -> AssertionResult<_>) = f
   member __.Run(f) = {
     Name = description
+    Parameters = []
     AssertionResult = try f () with e -> Error (e, [])
   }
 
@@ -81,6 +87,14 @@ type Append =
 let inline append xs ys =
   (xs ? (Append) <- Seq.empty) ys
 
+type ToList =
+  | ToList
+  static member (?<-) ((a1: 'a1, a2: 'a2), ToList, _: obj list) = fun () -> [ box a1; box a2 ]
+  static member (?<-) ((a1: 'a1, a2: 'a2, a3: 'a3), ToList, _: obj list) = fun () -> [ box a1; box a2; box a3 ]
+
+let inline toList x =
+  (x ? (ToList) <- []) ()
+
 type ParameterizeBuilder() =
   member __.Delay(f: unit -> _) = f
   member __.Run(f) = f ()
@@ -90,9 +104,9 @@ type ParameterizeBuilder() =
   [<CustomOperation("case")>]
   member inline __.Case(source, case) = append source case
   [<CustomOperation("run")>]
-  member __.RunTests(source: _ seq, f: _ -> TestResult<_>) =
+  member inline __.RunTests(source: _ seq, f: _ -> TestResult<_>) =
     source
-    |> Seq.map (fun x -> let ret = f x in { ret with Name = sprintf "%s%A" ret.Name x })
+    |> Seq.map (fun x -> let ret = f x in { ret with Parameters = toList x })
   [<CustomOperation("source")>]
   member __.Source (_, source: seq<_>) = source
 
