@@ -7,15 +7,15 @@ open FsUnit
 [<TestFixture>]
 module PersimmonTest =
 
-  let shouldSucceed expected = function
-    | { AssertionResult = Passed actual } -> actual |> should equal expected
-    | { AssertionResult = Failed xs } -> Assert.Fail(sprintf "%A" xs)
-    | { AssertionResult = Error (e, xs) } -> Assert.Fail(sprintf "%A\n%A" e xs)
+  let shouldSucceed<'T> (expected: 'T) = function
+    | TestResult { AssertionResult = Passed actual } -> actual |> should equal expected
+    | TestResult { AssertionResult = Failed xs } -> Assert.Fail(sprintf "%A" xs)
+    | TestResult { AssertionResult = Error (e, xs) } -> Assert.Fail(sprintf "%A\n%A" e xs)
 
-  let shouldFail (expectedMessage: NonEmptyList<string>) = function
-    | { AssertionResult = Passed x } -> Assert.Fail(sprintf "Expect: Failure\nActual: %A" x)
-    | { AssertionResult = Failed actual } -> actual |> should equal expectedMessage
-    | { AssertionResult = Error (e, xs) } -> Assert.Fail(sprintf "%A\n%A" e xs)
+  let shouldFail<'T> (expectedMessage: NonEmptyList<string>) = function
+    | TestResult { AssertionResult = Passed x } -> Assert.Fail(sprintf "Expect: Failure\nActual: %A" x)
+    | TestResult { AssertionResult = Failed actual } -> actual |> should equal expectedMessage
+    | TestResult { AssertionResult = Error (e, xs) } -> Assert.Fail(sprintf "%A\n%A" e xs)
 
   [<Test>]
   let ``simple succes assertion should succceed`` () =
@@ -39,7 +39,7 @@ module PersimmonTest =
       do! assertEquals 2 2
       do! assertEquals 3 4
     }
-    |> shouldFail ("Expect: 1\nActual: 2", [ "Expect: 3\nActual: 4" ])
+    |> shouldFail<obj> ("Expect: 1\nActual: 2", [ "Expect: 3\nActual: 4" ])
 
   [<Test>]
   let ``dependent assertion should not run if before assertion failed`` () =

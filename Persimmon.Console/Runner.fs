@@ -34,6 +34,7 @@ let runPersimmonTest (reporter: Reporter) (test: obj) =
 let typedefis<'T>(typ: Type) =
   typ.IsGenericType && typ.GetGenericTypeDefinition() = typedefof<'T>
 
+let (|Type|_|) (matching: Type) (typ: Type) = if typ = matching then Some typ else None
 let (|ArrayType|_|) (typ: Type) = if typ.IsArray then Some (typ.GetElementType()) else None
 let (|GenericType|_|) (typ: Type) =
   if typ.IsGenericType then
@@ -42,14 +43,17 @@ let (|GenericType|_|) (typ: Type) =
     None
 
 let persimmonTests f (typ: Type) = seq {
+  let testIF = typeof<ITest>
   match typ with
-  | ArrayType elemType ->
+  | Type testIF _ ->
+      yield f ()
+  | ArrayType elemType when typedefis<TestResult<_>>(elemType) || elemType = typeof<ITest> ->
       yield! (f (), elemType) |> RuntimeArray.map box
   | GenericType (genTypeDef, _) when genTypeDef = typedefof<TestResult<_>> ->
       yield f ()
-  | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ seq> && typedefis<TestResult<_>>(elemType) ->
+  | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ seq> && (typedefis<TestResult<_>>(elemType) || elemType = typeof<ITest>) ->
       yield! (f (), elemType) |> RuntimeSeq.map box
-  | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ list> && typedefis<TestResult<_>>(elemType) ->
+  | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ list> && (typedefis<TestResult<_>>(elemType) || elemType = typeof<ITest>) ->
       yield! (f (), elemType) |> RuntimeList.map box
   | _ -> ()
 }
