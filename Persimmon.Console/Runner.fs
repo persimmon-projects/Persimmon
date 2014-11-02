@@ -75,6 +75,7 @@ let rec runTests' reporter (rcontext: string list) (typ: Type) : int =
       yield!
         typ.GetMethods(BindingFlags.Static ||| BindingFlags.Public)
         |> Seq.filter (fun m -> not m.IsSpecialName) // ignore getter methods
+        |> Seq.filter (fun m -> m.GetParameters() |> Array.length = 0)
         |> Seq.collect persimmonTestMethods
     }
     |> Seq.sumBy (runPersimmonTest reporter)
