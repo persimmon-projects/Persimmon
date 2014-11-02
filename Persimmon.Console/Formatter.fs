@@ -27,6 +27,7 @@ module Formatters =
               | Passed _ -> "."
               | Failed _ -> "f"
               | Error _ -> "E"
+              | Skipped _ -> "s"
             end }
 
   module SummaryFormatter =
@@ -45,6 +46,9 @@ module Formatters =
                 yield! errs
               yield "------------------------ exception -------------------------"
               yield e.ToString()
+          | Skipped reason ->
+              yield "Skipped: " + res.Name
+              yield "reason: " + reason
         }
 
       { new IFormatter<TestResult<unit> seq> with

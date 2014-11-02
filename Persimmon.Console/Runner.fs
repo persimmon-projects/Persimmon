@@ -9,10 +9,10 @@ open Microsoft.FSharp.Reflection
 open Persimmon
 open RuntimeUtil
 
-let passedCase, failedCase, errorCase =
+let passedCase, failedCase, errorCase, skipCase =
   let typ = typedefof<AssertionResult<_>>
   match typ |> FSharpType.GetUnionCases with
-  | [| passed; failed; error |] -> passed, failed, error
+  | [| passed; failed; error; skip |] -> passed, failed, error, skip
   | _ -> failwith "oops!"
 
 let getTestResultFields typeArgs =

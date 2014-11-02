@@ -6,12 +6,14 @@ type AssertionResult<'T> =
   | Passed of 'T
   | Failed of NonEmptyList<string>
   | Error of exn * string list
+  | Skipped of string
 
 module AssertionResult =
   let map f = function
   | Passed s -> Passed (f s)
   | Failed errs -> Failed errs
   | Error (e, errs) -> Error (e, errs)
+  | Skipped reason -> Skipped reason
 
 type TestResult<'T> = {
   Name: string
@@ -44,10 +46,12 @@ type TestBuilder(description: string) =
         | Passed _ -> Failed errs1
         | Failed errs2 -> Failed (NonEmptyList.append errs1 errs2)
         | Error (e, errs2) -> Error (e, List.append (errs1 |> NonEmptyList.toList) errs2)
+        | Skipped msg -> Skipped msg
       with
         e -> Error (e, errs1 |> NonEmptyList.toList)
     | (Failed xs, ValueType) -> Failed xs
     | (Error (e, errs), _) -> Error (e, errs)
+    | (Skipped msg, _) -> Skipped msg
   member __.Delay(f: unit -> AssertionResult<_>) = f
   member __.Run(f) = {
     Name = description
@@ -78,6 +82,8 @@ let pass v = Passed v
 
 let check expected actual = checkWith actual expected actual
 let assertEquals expected actual = checkWith () expected actual
+
+let skip reason x = { x with AssertionResult = Skipped reason }
 
 type Append =
   | Append

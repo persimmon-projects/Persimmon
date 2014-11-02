@@ -11,11 +11,13 @@ module PersimmonTest =
     | { AssertionResult = Passed actual } -> actual |> should equal expected
     | { AssertionResult = Failed xs } -> Assert.Fail(sprintf "%A" xs)
     | { AssertionResult = Error (e, xs) } -> Assert.Fail(sprintf "%A\n%A" e xs)
+    | { AssertionResult = Skipped _ as s } -> Assert.Fail(sprintf "%A" s)
 
   let shouldFail (expectedMessage: NonEmptyList<string>) = function
     | { AssertionResult = Passed x } -> Assert.Fail(sprintf "Expect: Failure\nActual: %A" x)
     | { AssertionResult = Failed actual } -> actual |> should equal expectedMessage
     | { AssertionResult = Error (e, xs) } -> Assert.Fail(sprintf "%A\n%A" e xs)
+    | { AssertionResult = Skipped _ as s } -> Assert.Fail(sprintf "%A" s)
 
   [<Test>]
   let ``simple succes assertion should succceed`` () =
