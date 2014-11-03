@@ -92,3 +92,7 @@ type MyClass() =
   static member test2 = test "failure test(static property)" {
     do! assertEquals 1 2
   }
+
+let helperTest x = test "not execute because this is not a zero parameter function" {
+  do! assertEquals 1 x
+}
