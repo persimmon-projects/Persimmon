@@ -26,12 +26,12 @@ module AssertionResult =
 // +--------------+ +-------+
 type ITest = interface end
 
-type Context(name: string, children: ITest list) = class
-  member __.Name = name
-  member __.Children = children
-
+type Context = {
+  Name: string
+  Children: ITest list
+}
+with
   interface ITest
-end
 
 type BoxedTestResult = {
   Name: string
@@ -85,7 +85,7 @@ let (|TestResult|_|) (test: ITest) =
   test.Match((fun _ -> None), (fun tr -> Some tr))
 
 let context name children =
-  Context(name, children) :> ITest
+  { Name = name; Children = children } :> ITest
 
 module TestResult =
   let map (f: 'a -> 'b) (x: TestResult<'a>) =

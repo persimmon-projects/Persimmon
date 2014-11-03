@@ -17,38 +17,56 @@ module Writables =
 
 module Formatters =
   open Persimmon
+  open Persimmon.TestExtension
 
   module ProgressFormatter =
     let dot =
-      { new IFormatter<TestResult<unit>> with
-          member __.Format(res: TestResult<unit>) =
+      { new IFormatter<ITest> with
+          member __.Format(test: ITest) =
             Writables.string begin
-              match res.AssertionResult with
-              | Passed _ -> "."
-              | Failed _ -> "f"
-              | Error _ -> "E"
+              test.Match(
+                (fun _ -> ""),
+                (fun res ->
+                  match res.AssertionResult with
+                  | Passed _ -> "."
+                  | Failed _ -> "f"
+                  | Error _ -> "E")
+              )
             end }
 
   module SummaryFormatter =
-    let normal =
-      let toStr (res: TestResult<unit>) =
-        seq {
-          match res.AssertionResult with
-          | Passed _ -> ()
-          | Failed errs ->
-              yield "Assertion failed: " + res.FullName
-              yield! errs |> NonEmptyList.toList
-          | Error (e, errs) ->
-              yield "FATAL ERROR: " + res.FullName
-              if not (errs.IsEmpty) then
-                yield "------------------- finished assertions --------------------"
-                yield! errs
-              yield "------------------------ exception -------------------------"
-              yield e.ToString()
-        }
+    let private bar width (barChar: char) (center: string) =
+      let barLen = width - center.Length - 2
+      let left = barLen / 2
+      let res = (String.replicate left (string barChar)) + " " + center + " "
+      let right = width - res.Length
+      res + (String.replicate right (string barChar))
 
-      { new IFormatter<TestResult<unit> seq> with
-          member __.Format(xs: TestResult<unit> seq) =
+    let normal =
+      let toStr (test: ITest) =
+        test.Match(
+          (fun context ->
+            Seq.singleton (bar 70 '=' context.Name)),
+          (fun res ->
+            seq {
+              match res.AssertionResult with
+              | Passed _ -> ()
+              | Failed errs ->
+                  yield "Assertion failed: " + res.FullName
+                  yield! errs |> NonEmptyList.toList
+              | Error (e, errs) ->
+                  yield "FATAL ERROR: " + res.FullName
+                  if not (errs.IsEmpty) then
+                    yield bar 70 '-' "finished assertions"
+                    yield! errs
+                  yield bar 70 '-' "exception"
+                  yield e.ToString()
+            }
+          )
+        )
+
+      { new IFormatter<ITest seq> with
+          member __.Format(xs: ITest seq) =
             Writables.stringSeq begin
               xs |> Seq.collect toStr
             end }
