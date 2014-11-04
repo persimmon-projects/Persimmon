@@ -59,7 +59,6 @@ with
       AssertionResult = this.AssertionResult |> AssertionResult.map box }
 
   interface ITest
-end
 
 module TestExtension =
   let conv (x: obj) =
