@@ -24,14 +24,13 @@ module Formatters =
       { new IFormatter<ITest> with
           member __.Format(test: ITest) =
             Writables.string begin
-              test.Match(
-                (fun _ -> ""),
-                (fun res ->
+              match test with
+              | Context _ -> ""
+              | TestResult res ->
                   match res.AssertionResult with
                   | Passed _ -> "."
                   | Failed _ -> "f"
-                  | Error _ -> "E")
-              )
+                  | Error _ -> "E"
             end }
 
   module SummaryFormatter =
@@ -43,27 +42,24 @@ module Formatters =
       res + (String.replicate right (string barChar))
 
     let normal =
-      let toStr (test: ITest) =
-        test.Match(
-          (fun context ->
-            Seq.singleton (bar 70 '=' context.Name)),
-          (fun res ->
-            seq {
-              match res.AssertionResult with
-              | Passed _ -> ()
-              | Failed errs ->
-                  yield "Assertion failed: " + res.FullName
-                  yield! errs |> NonEmptyList.toList
-              | Error (e, errs) ->
-                  yield "FATAL ERROR: " + res.FullName
-                  if not (errs.IsEmpty) then
-                    yield bar 70 '-' "finished assertions"
-                    yield! errs
-                  yield bar 70 '-' "exception"
-                  yield e.ToString()
-            }
-          )
-        )
+      let toStr = function
+      | Context context ->
+          Seq.singleton (bar 70 '=' context.Name)
+      | TestResult res ->
+          seq {
+            match res.AssertionResult with
+            | Passed _ -> ()
+            | Failed errs ->
+                yield "Assertion failed: " + res.FullName
+                yield! errs |> NonEmptyList.toList
+            | Error (e, errs) ->
+                yield "FATAL ERROR: " + res.FullName
+                if not (errs.IsEmpty) then
+                  yield bar 70 '-' "finished assertions"
+                  yield! errs
+                yield bar 70 '-' "exception"
+                yield e.ToString()
+          }
 
       { new IFormatter<ITest seq> with
           member __.Format(xs: ITest seq) =

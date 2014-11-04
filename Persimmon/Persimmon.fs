@@ -77,11 +77,8 @@ module TestExtension =
 
 open TestExtension
 
-let (|Context|_|) (test: ITest) =
-  test.Match((fun c -> Some c), (fun _ -> None))
-
-let (|TestResult|_|) (test: ITest) =
-  test.Match((fun _ -> None), (fun tr -> Some tr))
+let (|Context|TestResult|) (test: ITest) =
+  test.Match((fun c -> Context c), (fun tr -> TestResult tr))
 
 let context name children =
   { Name = name; Children = children } :> ITest
