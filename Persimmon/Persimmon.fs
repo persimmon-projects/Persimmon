@@ -13,6 +13,36 @@ module AssertionResult =
   | Failed errs -> Failed errs
   | Error (e, errs) -> Error (e, errs)
 
+// hack: F# doesn't support the GADTs. So we encode it using the class hierarchy.
+//              +-----+
+//              |ITest|<--------+
+//              +-----+         |
+//                △            |
+//                ｜            |
+//         +------------+       |
+//         |            |       |
+// +--------------+ +-------+   |
+// |TestResult<'T>| |Context|◇-+
+// +--------------+ +-------+
+type ITest = interface end
+
+type Context = {
+  Name: string
+  Children: ITest list
+}
+with
+  interface ITest
+
+type BoxedTestResult = {
+  Name: string
+  Parameters: obj list
+  AssertionResult: AssertionResult<obj>
+}
+with
+  member this.FullName =
+    if this.Parameters.IsEmpty then this.Name
+    else this.Name + "(" + (String.concat ", " (this.Parameters |> List.map string)) + ")"
+
 type TestResult<'T> = {
   Name: string
   Parameters: obj list
@@ -23,9 +53,40 @@ with
     if this.Parameters.IsEmpty then this.Name
     else this.Name + "(" + (String.concat ", " (this.Parameters |> List.map string)) + ")"
 
+  member this.BoxTypeParam () =
+    { BoxedTestResult.Name = this.Name
+      Parameters = this.Parameters
+      AssertionResult = this.AssertionResult |> AssertionResult.map box }
+
+  interface ITest
+
+module TestExtension =
+  let conv (x: obj) =
+    let typ = x.GetType()
+    let m = typ.GetMethod("BoxTypeParam")
+    m.Invoke(x, [||]) :?> BoxedTestResult
+
+  type ITest with
+    member this.Match<'T>(f, g) : 'T =
+      match this with
+      | :? Context as c -> f c
+      | self when self.GetType().GetGenericTypeDefinition() = typedefof<TestResult<_>> ->
+          g (conv self)
+      | _other ->
+          failwithf "oops!: %A" (typeof<'T>)
+
+open TestExtension
+
+let (|Context|TestResult|) (test: ITest) =
+  test.Match((fun c -> Context c), (fun tr -> TestResult tr))
+
+let context name children =
+  { Name = name; Children = children } :> ITest
+
 module TestResult =
-  let map f x =
-    { Name = x.Name; Parameters = x.Parameters; AssertionResult = AssertionResult.map f x.AssertionResult }
+  let map (f: 'a -> 'b) (x: TestResult<'a>) =
+    let mapped = x.AssertionResult |> AssertionResult.map f
+    { Name = x.Name; Parameters = x.Parameters; AssertionResult = mapped } :> ITest
 
 type TestBuilder(description: string) =
   member __.Return(x) = Passed x
@@ -49,11 +110,8 @@ type TestBuilder(description: string) =
     | (Failed xs, ValueType) -> Failed xs
     | (Error (e, errs), _) -> Error (e, errs)
   member __.Delay(f: unit -> AssertionResult<_>) = f
-  member __.Run(f) = {
-    Name = description
-    Parameters = []
-    AssertionResult = try f () with e -> Error (e, [])
-  }
+  member __.Run(f) =
+    { Name = description; Parameters = []; AssertionResult = try f () with e -> Error (e, []) }
 
 let test description = TestBuilder(description)
 
@@ -106,7 +164,7 @@ type ParameterizeBuilder() =
   [<CustomOperation("run")>]
   member inline __.RunTests(source: _ seq, f: _ -> TestResult<_>) =
     source
-    |> Seq.map (fun x -> let ret = f x in { ret with Parameters = toList x })
+    |> Seq.map (fun x -> let ret = f x in { ret with Parameters = toList x } :> ITest)
   [<CustomOperation("source")>]
   member __.Source (_, source: seq<_>) = source
 

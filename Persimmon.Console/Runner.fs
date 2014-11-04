@@ -22,8 +22,8 @@ let getTestResultFields typeArgs =
   | [| name; parameters; result |] -> name, parameters, result
   | _ -> failwith "oops!"
 
-let runPersimmonTest (reporter: Reporter) (test: obj) =
-  let typeArgs = test.GetType().GetGenericArguments()
+let runPersimmonTest (reporter: Reporter) (test: obj, typ: Type) =
+  let typeArgs = typ.GetGenericArguments()
   let _, _, resultField = getTestResultFields typeArgs
   let result = FSharpValue.GetRecordField(test, resultField)
   let case, _ = FSharpValue.GetUnionFields(result, result.GetType())
@@ -31,9 +31,23 @@ let runPersimmonTest (reporter: Reporter) (test: obj) =
   reporter.ReportProgress(res)
   if case.Tag = passedCase.Tag then 0 else 1
 
+let rec runPersimmonContext (reporter: Reporter) (context: Context) =
+  reporter.ReportProgress(context)
+  let children = context.Children
+  let failureCount =
+    children
+    |> Seq.sumBy (runPersimmonContextOrTest reporter)
+  failureCount
+
+and runPersimmonContextOrTest (reporter: Reporter) (contextOrTest: obj) =
+  match contextOrTest with
+  | :? Context as context -> runPersimmonContext reporter context
+  | other -> runPersimmonTest reporter (other,other.GetType())
+
 let typedefis<'T>(typ: Type) =
   typ.IsGenericType && typ.GetGenericTypeDefinition() = typedefof<'T>
 
+let (|Type|_|) (matching: Type) (typ: Type) = if typ = matching then Some typ else None
 let (|ArrayType|_|) (typ: Type) = if typ.IsArray then Some (typ.GetElementType()) else None
 let (|GenericType|_|) (typ: Type) =
   if typ.IsGenericType then
@@ -42,14 +56,17 @@ let (|GenericType|_|) (typ: Type) =
     None
 
 let persimmonTests f (typ: Type) = seq {
+  let testIF = typeof<ITest>
   match typ with
-  | ArrayType elemType ->
+  | Type testIF _ ->
+      yield f ()
+  | ArrayType elemType when typedefis<TestResult<_>>(elemType) || elemType = typeof<ITest> ->
       yield! (f (), elemType) |> RuntimeArray.map box
   | GenericType (genTypeDef, _) when genTypeDef = typedefof<TestResult<_>> ->
       yield f ()
-  | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ seq> && typedefis<TestResult<_>>(elemType) ->
+  | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ seq> && (typedefis<TestResult<_>>(elemType) || elemType = typeof<ITest>) ->
       yield! (f (), elemType) |> RuntimeSeq.map box
-  | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ list> && typedefis<TestResult<_>>(elemType) ->
+  | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ list> && (typedefis<TestResult<_>>(elemType) || elemType = typeof<ITest>) ->
       yield! (f (), elemType) |> RuntimeList.map box
   | _ -> ()
 }
@@ -78,7 +95,7 @@ let rec runTests' reporter (rcontext: string list) (typ: Type) : int =
         |> Seq.filter (fun m -> m.GetParameters() |> Array.isEmpty)
         |> Seq.collect persimmonTestMethods
     }
-    |> Seq.sumBy (runPersimmonTest reporter)
+    |> Seq.sumBy (runPersimmonContextOrTest reporter)
   nestedTestFailures + failures
 
 let runTests reporter (typ: Type) = runTests' reporter [] typ

@@ -85,6 +85,18 @@ let tests6 =
     run parameterizeTest
   }
 
+let context1 =
+  context "Hoge" [
+    context "Piyo" [
+      test "success(context)" {
+        do! assertEquals 1 1
+      }
+      test "failure(context)" {
+        do! assertEquals 1 2
+      }
+    ]
+  ]
+
 type MyClass() =
   member __.test() = test "not execute because this is instance method" {
     do! assertEquals 1 2

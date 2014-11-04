@@ -3,12 +3,12 @@
 open System
 open Persimmon
 
-type Reporter (progressPrinter: Printer<TestResult<unit>>, summaryPrinter: Printer<TestResult<unit> seq>, errorPrinter: Printer<string>) =
-  let results = ResizeArray<TestResult<unit>>()
+type Reporter (progressPrinter: Printer<ITest>, summaryPrinter: Printer<ITest seq>, errorPrinter: Printer<string>) =
+  let results = ResizeArray<ITest>()
 
-  member __.ReportProgress(result: TestResult<_>) =
-    results.Add(result)
-    progressPrinter.Print(result)
+  member __.ReportProgress(test: ITest) =
+    results.Add(test)
+    progressPrinter.Print(test)
 
   member __.ReportSummary() =
     summaryPrinter.PrintLine(results)
