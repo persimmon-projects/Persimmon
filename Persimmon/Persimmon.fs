@@ -145,13 +145,13 @@ type Append =
 let inline append xs ys =
   (xs ? (Append) <- Seq.empty) ys
 
-type ToList =
-  | ToList
-  static member (?<-) ((a1: 'a1, a2: 'a2), ToList, _: obj list) = fun () -> [ box a1; box a2 ]
-  static member (?<-) ((a1: 'a1, a2: 'a2, a3: 'a3), ToList, _: obj list) = fun () -> [ box a1; box a2; box a3 ]
+open Microsoft.FSharp.Reflection
 
-let inline toList x =
-  (x ? (ToList) <- []) ()
+let toList (x: 'a) =
+  if (typeof<'a>).FullName.StartsWith("System.Tuple") then
+    FSharpValue.GetTupleFields (box x) |> Array.toList
+  else
+    [ box x ]
 
 type ParameterizeBuilder() =
   member __.Delay(f: unit -> _) = f
@@ -162,7 +162,7 @@ type ParameterizeBuilder() =
   [<CustomOperation("case")>]
   member inline __.Case(source, case) = append source case
   [<CustomOperation("run")>]
-  member inline __.RunTests(source: _ seq, f: _ -> TestResult<_>) =
+  member __.RunTests(source: _ seq, f: _ -> TestResult<_>) =
     source
     |> Seq.map (fun x -> let ret = f x in { ret with Parameters = toList x } :> ITest)
   [<CustomOperation("source")>]
