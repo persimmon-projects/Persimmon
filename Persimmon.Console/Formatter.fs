@@ -17,7 +17,7 @@ module Writables =
 
 module Formatters =
   open Persimmon
-  open Persimmon.TestExtension
+  open Persimmon.Old.TestExtension
 
   module ProgressFormatter =
     let dot =

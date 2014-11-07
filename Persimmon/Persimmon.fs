@@ -1,4 +1,5 @@
-﻿module Persimmon
+﻿[<AutoOpen>]
+module Persimmon.Old
 
 type ReturnType = UnitType | ValueType
 

@@ -22,7 +22,7 @@ module Runtime =
     FSharpValue.MakeFunction(typ, body)
 
 module RuntimeTestResult =
-  let private typ = Runtime.getModule<TestResult<_>>("Persimmon+TestResult")
+  let private typ = Runtime.getModule<TestResult<_>>("Persimmon.Old+TestResult")
 
   let private mapMethod = typ.GetMethod("map")
   let map<'TDest> (f: obj -> obj (* 'a -> 'TDest *)) (res: obj (* TestResult<'a> *), elemType: Type (* typeof<'a> *)) =
