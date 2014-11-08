@@ -45,6 +45,7 @@
     <Compile Include="NonEmptyList.fsi" />
     <Compile Include="NonEmptyList.fs" />
     <Compile Include="Types.fs" />
+    <Compile Include="ComputationExpressions.fs" />
     <Compile Include="Persimmon.fs" />
   </ItemGroup>
   <PropertyGroup>

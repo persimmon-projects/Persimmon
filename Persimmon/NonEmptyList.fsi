@@ -9,5 +9,6 @@ module NonEmptyList =
   val cons: 'T -> NonEmptyList<'T> -> NonEmptyList<'T>
   val singleton: 'T -> NonEmptyList<'T>
   val append: NonEmptyList<'T> -> NonEmptyList<'T> -> NonEmptyList<'T>
+  val appendList: NonEmptyList<'T> -> 'T list -> NonEmptyList<'T>
   val iter: ('T -> unit) -> NonEmptyList<'T> -> unit
   val toList: NonEmptyList<'T> -> 'T list

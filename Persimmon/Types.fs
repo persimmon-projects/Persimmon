@@ -1,10 +1,23 @@
 ﻿namespace Persimmon
 
+type NotPassedCause =
+  | Skipped of string
+  | Violated of string
+
 /// The result of each assertion.
 type AssertionResult<'T> =
   | Passed of 'T
-  | Skipped of string
-  | Vaiolated of string
+  | NotPassed of NotPassedCause
+
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+module NotPassedCause =
+  module List =
+    let toAssertionResultList xs = xs |> List.map NotPassed
+
+module AssertionResult =
+  module List =
+    let onlyNotPassed xs =
+      xs |> List.choose (function NotPassed x -> Some x | _ -> None)
 
 /// The metadata that is common to each test case and test result.
 type TestMetadata = {
@@ -47,6 +60,10 @@ type Context(name: string, children: TestObject list) =
 type TestCase<'T>(metadata: TestMetadata, body: unit -> TestResult<'T>) =
   inherit TestObject ()
 
+  new (name, parameters, body) = TestCase<_>({ Name = name; Parameters = parameters }, body)
+
+  member internal __.Metadata = metadata
+
   /// The test name. It doesn't contain the parameters.
   member __.Name = metadata.Name
   /// The test name(if the test has parameters then the value contains them).
@@ -64,7 +81,7 @@ type TestCase<'T>(metadata: TestMetadata, body: unit -> TestResult<'T>) =
 and TestResult<'T> =
     /// This case represents the break by exception.
     /// If exist some assertion results before thrown exception, this case holds them.
-  | Break of TestMetadata * exn * AssertionResult<'T> list
+  | Break of TestMetadata * exn * NotPassedCause list
     /// This case represents that all of the assertions is finished.
   | Done of TestMetadata * NonEmptyList<AssertionResult<'T>>
   with
@@ -77,3 +94,78 @@ and TestResult<'T> =
     /// The test parameters.
     /// If the test has no parameters then the value is empty list.
     member this.Parameters = this.Metadata.Parameters
+
+module TestResult =
+  let addAssertionResult x = function
+  | Done (metadata, (Passed _, [])) -> Done (metadata, NonEmptyList.singleton x)
+  | Done (metadata, results) -> Done (metadata, NonEmptyList.cons x results)
+  | Break (metadata, e, results) -> Break (metadata, e, match x with Passed _ -> results | NotPassed x -> x::results)
+
+  let addAssertionResults (xs: NonEmptyList<AssertionResult<_>>) = function
+  | Done (metadata, (Passed _, [])) -> Done (metadata, xs)
+  | Done (metadata, results) ->
+      Done (metadata, NonEmptyList.appendList xs (results |> NonEmptyList.toList |> AssertionResult.List.onlyNotPassed |> NotPassedCause.List.toAssertionResultList))
+  | Break (metadata, e, results) ->
+      Break (metadata, e, (xs |> NonEmptyList.toList |> AssertionResult.List.onlyNotPassed)@results)
+
+type TestType<'T> =
+  | NoValueTest of TestCase<'T>
+  | HasValueTest of TestCase<'T>
+
+module TestCase =
+  let make name parameters x =
+    let meta = { Name = name; Parameters = parameters }
+    TestCase(meta, fun () -> Done (meta, NonEmptyList.singleton x))
+
+  let makeBreak name parameters exn =
+    let meta = { Name = name; Parameters = parameters }
+    TestCase(meta, fun () -> Break (meta, exn, []))
+
+  let addNotPassed notPassedCause (x: TestCase<_>) =
+    TestCase(x.Metadata, fun () -> x.Run() |> TestResult.addAssertionResult (NotPassed notPassedCause))
+
+  let combine (x: TestType<'T>) (rest: 'T -> TestCase<'U>) =
+    match x with
+    | NoValueTest x ->
+        TestCase(
+          x.Metadata,
+          fun () ->
+            match x.Run() with
+            | Done (meta, (Passed unit, [])) ->
+                try (rest unit).Run()
+                with e -> Break (meta, e, [])
+            | Done (meta, assertionResults) ->
+                let notPassed =
+                  assertionResults
+                  |> NonEmptyList.toList
+                  |> AssertionResult.List.onlyNotPassed
+                try
+                  match notPassed with
+                  | [] -> failwith "oops!"
+                  | head::tail ->
+                      assert (typeof<'T> = typeof<unit>)
+                      let testRes = (rest Unchecked.defaultof<'T>).Run()
+                      testRes |> TestResult.addAssertionResults (NonEmptyList.make (NotPassed head) (tail |> List.map NotPassed))
+                with e -> Break (meta, e, notPassed)
+            | Break (meta, e, results) ->
+                Break (meta, e, results)
+        )
+    | HasValueTest x ->
+        TestCase(
+          x.Metadata,
+          fun () ->
+            match x.Run() with
+            | Done (meta, (Passed value, [])) ->
+                try (rest value).Run()
+                with e -> Break (meta, e, [])
+            | Done (meta, assertionResults) ->
+                let notPassed =
+                  assertionResults
+                  |> NonEmptyList.toList
+                  |> AssertionResult.List.onlyNotPassed
+                match notPassed with
+                | [] -> failwith "oops!"
+                | head::tail -> Done (meta, NonEmptyList.make (NotPassed head) (tail |> List.map NotPassed))
+            | Break (meta, e, results) ->
+                Break (meta, e, results)
+        )

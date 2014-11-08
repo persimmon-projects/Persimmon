@@ -12,6 +12,9 @@ module NonEmptyList =
     let x, xs = xs
     let y, ys = ys
     (x, (xs@(y::ys)))
+  let appendList (xs: NonEmptyList<_>) ys =
+    let x, xs = xs
+    (x, xs@ys)
   let iter action (list: NonEmptyList<'T>) =
     let head, tail = list
     action head
@@ -19,4 +22,3 @@ module NonEmptyList =
   let toList (list: NonEmptyList<'T>) =
     let head, tail = list
     [ yield head; yield! tail ]
-
