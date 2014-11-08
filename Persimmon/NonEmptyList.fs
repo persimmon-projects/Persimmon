@@ -28,3 +28,6 @@ module NonEmptyList =
   let toList (list: NonEmptyList<'T>) =
     let head, tail = list
     [ yield head; yield! tail ]
+  let length (list: NonEmptyList<_>) =
+    let _, tail = list
+    1 + List.length tail
