@@ -46,6 +46,7 @@
     <Compile Include="NonEmptyList.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="ComputationExpressions.fs" />
+    <Compile Include="Assertions.fs" />
     <Compile Include="Persimmon.fs" />
   </ItemGroup>
   <PropertyGroup>
