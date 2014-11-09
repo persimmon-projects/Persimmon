@@ -10,5 +10,6 @@ module NonEmptyList =
   val singleton: 'T -> NonEmptyList<'T>
   val append: NonEmptyList<'T> -> NonEmptyList<'T> -> NonEmptyList<'T>
   val appendList: NonEmptyList<'T> -> 'T list -> NonEmptyList<'T>
+  val map: ('T -> 'U) -> NonEmptyList<'T> -> NonEmptyList<'U>
   val iter: ('T -> unit) -> NonEmptyList<'T> -> unit
   val toList: NonEmptyList<'T> -> 'T list

@@ -7,22 +7,29 @@ open FsUnit
 [<TestFixture>]
 module PersimmonTest =
 
-  let shouldSucceed<'T> (expected: 'T) = function
-    | TestResult { AssertionResult = Passed actual } -> actual |> should equal expected
-    | TestResult { AssertionResult = Failed xs } -> Assert.Fail(sprintf "%A" xs)
-    | TestResult { AssertionResult = Error (e, xs) } -> Assert.Fail(sprintf "%A\n%A" e xs)
+  let run (x: TestCase<_>) = x.Run()
 
-  let shouldFail<'T> (expectedMessage: NonEmptyList<string>) = function
-    | TestResult { AssertionResult = Passed x } -> Assert.Fail(sprintf "Expect: Failure\nActual: %A" x)
-    | TestResult { AssertionResult = Failed actual } -> actual |> should equal expectedMessage
-    | TestResult { AssertionResult = Error (e, xs) } -> Assert.Fail(sprintf "%A\n%A" e xs)
+  let shouldPassed<'T> (expected: 'T) = function
+    | Done (_, (Persimmon.Passed (actual: 'T), [])) -> actual |> should equal expected
+    | Done (_, results) -> Assert.Fail(sprintf "%A" (results |> NonEmptyList.toList))
+    | Break (_, e, results) -> Assert.Fail(sprintf "%A\n%A" e results)
+
+  let shouldNotPassed<'T> (expectedMessage: NonEmptyList<string>) = function
+    | Done (_, (Persimmon.Passed (actual: 'T), [])) ->
+        Assert.Fail(sprintf "Expect: Failure\nActual: %A" actual)
+    | Done (_, results) ->
+        results
+        |> NonEmptyList.map (function NotPassed (Skipped x | Violated x) -> x | Persimmon.Passed x -> sprintf "Expected is NotPased but Passed(%A)" x)
+        |> should equal expectedMessage
+    | Break (_, e, results) -> Assert.Fail(sprintf "%A\n%A" e results)
 
   [<Test>]
   let ``simple succes assertion should succceed`` () =
     test "simple success assertion should succee" {
       return! pass 1
     }
-    |> shouldSucceed 1
+    |> run
+    |> shouldPassed 1
 
   [<Test>]
   let ``simple failure asseertion should fail`` () =
@@ -30,7 +37,8 @@ module PersimmonTest =
     test "simple failure assertion should fail" {
       return! fail msg
     }
-    |> shouldFail (msg, [])
+    |> run
+    |> shouldNotPassed (msg, [])
 
   [<Test>]
   let ``all unit type assertion should run`` () =
@@ -39,7 +47,8 @@ module PersimmonTest =
       do! assertEquals 2 2
       do! assertEquals 3 4
     }
-    |> shouldFail<obj> ("Expect: 1\nActual: 2", [ "Expect: 3\nActual: 4" ])
+    |> run
+    |> shouldNotPassed<unit> ("Expect: 1\nActual: 2", [ "Expect: 3\nActual: 4" ])
 
   [<Test>]
   let ``dependent assertion should not run if before assertion failed`` () =
@@ -47,7 +56,8 @@ module PersimmonTest =
       let! v = check 1 2
       do! assertEquals v 3
     }
-    |> shouldFail ("Expect: 1\nActual: 2", [])
+    |> run
+    |> shouldNotPassed ("Expect: 1\nActual: 2", [])
 
   let table = Map.ofList [("x", "y"); ("y", "z"); ("z", "other")]
 
@@ -80,7 +90,7 @@ module PersimmonTest =
 
   [<Test>]
   let ``test should be able to compose`` () =
-    test1 |> shouldSucceed "y"
-    test2 |> shouldSucceed "z"
-    test3 |> shouldFail ("Expect: \"x\"\nActual: \"other\"", [])
-    test4 |> shouldFail ("Expect: \"x\"\nActual: \"other\"", [])
+    test1 |> run |> shouldPassed "y"
+    test2 |> run |> shouldPassed "z"
+    test3 |> run |> shouldNotPassed ("Expect: \"x\"\nActual: \"other\"", [])
+    test4 |> run |> shouldNotPassed ("Expect: \"x\"\nActual: \"other\"", [])

@@ -15,6 +15,9 @@ module NonEmptyList =
   let appendList (xs: NonEmptyList<_>) ys =
     let x, xs = xs
     (x, xs@ys)
+  let map f (list: NonEmptyList<'T>) =
+    let head, tail = list
+    (f head, List.map f tail)
   let iter action (list: NonEmptyList<'T>) =
     let head, tail = list
     action head
