@@ -35,6 +35,33 @@ type TestBuilder(name: string) =
     try f ()
     with e -> TestCase.makeBreak name [] e
 
+[<AutoOpen>]
+module private Util =
+  open Microsoft.FSharp.Reflection
+
+  let toList (x: 'a) =
+    if FSharpType.IsTuple typeof<'a> then
+      FSharpValue.GetTupleFields (box x) |> Array.toList
+    else
+      [ box x ]
+
+type ParameterizeBuilder() =
+  member __.Delay(f: unit -> _) = f
+  member __.Run(f) = f ()
+  member __.Yield(()) = Seq.empty
+  member __.Yield(x) = Seq.singleton x
+  member __.YieldFrom(xs: _ seq) = xs
+  [<CustomOperation("case")>]
+  member inline __.Case(source, case) = seq { yield! source; yield case }
+  [<CustomOperation("source")>]
+  member __.Source (source1, source2) = Seq.append source1 source2
+  [<CustomOperation("run")>]
+  member __.RunTests(source: _ seq, f: _ -> TestCase<_>) =
+    source
+    |> Seq.map (fun x ->
+        let ret = f x
+        TestCase<_>({ ret.Metadata with Parameters = toList x }, ret.Run) :> TestObject)
+
 type TrapBuilder () =
   member __.Zero () = ()
   member __.Delay(f: unit -> _) = f
@@ -48,4 +75,5 @@ type TrapBuilder () =
 [<AutoOpen>]
 module Builder =
   let test name = TestBuilder(name)
+  let parameterize = ParameterizeBuilder()
   let trap = TrapBuilder()
