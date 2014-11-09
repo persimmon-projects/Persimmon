@@ -35,6 +35,17 @@ type TestBuilder(name: string) =
     try f ()
     with e -> TestCase.makeBreak name [] e
 
+type TrapBuilder () =
+  member __.Zero () = ()
+  member __.Delay(f: unit -> _) = f
+  member __.Run(f) =
+    try
+      f () |> ignore
+      fail "Expect thrown exn but not"
+    with
+      e -> pass e
+
 [<AutoOpen>]
 module Builder =
   let test name = TestBuilder(name)
+  let trap = TrapBuilder()
