@@ -148,7 +148,7 @@ let inline append xs ys =
 open Microsoft.FSharp.Reflection
 
 let toList (x: 'a) =
-  if (typeof<'a>).FullName.StartsWith("System.Tuple") then
+  if FSharpType.IsTuple typeof<'a> then
     FSharpValue.GetTupleFields (box x) |> Array.toList
   else
     [ box x ]
