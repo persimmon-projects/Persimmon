@@ -71,9 +71,3 @@ type TrapBuilder () =
       fail "Expect thrown exn but not"
     with
       e -> pass e
-
-[<AutoOpen>]
-module Builder =
-  let test name = TestBuilder(name)
-  let parameterize = ParameterizeBuilder()
-  let trap = TrapBuilder()

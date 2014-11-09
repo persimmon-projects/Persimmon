@@ -47,6 +47,7 @@
     <Compile Include="Types.fs" />
     <Compile Include="Assertions.fs" />
     <Compile Include="ComputationExpressions.fs" />
+    <Compile Include="Syntax.fs" />
     <Compile Include="Persimmon.fs" />
   </ItemGroup>
   <PropertyGroup>
