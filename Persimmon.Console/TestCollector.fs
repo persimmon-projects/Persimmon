@@ -24,26 +24,26 @@ let (|GenericType|_|) (typ: Type) =
   else
     None
 
-let persimmonTests f (typ: Type) = seq {
+let persimmonTests (f: unit -> obj) (typ: Type) = seq {
   let testObjType = typeof<TestObject>
   match typ with
   | Type testObjType _ ->
-      yield f ()
+      yield f () :?> TestObject
   | ArrayType elemType when typedefis<TestCase<_>>(elemType) || elemType = typeof<TestObject> ->
-      yield! (f (), elemType) |> RuntimeArray.map box
+      yield! (f (), elemType) |> RuntimeArray.map (fun x -> x :?> TestObject |> box)
   | GenericType (genTypeDef, _) when genTypeDef = typedefof<TestCase<_>> ->
-      yield f ()
+      yield f () :?> TestObject
   | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ seq> && (typedefis<TestCase<_>>(elemType) || elemType = typeof<TestObject>) ->
-      yield! (f (), elemType) |> RuntimeSeq.map box
+      yield! (f (), elemType) |> RuntimeSeq.map (fun x -> x :?> TestObject |> box)
   | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ list> && (typedefis<TestCase<_>>(elemType) || elemType = typeof<TestObject>) ->
-      yield! (f (), elemType) |> RuntimeList.map box
+      yield! (f (), elemType) |> RuntimeList.map (fun x -> x :?> TestObject |> box)
   | _ -> ()
 }
 
 let persimmonTestProps (p: PropertyInfo) =
-  persimmonTests (fun () -> p.GetValue(null) :?> TestObject) p.PropertyType
+  persimmonTests (fun () -> p.GetValue(null)) p.PropertyType
 let persimmonTestMethods (m: MethodInfo) =
-  persimmonTests (fun () -> m.Invoke(null, [||]) :?> TestObject) m.ReturnType
+  persimmonTests (fun () -> m.Invoke(null, [||])) m.ReturnType
 
 let rec private testObjects (typ: Type) =
   seq {

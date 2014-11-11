@@ -29,6 +29,6 @@ let runTests (reporter: Reporter) (test: TestObject) =
       result :> ITestResult
 
 let runAllTests reporter (tests: TestObject seq) =
-  let rootResults = tests |> Seq.map (runTests reporter)
+  let rootResults = tests |> Seq.map (runTests reporter) |> Seq.toList
   // todo : rootResults to Result
   Result.empty
