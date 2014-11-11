@@ -90,8 +90,40 @@ module Formatter =
               yield! causes |> causesToStrs indent
             }
 
+    type Summary = {
+      Run: int
+      Skipped: int
+      Violated: int
+      Error: int
+    }
+    with
+      override this.ToString() =
+        sprintf "run: %d, error: %d, violated: %d, skipped: %d" this.Run this.Error this.Violated this.Skipped
+
+    [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+    module Summary =
+      let empty = { Run = 0; Skipped = 0; Violated = 0; Error = 0 }
+
+    let rec private collectSummary summary = function
+    | ContextResult ctx ->
+        ctx.Children |> Seq.fold collectSummary summary
+    | TestResult (Break _) ->
+        { summary with Run = summary.Run + 1; Error = summary.Error + 1 }
+    | TestResult (Done (_, res)) ->
+        match res |> AssertionResult.NonEmptyList.typicalResult with
+        | Passed _ -> { summary with Run = summary.Run + 1 }
+        | NotPassed (Skipped _) -> { summary with Run = summary.Run + 1; Skipped = summary.Skipped + 1 }
+        | NotPassed (Violated _) -> { summary with Run = summary.Run + 1; Violated = summary.Violated + 1 }
+
     let normal =
       { new IFormatter<ITestResult seq> with
           member x.Format(results: ITestResult seq): IWritable = 
-            Writable.stringSeq (results |> Seq.collect (toStrs 0))
+            Writable.stringSeq begin
+              seq {
+                yield! results |> Seq.collect (toStrs 0)
+                yield bar 70 '=' "summary"
+                let summary = results |> Seq.fold collectSummary Summary.empty
+                yield string summary
+              }
+            end
           }
