@@ -14,6 +14,7 @@ module Formatter =
           member x.Format(test: ITestResult): IWritable = 
             match test with
             | ContextResult _ctx -> Writable.doNothing
+            | EndMarker -> Writable.newline
             | TestResult tr ->
                 match tr with
                 | Break _ -> Writable.char 'E'
@@ -55,6 +56,7 @@ module Formatter =
          )
 
     let rec private toStrs indent = function
+    | EndMarker -> Seq.empty
     | ContextResult ctx ->
         seq {
           yield (indentStr indent) + "begin " + ctx.Name
@@ -103,6 +105,7 @@ module Formatter =
       let empty = { Run = 0; Skipped = 0; Violated = 0; Error = 0 }
 
     let rec private collectSummary summary = function
+    | EndMarker -> summary
     | ContextResult ctx ->
         ctx.Children |> Seq.fold collectSummary summary
     | TestResult (Break _) ->

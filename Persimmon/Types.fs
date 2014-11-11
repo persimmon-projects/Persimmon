@@ -149,6 +149,8 @@ type TestCase<'T> with
     TestCase<obj>(this.Metadata, fun () -> this.Run().BoxTypeParam())
 
 module TestResult =
+  let endMarker = { new ITestResult }
+
   let addAssertionResult x = function
   | Done (metadata, (Passed _, [])) -> Done (metadata, NonEmptyList.singleton x)
   | Done (metadata, results) -> Done (metadata, NonEmptyList.cons x results)

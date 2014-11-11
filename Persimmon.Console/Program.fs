@@ -2,6 +2,7 @@
 open System.IO
 open System.Text
 open System.Reflection
+open Persimmon
 open Persimmon.Output
 
 let entryPoint (args: Args) =
@@ -34,6 +35,7 @@ let entryPoint (args: Args) =
     let tests = TestCollector.collectRootTestObjects asms
     let res = TestRunner.runAllTests reporter tests
     // report
+    reporter.ReportProgress(TestResult.endMarker)
     reporter.ReportSummary(res.ExecutedRootTestResults)
     res.Errors
   else

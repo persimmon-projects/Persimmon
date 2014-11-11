@@ -16,6 +16,12 @@ module Writable =
           writer.Write(ch)
         }
 
+  let newline =
+    { new IWritable with
+        member __.WriteTo(writer: TextWriter) =
+          writer.WriteLine()
+        }
+
   let stringSeq (strs: string seq) =
     { new IWritable with
         member __.WriteTo(writer: TextWriter) = 
