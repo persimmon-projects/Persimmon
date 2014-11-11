@@ -67,15 +67,20 @@ type Context(name: string, children: TestObject list) =
   member __.Children = children
 
   /// Execute tests.
-  member __.Run() =
+  member __.Run(reporter: ITestResult -> unit) =
     { Name = name
       Children =
         children
         |> Seq.map (function
-                    | :? Context as c -> c.Run() :> ITestResult
+                    | :? Context as c ->
+                        let res = c.Run(reporter) :> ITestResult
+                        reporter res
+                        res
                     | x (* :? TestCase<_> *) ->
                         let run = x.GetType().GetMethod("Run")
-                        run.Invoke(x, [||]) :?> ITestResult) }
+                        let res = run.Invoke(x, [||]) :?> ITestResult
+                        reporter res
+                        res) }
 
   override this.ToString() =
     sprintf "Context(%A, %A)" name children
@@ -138,6 +143,10 @@ and TestResult<'T> =
           Done (meta, res |> NonEmptyList.map (function Passed x -> Passed (box x) | NotPassed x -> NotPassed x))
 
     interface ITestResult
+
+type TestCase<'T> with
+  member this.BoxTypeParam() =
+    TestCase<obj>(this.Metadata, fun () -> this.Run().BoxTypeParam())
 
 module TestResult =
   let addAssertionResult x = function

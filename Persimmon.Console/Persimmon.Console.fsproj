@@ -49,17 +49,19 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Writer.fs" />
-    <Compile Include="Formatter.fs" />
-    <Compile Include="Printer.fs" />
-    <Compile Include="Reporter.fs" />
     <Compile Include="Args.fs" />
     <Compile Include="RuntimeUtil.fs" />
-    <Compile Include="Runner.fs" />
+    <Compile Include="TestCollector.fs" />
+    <Compile Include="TestRunner.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Persimmon.Output\Persimmon.Output.fsproj">
+      <Name>Persimmon.Output</Name>
+      <Project>{4e5f5f61-52cb-45e4-b620-76f9e174ebc3}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Persimmon\Persimmon.fsproj">
       <Name>Persimmon</Name>
       <Project>{f1d851fd-a776-4204-b287-5c14c3aa198c}</Project>
