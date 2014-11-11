@@ -125,3 +125,10 @@ module Formatter =
               }
             end
           }
+
+  module ErrorFormatter =
+    let normal =
+      { new IFormatter<string> with
+          member __.Format(message: string) = 
+            Writable.stringSeq (Seq.singleton message)
+          }
