@@ -45,6 +45,7 @@
     <Compile Include="NonEmptyList.fsi" />
     <Compile Include="NonEmptyList.fs" />
     <Compile Include="Types.fs" />
+    <Compile Include="ActivePatterns.fs" />
     <Compile Include="Assertions.fs" />
     <Compile Include="ComputationExpressions.fs" />
     <Compile Include="Syntax.fs" />

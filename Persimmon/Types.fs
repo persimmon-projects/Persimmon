@@ -19,6 +19,18 @@ module AssertionResult =
     let onlyNotPassed xs =
       xs |> List.choose (function NotPassed x -> Some x | _ -> None)
 
+  module NonEmptyList =
+    let typicalResult xs =
+      xs
+      |> NonEmptyList.reduce (fun acc x ->
+          match acc, x with
+          | NotPassed (Violated _), _
+          | NotPassed (Skipped _), NotPassed (Skipped _)
+          | NotPassed (Skipped _), Passed _
+          | Passed _, Passed _ -> acc
+          | _, _ -> x
+      )
+
 /// The metadata that is common to each test case and test result.
 type TestMetadata = {
   /// The test name. It doesn't contain the parameters.
@@ -42,6 +54,8 @@ with
 [<AbstractClass>]
 type TestObject internal () = class end
 
+type ITestResult = interface end
+
 /// This class represents a nested test.
 /// We can use this class for grouping of the tests.
 type Context(name: string, children: TestObject list) =
@@ -52,8 +66,29 @@ type Context(name: string, children: TestObject list) =
   /// This is a list that has the elements represented the subcontext or the test case.
   member __.Children = children
 
+  /// Execute tests.
+  member __.Run() =
+    { Name = name
+      Children =
+        children
+        |> Seq.map (function
+                    | :? Context as c -> c.Run() :> ITestResult
+                    | x (* :? TestCase<_> *) ->
+                        let run = x.GetType().GetMethod("Run")
+                        run.Invoke(x, [||]) :?> ITestResult) }
+
   override this.ToString() =
     sprintf "Context(%A, %A)" name children
+
+/// This class represents a nested test result.
+/// After running tests, the Context objects become the ContextReults objects.
+and ContextResult = {
+  Name: string
+  Children: ITestResult seq
+}
+with
+  override this.ToString() = sprintf "%A" this
+  interface ITestResult
 
 /// This class represents a test that has not been run yet.
 /// In order to run the test represented this class, use the "Run" method.
@@ -78,6 +113,7 @@ type TestCase<'T>(metadata: TestMetadata, body: unit -> TestResult<'T>) =
     sprintf "TestCase<%s>(%A)" (typeof<'T>.Name) metadata
 
 /// The result of each test.
+/// After running tests, the TestCase objects become the TestResult objects.
 and TestResult<'T> =
     /// This case represents the break by exception.
     /// If exist some assertion results before thrown exception, this case holds them.
@@ -94,6 +130,14 @@ and TestResult<'T> =
     /// The test parameters.
     /// If the test has no parameters then the value is empty list.
     member this.Parameters = this.Metadata.Parameters
+
+    member this.BoxTypeParam() =
+      match this with
+      | Break (meta, e, res) -> Break (meta, e, res)
+      | Done (meta, res) ->
+          Done (meta, res |> NonEmptyList.map (function Passed x -> Passed (box x) | NotPassed x -> NotPassed x))
+
+    interface ITestResult
 
 module TestResult =
   let addAssertionResult x = function

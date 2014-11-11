@@ -24,3 +24,9 @@ module Writable =
         member __.WriteTo(writer: TextWriter) =
           xdoc.Save(writer)
         }
+
+  let group (writables: IWritable seq) =
+    { new IWritable with
+        member __.WriteTo(writer: TextWriter) =
+          writables |> Seq.iter (fun writable -> writable.WriteTo(writer))
+        }
