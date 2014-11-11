@@ -21,15 +21,6 @@ module Runtime =
     let typ = FSharpType.MakeFunctionType(srcType, dstType)
     FSharpValue.MakeFunction(typ, body)
 
-module RuntimeTestResult =
-  let private typ = Runtime.getModule<TestResult<_>>("Persimmon.Old+TestResult")
-
-  let private mapMethod = typ.GetMethod("map")
-  let map<'TDest> (f: obj -> obj (* 'a -> 'TDest *)) (res: obj (* TestResult<'a> *), elemType: Type (* typeof<'a> *)) =
-    let f = Runtime.lambda (elemType, typeof<'TDest>) f
-    let result = Runtime.invoke mapMethod [| elemType; typeof<'TDest> |] [| f; res |]
-    result :?> TestResult<'TDest>
-
 module RuntimeSeq =
   let private typ = Runtime.getModule<_ list>("Microsoft.FSharp.Collections.SeqModule")
 
