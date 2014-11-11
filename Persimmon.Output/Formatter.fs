@@ -13,9 +13,7 @@ module Formatter =
       { new IFormatter<ITestResult> with
           member x.Format(test: ITestResult): IWritable = 
             match test with
-            | ContextResult ctx ->
-                let writables = ctx.Children |> Seq.map (x.Format)
-                Writable.group writables
+            | ContextResult _ctx -> Writable.doNothing
             | TestResult tr ->
                 match tr with
                 | Break _ -> Writable.char 'E'

@@ -7,6 +7,9 @@ type IWritable =
   abstract WriteTo: writer:TextWriter -> unit
 
 module Writable =
+  let doNothing =
+    { new IWritable with member __.WriteTo(_writer: TextWriter) = () }
+
   let char (ch: char) =
     { new IWritable with
         member __.WriteTo(writer: TextWriter) =
