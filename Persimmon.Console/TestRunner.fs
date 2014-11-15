@@ -28,7 +28,7 @@ let runTests (reporter: Reporter) (test: TestObject) =
       reporter.ReportProgress(result)
       result :> ITestResult
 
-let runAllTests reporter (tests: TestObject seq) =
-  let rootResults = tests |> Seq.map (runTests reporter) |> Seq.toList
-  // todo : rootResults to Result
-  Result.empty
+let runAllTests reporter (tests: TestObject list) =
+  let rootResults = tests |> List.map (runTests reporter)
+  // todo : aggregate the count of error tests
+  { Errors = 0; ExecutedRootTestResults = rootResults }

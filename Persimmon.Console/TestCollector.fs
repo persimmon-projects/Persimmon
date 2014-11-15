@@ -16,7 +16,8 @@ let private publicNestedTypes (typ: Type) =
 let private typedefis<'T>(typ: Type) =
   typ.IsGenericType && typ.GetGenericTypeDefinition() = typedefof<'T>
 
-let (|Type|_|) (matching: Type) (typ: Type) = if typ = matching then Some typ else None
+let (|SubTypeOf|_|) (matching: Type) (typ: Type) =
+  if matching.IsAssignableFrom(typ) then Some typ else None
 let (|ArrayType|_|) (typ: Type) = if typ.IsArray then Some (typ.GetElementType()) else None
 let (|GenericType|_|) (typ: Type) =
   if typ.IsGenericType then
@@ -27,7 +28,7 @@ let (|GenericType|_|) (typ: Type) =
 let persimmonTests (f: unit -> obj) (typ: Type) = seq {
   let testObjType = typeof<TestObject>
   match typ with
-  | Type testObjType _ ->
+  | SubTypeOf testObjType _ ->
       yield f () :?> TestObject
   | ArrayType elemType when typedefis<TestCase<_>>(elemType) || elemType = typeof<TestObject> ->
       yield! (f (), elemType) |> RuntimeArray.map (fun x -> x :?> TestObject |> box)
@@ -65,3 +66,4 @@ let collectRootTestObjects (asms: Assembly list) =
   asms
   |> Seq.collect publicTypes
   |> Seq.collect testObjects
+  |> Seq.toList

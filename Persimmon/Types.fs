@@ -71,16 +71,16 @@ type Context(name: string, children: TestObject list) =
     { Name = name
       Children =
         children
-        |> Seq.map (function
-                    | :? Context as c ->
-                        let res = c.Run(reporter) :> ITestResult
-                        reporter res
-                        res
-                    | x (* :? TestCase<_> *) ->
-                        let run = x.GetType().GetMethod("Run")
-                        let res = run.Invoke(x, [||]) :?> ITestResult
-                        reporter res
-                        res) }
+        |> List.map (function
+                     | :? Context as c ->
+                         let res = c.Run(reporter) :> ITestResult
+                         reporter res
+                         res
+                     | x (* :? TestCase<_> *) ->
+                         let run = x.GetType().GetMethod("Run")
+                         let res = run.Invoke(x, [||]) :?> ITestResult
+                         reporter res
+                         res) }
 
   override this.ToString() =
     sprintf "Context(%A, %A)" name children
@@ -89,7 +89,7 @@ type Context(name: string, children: TestObject list) =
 /// After running tests, the Context objects become the ContextReults objects.
 and ContextResult = {
   Name: string
-  Children: ITestResult seq
+  Children: ITestResult list
 }
 with
   override this.ToString() = sprintf "%A" this
