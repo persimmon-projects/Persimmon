@@ -1,7 +1,9 @@
 ﻿[<AutoOpen>]
 module Persimmon.Assertions
 
+/// This assertion is always violated.
 let fail message = NotPassed (Violated message)
+/// This assertion is always passed.
 let pass value = Passed value
 
 let check expected actual =

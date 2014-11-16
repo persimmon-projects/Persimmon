@@ -1,12 +1,17 @@
 ﻿namespace Persimmon
 
+/// The cause of not passed assertion.
 type NotPassedCause =
+    /// The assertion is not passed because it is skipped.
   | Skipped of string
+    /// The assertion is not passed because it is violated.
   | Violated of string
 
 /// The result of each assertion.
 type AssertionResult<'T> =
+    /// The assertion is passed.
   | Passed of 'T
+    /// The assertion is not passed.
   | NotPassed of NotPassedCause
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
@@ -20,6 +25,9 @@ module AssertionResult =
       xs |> List.choose (function NotPassed x -> Some x | _ -> None)
 
   module NonEmptyList =
+    /// Calculate the typical assertion result.
+    /// It returns most important result.
+    /// For example, "Violated" is more important than "Passed"
     let typicalResult xs =
       xs
       |> NonEmptyList.reduce (fun acc x ->
@@ -51,9 +59,16 @@ with
 /// The type that is treated as tests by Persimmon.
 /// Derived class of this class are only two classes,
 /// they are Context and TestCase<'T>.
+/// When the TestObject is executed becomes TestResult.
+/// This is a marker abstract class.
+/// You should use the ActivePatterns
+/// if you want to process derived objects through this class.
 [<AbstractClass>]
 type TestObject internal () = class end
 
+/// This marker interface represents a test result.
+/// You should use the ActivePatterns
+/// if you want to process derived objects through this interface.
 type ITestResult = interface end
 
 /// This class represents a nested test.
@@ -66,7 +81,7 @@ type Context(name: string, children: TestObject list) =
   /// This is a list that has the elements represented the subcontext or the test case.
   member __.Children = children
 
-  /// Execute tests.
+  /// Execute tests recursively.
   member __.Run(reporter: ITestResult -> unit) =
     { Name = name
       Children =
@@ -136,6 +151,7 @@ and TestResult<'T> =
     /// If the test has no parameters then the value is empty list.
     member this.Parameters = this.Metadata.Parameters
 
+    /// Convert TestResult<'T> to TestResult<obj>.
     member this.BoxTypeParam() =
       match this with
       | Break (meta, e, res) -> Break (meta, e, res)
@@ -144,11 +160,16 @@ and TestResult<'T> =
 
     interface ITestResult
 
+// extension
 type TestCase<'T> with
+  /// Convert TestCase<'T> to TestCase<obj>.
   member this.BoxTypeParam() =
     TestCase<obj>(this.Metadata, fun () -> this.Run().BoxTypeParam())
 
+// Utility functions of TestResult<'T>
 module TestResult =
+  /// The marker represents the end of tests.
+  /// The progress reporter needs the end marker in order to print new line at the end.
   let endMarker = { new ITestResult }
 
   let addAssertionResult x = function
@@ -163,8 +184,15 @@ module TestResult =
   | Break (metadata, e, results) ->
       Break (metadata, e, (xs |> NonEmptyList.toList |> AssertionResult.List.onlyNotPassed)@results)
 
-type TestType<'T> =
+/// This DU represents the type of the test case.
+/// If the test has some return values, then the type of the test case is HasValueTest.
+/// If not, then it is NoValueTest.
+type TestCaseType<'T> =
+    /// The TestCase does not have any return values.
+    /// It means that the TestCase is TestCase<unit>.
   | NoValueTest of TestCase<'T>
+    /// The TestCase has some return values.
+    /// It means that the TestCase is not TestCase<unit>.
   | HasValueTest of TestCase<'T>
 
 module TestCase =
@@ -179,7 +207,7 @@ module TestCase =
   let addNotPassed notPassedCause (x: TestCase<_>) =
     TestCase(x.Metadata, fun () -> x.Run() |> TestResult.addAssertionResult (NotPassed notPassedCause))
 
-  let combine (x: TestType<'T>) (rest: 'T -> TestCase<'U>) =
+  let combine (x: TestCaseType<'T>) (rest: 'T -> TestCase<'U>) =
     match x with
     | NoValueTest x ->
         TestCase(
@@ -190,6 +218,10 @@ module TestCase =
                 try (rest unit).Run()
                 with e -> Break (meta, e, [])
             | Done (meta, assertionResults) ->
+                // If the TestCase does not have any values,
+                // even if the assertion is not passed,
+                // the test is continuable.
+                // So, continue the test.
                 let notPassed =
                   assertionResults
                   |> NonEmptyList.toList
@@ -199,10 +231,16 @@ module TestCase =
                   | [] -> failwith "oops!"
                   | head::tail ->
                       assert (typeof<'T> = typeof<unit>)
+                      // continue the test!
                       let testRes = (rest Unchecked.defaultof<'T>).Run()
                       testRes |> TestResult.addAssertionResults (NonEmptyList.make (NotPassed head) (tail |> List.map NotPassed))
                 with e -> Break (meta, e, notPassed)
             | Break (meta, e, results) ->
+                // If the TestCase does not have any values,
+                // even if the assertion is not passed,
+                // the test is continuable.
+                // But "Break" means that the test does not continue.
+                // So, not continue the test.
                 Break (meta, e, results)
         )
     | HasValueTest x ->
@@ -214,6 +252,8 @@ module TestCase =
                 try (rest value).Run()
                 with e -> Break (meta, e, [])
             | Done (meta, assertionResults) ->
+                // If the TestCase has some values,
+                // the test is not continuable.
                 let notPassed =
                   assertionResults
                   |> NonEmptyList.toList
@@ -222,5 +262,7 @@ module TestCase =
                 | [] -> failwith "oops!"
                 | head::tail -> Done (meta, NonEmptyList.make (NotPassed head) (tail |> List.map NotPassed))
             | Break (meta, e, results) ->
+                // If the TestCase has some values,
+                // the test is not continuable.
                 Break (meta, e, results)
         )

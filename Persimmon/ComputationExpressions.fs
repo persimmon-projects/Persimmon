@@ -1,5 +1,6 @@
 ﻿namespace Persimmon
 
+/// This type is used only in the library.
 type BindingValue<'T> =
   | UnitAssertionResult of AssertionResult<'T (* unit *)>
   | NonUnitAssertionResult of AssertionResult<'T>
@@ -7,15 +8,22 @@ type BindingValue<'T> =
   | NonUnitTestCase of TestCase<'T>
 
 type TestBuilder(name: string) =
+  // return x
   member __.Return(x) = TestCase.make name [] (Passed x)
+  // return! x
   member __.ReturnFrom(x: BindingValue<_>) =
     match x with
     | UnitAssertionResult x | NonUnitAssertionResult x -> TestCase.make name [] x
     | UnitTestCase x | NonUnitTestCase x -> TestCase<_>(name, x.Parameters, x.Run)
+  // let! a = (x: AssertionResult<unit>) in ...
   member __.Source(x: AssertionResult<unit>) = UnitAssertionResult x
+  // let! a = (x: AssertionResult<_>) in ...
   member __.Source(x: AssertionResult<_>) = NonUnitAssertionResult x
+  // let! a = (x: TestCase<unit>) in ...
   member __.Source(x: TestCase<unit>) = UnitTestCase x
+  // let! a = (x: TestCase<_>) in ...
   member __.Source(x: TestCase<_>) = NonUnitTestCase x
+  // let! a = (x: BindingValue<_>) in ...
   member __.Bind(x, f: 'T -> TestCase<'U>) =
     match x with
     | UnitAssertionResult (Passed x)

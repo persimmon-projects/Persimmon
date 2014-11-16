@@ -4,7 +4,7 @@ open Persimmon
 open Persimmon.ActivePatterns
 open Persimmon.Output
 
-type Result = {
+type RunResult = {
   Errors: int
   ExecutedRootTestResults: ITestResult seq
 }

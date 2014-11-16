@@ -7,7 +7,6 @@ open System.Reflection
 open Microsoft.FSharp.Reflection
 
 module internal Runtime =
-
   let getModule<'TSameAssemblyType>(name: string) = (typeof<'TSameAssemblyType>).Assembly.GetType(name)
 
   let invoke (m: MethodInfo) typeArgs args =
