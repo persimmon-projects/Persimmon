@@ -5,13 +5,13 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>4e5f5f61-52cb-45e4-b620-76f9e174ebc3</ProjectGuid>
+    <ProjectGuid>585b95fd-6b0c-4b45-a4cf-f44098a8ba49</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Persimmon.Output</RootNamespace>
-    <AssemblyName>Persimmon.Output</AssemblyName>
+    <RootNamespace>Persimmon.Runner</RootNamespace>
+    <AssemblyName>Persimmon.Runner</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
-    <Name>Persimmon.Output</Name>
+    <Name>Persimmon.Runner</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,7 +21,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\Persimmon.Output.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\Persimmon.Runner.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -30,7 +30,7 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\Persimmon.Output.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\Persimmon.Runner.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -55,6 +55,9 @@
     <Compile Include="Formatter.fs" />
     <Compile Include="Printer.fs" />
     <Compile Include="Reporter.fs" />
+    <Compile Include="RuntimeUtil.fs" />
+    <Compile Include="TestCollector.fs" />
+    <Compile Include="TestRunner.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

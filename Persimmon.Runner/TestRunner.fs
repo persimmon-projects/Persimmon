@@ -1,24 +1,13 @@
-﻿module TestRunner
-
-open System
-open System.IO
-open System.Reflection
-
-open Microsoft.FSharp.Reflection
+﻿module Persimmon.Runner.TestRunner
 
 open Persimmon
 open Persimmon.ActivePatterns
 open Persimmon.Output
-open RuntimeUtil
 
 type Result = {
   Errors: int
   ExecutedRootTestResults: ITestResult seq
 }
-
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
-module Result =
-  let empty = { Errors = 0; ExecutedRootTestResults = Seq.empty }
 
 let runTests (reporter: Reporter) (test: TestObject) =
   match test with

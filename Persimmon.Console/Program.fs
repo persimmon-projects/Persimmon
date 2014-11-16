@@ -3,6 +3,7 @@ open System.IO
 open System.Text
 open System.Reflection
 open Persimmon
+open Persimmon.Runner
 open Persimmon.Output
 
 let entryPoint (args: Args) =

@@ -50,16 +50,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Args.fs" />
-    <Compile Include="RuntimeUtil.fs" />
-    <Compile Include="TestCollector.fs" />
-    <Compile Include="TestRunner.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Persimmon.Output\Persimmon.Output.fsproj">
-      <Name>Persimmon.Output</Name>
-      <Project>{4e5f5f61-52cb-45e4-b620-76f9e174ebc3}</Project>
+    <ProjectReference Include="..\Persimmon.Runner\Persimmon.Runner.fsproj">
+      <Name>Persimmon.Runner</Name>
+      <Project>{585b95fd-6b0c-4b45-a4cf-f44098a8ba49}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\Persimmon\Persimmon.fsproj">
