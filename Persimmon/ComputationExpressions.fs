@@ -72,6 +72,9 @@ type ParameterizeBuilder() =
 
 type TrapBuilder () =
   member __.Zero () = ()
+  member __.Yield(()) = Seq.empty
+  [<CustomOperation("it")>]
+  member __.It(_, f) = f
   member __.Delay(f: unit -> _) = f
   member __.Run(f) =
     try
