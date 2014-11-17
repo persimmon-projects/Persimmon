@@ -50,15 +50,6 @@ module PersimmonTest =
     |> run
     |> shouldNotPassed<unit> ("Expect: 1\nActual: 2", [ "Expect: 3\nActual: 4" ])
 
-  [<Test>]
-  let ``dependent assertion should not run if before assertion failed`` () =
-    test "dependent assertion should not run if before assertion failed" {
-      let! v = check 1 2
-      do! assertEquals v 3
-    }
-    |> run
-    |> shouldNotPassed ("Expect: 1\nActual: 2", [])
-
   let table = Map.ofList [("x", "y"); ("y", "z"); ("z", "other")]
 
   let test1 = test "success" {
