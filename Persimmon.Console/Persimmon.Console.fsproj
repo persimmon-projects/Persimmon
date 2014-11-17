@@ -25,7 +25,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Debug\Persimmon.Console.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>..\..\..\Persimmon.Sample\bin\Debug\Persimmon.Sample.dll</StartArguments>
+    <StartArguments>..\..\..\Persimmon.Tests\bin\Debug\Persimmon.Tests.dll</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -37,7 +37,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Release\Persimmon.Console.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>..\..\..\Persimmon.Sample\bin\Release\Persimmon.Sample.dll</StartArguments>
+    <StartArguments>..\..\..\Persimmon.Tests\bin\Release\Persimmon.Tests.dll</StartArguments>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
