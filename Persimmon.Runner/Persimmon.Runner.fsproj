@@ -5,14 +5,13 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>fb2affd6-76d4-4c18-8750-588ada5c0e21</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>Persimmon.Console</RootNamespace>
-    <AssemblyName>Persimmon.Console</AssemblyName>
+    <ProjectGuid>585b95fd-6b0c-4b45-a4cf-f44098a8ba49</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Persimmon.Runner</RootNamespace>
+    <AssemblyName>Persimmon.Runner</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
-    <Name>Persimmon.Console</Name>
+    <Name>Persimmon.Runner</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,10 +21,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\Persimmon.Console.XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>..\..\..\Persimmon.Sample\bin\Debug\Persimmon.Sample.dll</StartArguments>
+    <DocumentationFile>bin\Debug\Persimmon.Runner.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -34,10 +30,7 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\Persimmon.Console.XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>..\..\..\Persimmon.Sample\bin\Release\Persimmon.Sample.dll</StartArguments>
+    <DocumentationFile>bin\Release\Persimmon.Runner.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -47,23 +40,24 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Args.fs" />
-    <Compile Include="Program.fs" />
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Persimmon.Runner\Persimmon.Runner.fsproj">
-      <Name>Persimmon.Runner</Name>
-      <Project>{585b95fd-6b0c-4b45-a4cf-f44098a8ba49}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\Persimmon\Persimmon.fsproj">
       <Name>Persimmon</Name>
       <Project>{f1d851fd-a776-4204-b287-5c14c3aa198c}</Project>
       <Private>True</Private>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Writable.fs" />
+    <Compile Include="Formatter.fs" />
+    <Compile Include="Printer.fs" />
+    <Compile Include="Reporter.fs" />
+    <Compile Include="RuntimeUtil.fs" />
+    <Compile Include="TestCollector.fs" />
+    <Compile Include="TestRunner.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
@@ -81,10 +75,6 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
-  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

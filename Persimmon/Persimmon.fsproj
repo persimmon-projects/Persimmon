@@ -44,7 +44,11 @@
   <ItemGroup>
     <Compile Include="NonEmptyList.fsi" />
     <Compile Include="NonEmptyList.fs" />
-    <Compile Include="Persimmon.fs" />
+    <Compile Include="Types.fs" />
+    <Compile Include="ActivePatterns.fs" />
+    <Compile Include="Assertions.fs" />
+    <Compile Include="ComputationExpressions.fs" />
+    <Compile Include="Syntax.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

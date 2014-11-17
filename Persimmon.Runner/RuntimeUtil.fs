@@ -1,4 +1,4 @@
-﻿module RuntimeUtil
+﻿module Persimmon.Runner.RuntimeUtil
 
 open Persimmon
 
@@ -6,8 +6,7 @@ open System
 open System.Reflection
 open Microsoft.FSharp.Reflection
 
-module Runtime =
-
+module internal Runtime =
   let getModule<'TSameAssemblyType>(name: string) = (typeof<'TSameAssemblyType>).Assembly.GetType(name)
 
   let invoke (m: MethodInfo) typeArgs args =
@@ -21,16 +20,7 @@ module Runtime =
     let typ = FSharpType.MakeFunctionType(srcType, dstType)
     FSharpValue.MakeFunction(typ, body)
 
-module RuntimeTestResult =
-  let private typ = Runtime.getModule<TestResult<_>>("Persimmon+TestResult")
-
-  let private mapMethod = typ.GetMethod("map")
-  let map<'TDest> (f: obj -> obj (* 'a -> 'TDest *)) (res: obj (* TestResult<'a> *), elemType: Type (* typeof<'a> *)) =
-    let f = Runtime.lambda (elemType, typeof<'TDest>) f
-    let result = Runtime.invoke mapMethod [| elemType; typeof<'TDest> |] [| f; res |]
-    result :?> TestResult<'TDest>
-
-module RuntimeSeq =
+module internal RuntimeSeq =
   let private typ = Runtime.getModule<_ list>("Microsoft.FSharp.Collections.SeqModule")
 
   let private mapMethod = typ.GetMethod("Map")
@@ -39,7 +29,7 @@ module RuntimeSeq =
     let result = Runtime.invoke mapMethod [| elemType; typeof<'TDest> |] [| f; xs |]
     result :?> 'TDest seq
 
-module RuntimeList =
+module internal RuntimeList =
   let private typ = Runtime.getModule<_ list>("Microsoft.FSharp.Collections.ListModule")
 
   let private mapMethod = typ.GetMethod("Map")
@@ -48,7 +38,7 @@ module RuntimeList =
     let result = Runtime.invoke mapMethod [| elemType; typeof<'TDest> |] [| f; xs |]
     result :?> 'TDest list
 
-module RuntimeArray =
+module internal RuntimeArray =
   let private typ = Runtime.getModule<_ list>("Microsoft.FSharp.Collections.ArrayModule")
 
   let private mapMethod = typ.GetMethod("Map")
