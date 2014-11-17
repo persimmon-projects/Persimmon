@@ -6,4 +6,4 @@ configuration:
   - Release
 
 test_script:
-  - Start-Process -FilePath "Persimmon.Console\bin\$env:configuration\Persimmon.Console.exe" -ArgumentList "Persimmon.Tests\bin\$env:configuration\Persimmon.Tests.dll"
+  - ps: Start-Process -FilePath "Persimmon.Console\bin\$env:configuration\Persimmon.Console.exe" -ArgumentList "Persimmon.Tests\bin\$env:configuration\Persimmon.Tests.dll"
