@@ -37,7 +37,7 @@ module PersimmonTest =
     test "'fail' function should always fail" {
       return! fail msg
     }
-    |> shouldNotPassed (msg, [])
+    |> shouldNotPassed (NonEmptyList.singleton msg)
 
   let ``all unit type assertion should run`` =
     test "all unit type assertion should run" {
@@ -45,7 +45,7 @@ module PersimmonTest =
       do! assertEquals 2 2
       do! assertEquals 3 4
     }
-    |> shouldNotPassed<unit> ("Expect: 1\nActual: 2", [ "Expect: 3\nActual: 4" ])
+    |> shouldNotPassed<unit> (NonEmptyList.make "Expect: 1\nActual: 2" [ "Expect: 3\nActual: 4" ])
 
   let table = Map.ofList [("x", "y"); ("y", "z"); ("z", "other")]
 
@@ -77,6 +77,6 @@ module PersimmonTest =
     test "Persimmon test should be able to compose" {
       do! test1 |> shouldPassed "y"
       do! test2 |> shouldPassed "z"
-      do! test3 |> shouldNotPassed ("Expect: \"x\"\nActual: \"other\"", [])
-      do! test4 |> shouldNotPassed ("Expect: \"x\"\nActual: \"other\"", [])
+      do! test3 |> shouldNotPassed (NonEmptyList.singleton "Expect: \"x\"\nActual: \"other\"")
+      do! test4 |> shouldNotPassed (NonEmptyList.singleton "Expect: \"x\"\nActual: \"other\"")
     }
