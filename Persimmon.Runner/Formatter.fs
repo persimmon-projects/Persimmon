@@ -17,7 +17,7 @@ module Formatter =
             | EndMarker -> Writable.newline
             | TestResult tr ->
                 match tr with
-                | Break _ -> Writable.char 'E'
+                | Error _ -> Writable.char 'E'
                 | Done (_, res) ->
                     let typicalRes = res |> AssertionResult.NonEmptyList.typicalResult
                     match typicalRes with
@@ -55,6 +55,20 @@ module Formatter =
           }
          )
 
+    let private exnsToStrs indent (exns: exn list) =
+      exns
+      |> Seq.mapi (fun i exn -> (i + 1, exn))
+      |> Seq.collect (fun (i, exn) ->
+          seq {
+            match exn.ToString().Split([|"\r\n";"\r";"\n"|], StringSplitOptions.None) |> Array.toList with
+            | [] -> yield ""
+            | x::xs ->
+                let no = (string i) + ". "
+                yield indent + no + x
+                yield! xs |> Seq.map (fun x -> indent + (String.replicate no.Length " ") + x)
+          }
+         )
+
     let rec private toStrs indent = function
     | EndMarker -> Seq.empty
     | ContextResult ctx ->
@@ -65,17 +79,15 @@ module Formatter =
         }
     | TestResult tr ->
         match tr with
-        | Break (meta, e, res) ->
+        | Error (meta, es, res) ->
             seq {
               let indent = indentStr indent
               yield indent + "FATAL ERROR: " + meta.FullName
               if not (res.IsEmpty) then
                 yield (bar (70 - indent.Length) '-' "finished assertions")
                 yield! res |> causesToStrs indent
-              yield indent + (bar (70 - indent.Length) '-' "exception")
-              yield!
-                e.ToString().Split([|"\r\n";"\r";"\n"|], StringSplitOptions.None)
-                |> Seq.map (fun line -> indent + line)
+              yield indent + (bar (70 - indent.Length) '-' "exceptions")
+              yield! es |> List.rev |> exnsToStrs indent
             }
         | Done (meta, res) ->
             seq {
@@ -108,7 +120,7 @@ module Formatter =
     | EndMarker -> summary
     | ContextResult ctx ->
         ctx.Children |> Seq.fold collectSummary summary
-    | TestResult (Break _) ->
+    | TestResult (Error _) ->
         { summary with Run = summary.Run + 1; Error = summary.Error + 1 }
     | TestResult (Done (_, res)) ->
         match res |> AssertionResult.NonEmptyList.typicalResult with

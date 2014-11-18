@@ -12,7 +12,7 @@ module PersimmonTest =
     | Done (m, results) -> Done (m, results |> NonEmptyList.map (function
       | Passed _ -> Passed ()
       | NotPassed x -> NotPassed x))
-    | Break (m, e, results) -> Break (m, e, results)
+    | Error (m, es, results) -> Error (m, es, results)
     TestCase({ Name = x.Name; Parameters = x.Parameters }, fun () -> inner (run x))
 
   let shouldNotPassed<'T> (expectedMessages: NonEmptyList<string>) (x: TestCase<'T>) =
@@ -23,7 +23,7 @@ module PersimmonTest =
         results
         |> NonEmptyList.map (function NotPassed (Skipped x | Violated x) -> x | Persimmon.Passed x -> sprintf "Expected is NotPased but Passed(%A)" x)
         |> fun actual -> Done (m, (assertEquals expectedMessages actual, []))
-    | Break (m, e, results) -> Break (m, e, results)
+    | Error (m, es, results) -> Error (m, es, results)
     TestCase({ Name = x.Name; Parameters = x.Parameters }, fun () -> inner (run x))
 
   let ``'pass' function should always pass`` =

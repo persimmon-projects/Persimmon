@@ -22,7 +22,7 @@ let rec countErrors = function
     cr.Children |> List.sumBy countErrors
 | TestResult tr ->
     match tr with
-    | Break _ -> 1
+    | Error _ -> 1
     | Done (_, res) ->
         let typicalRes = AssertionResult.NonEmptyList.typicalResult res
         match typicalRes with

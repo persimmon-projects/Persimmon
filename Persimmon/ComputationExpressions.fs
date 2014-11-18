@@ -41,7 +41,7 @@ type TestBuilder(name: string) =
   member __.Delay(f) = f
   member __.Run(f) =
     try f ()
-    with e -> TestCase.makeBreak name [] e
+    with e -> TestCase.makeError name [] e
 
 [<AutoOpen>]
 module private Util =
