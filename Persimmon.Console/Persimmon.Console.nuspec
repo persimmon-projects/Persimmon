@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <dependencies>
+      <dependency id="Persimmon" version="$version$" />
+      <dependency id="Persimmon.Runner" version="$version$" />
+    </dependencies>
+    <title>$title$</title>
+    <authors>bleis-tift, Gab-km, pocketberserker</authors>
+    <owners>bleis-tift, Gab-km, pocketberserker</owners>
+    <licenseUrl>https://github.com/persimmon-projects/Persimmon/tree/$version$/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/persimmon-projects/Persimmon</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>The console command-line runner for Persimmon.</description>
+    <tags>f# test testing</tags>
+  </metadata>
+  <files>
+    <file src="bin\Release\*.exe" target="tools" />
+    <file src="bin\Release\*.config" target="tools" />
+    <file src="bin\Release\*.dll" target="tools" />
+  </files>
+</package>
