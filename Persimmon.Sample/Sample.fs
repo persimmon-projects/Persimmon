@@ -13,7 +13,10 @@ let test2 = test "failure test" {
 exception MyException
 
 let test3 = test "exn test" {
-  let! e = trap { raise MyException }
+  let f () =
+    raise MyException
+    42
+  let! e = trap { it (f ()) }
   do! assertEquals "" e.Message
   do! assertEquals typeof<MyException> (e.GetType())
   do! assertEquals "" (e.StackTrace.Substring(0, 5))
