@@ -2,7 +2,24 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe Persimmon.sln /prope
 
 .\.nuget\nuget.exe pack .\Persimmon\Persimmon.fsproj -Build -Symbols -Properties VisualStudioVersion=12.0
 .\.nuget\nuget.exe pack .\Persimmon.Runner\Persimmon.Runner.fsproj -Build -Symbols -Properties VisualStudioVersion=12.0
-.\.nuget\nuget.exe pack .\Persimmon.Console\Persimmon.Console.fsproj -Properties VisualStudioVersion=12.0
+
+$fsproj = [xml] (cat Persimmon.Console\Persimmon.Console.fsproj)
+
+$id = ([string] $fsproj.Project.PropertyGroup.AssemblyName).Trim()
+
+$asmInfo = cat Persimmon.Console\AssemblyInfo.fs
+
+[void] (($asmInfo | ?{ $_.Contains('AssemblyTitle') }) -match '"([^"]+)"')
+$title = $Matches[1]
+
+[void] (($asmInfo | ?{ $_.Contains('AssemblyInformationalVersion') }) -match '"([^"]+)"')
+$version = $Matches[1]
+
+$template = cat Persimmon.Console\Persimmon.Console.nuspec.template
+$template = $template.Replace('$id$', $id).Replace('$title$', $title).Replace('$version$', $version)
+$template | Out-File -Encoding UTF8 .\Persimmon.Console\Persimmon.Console.nuspec
+
+.\.nuget\nuget.exe pack .\Persimmon.Console\Persimmon.Console.nuspec
 
 if(Test-Path "nuget-packages")
 {
