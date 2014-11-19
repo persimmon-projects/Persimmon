@@ -1,7 +1,7 @@
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe Persimmon.sln /property:Configuration=Release /property:VisualStudioVersion=12.0 /target:rebuild
 
-.\.nuget\nuget.exe pack .\Persimmon\Persimmon.fsproj -Build -Symbols -Properties VisualStudioVersion=12.0
-.\.nuget\nuget.exe pack .\Persimmon.Runner\Persimmon.Runner.fsproj -Build -Symbols -Properties VisualStudioVersion=12.0
+.\.nuget\nuget.exe pack .\Persimmon\Persimmon.fsproj -Symbols -Properties VisualStudioVersion=12.0
+.\.nuget\nuget.exe pack .\Persimmon.Runner\Persimmon.Runner.fsproj -Symbols -Properties VisualStudioVersion=12.0
 
 $fsproj = [xml] (cat Persimmon.Console\Persimmon.Console.fsproj)
 
@@ -23,12 +23,9 @@ $template | Out-File -Encoding UTF8 .\Persimmon.Console\Persimmon.Console.nuspec
 
 if(Test-Path "nuget-packages")
 {
-  rm nuget-packages\*
+  rm nuget-packages -Recurse -Force
 }
-else
-{
-  mkdir nuget-packages
-}
+mkdir nuget-packages
 
 mv .\*.nupkg nuget-packages
 
