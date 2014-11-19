@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <dependencies>
+      <dependency id="Persimmon" version="$version$" />
+    </dependencies>
+    <title>$title$</title>
+    <authors>bleis-tift, Gab-km, pocketberserker</authors>
+    <owners>bleis-tift, Gab-km, pocketberserker</owners>
+    <licenseUrl>https://github.com/persimmon-projects/Persimmon/tree/$version$/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/persimmon-projects/Persimmon</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A test framework for F#</description>
+    <tags>f# test testing</tags>
+  </metadata>
+</package>
