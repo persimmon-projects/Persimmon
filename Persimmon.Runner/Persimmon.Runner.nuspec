@@ -6,6 +6,10 @@
     <dependencies>
       <dependency id="Persimmon" version="$version$" />
     </dependencies>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System.Xml" />
+      <frameworkAssembly assemblyName="System.Xml.Linq" targetFramework="net35" />
+    </frameworkAssemblies>
     <title>$title$</title>
     <authors>bleis-tift, Gab-km, pocketberserker</authors>
     <owners>bleis-tift, Gab-km, pocketberserker</owners>

@@ -43,7 +43,7 @@ module private Impl =
   }
 
   let persimmonTestProps (p: PropertyInfo) =
-    persimmonTests (fun () -> p.GetValue(null)) p.PropertyType
+    persimmonTests (fun () -> p.GetValue(null, null)) p.PropertyType
   let persimmonTestMethods (m: MethodInfo) =
     persimmonTests (fun () -> m.Invoke(null, [||])) m.ReturnType
 
