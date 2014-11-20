@@ -19,3 +19,11 @@ let assertPred pred =
   else fail "assert fail."
 
 let ignoreResult message (_: AssertionResult<_>) = NotPassed (Skipped message)
+
+let violatedMessage message = function
+| NotPassed (Violated _) -> NotPassed (Violated message)
+| other -> other
+
+let replaceViolatedMessage replacer = function
+| NotPassed (Violated msg) -> NotPassed (Violated (replacer msg))
+| other -> other
