@@ -17,3 +17,5 @@ let assertNotEquals notExpected actual =
 let assertPred pred =
   if pred then pass ()
   else fail "assert fail."
+
+let ignoreResult message (_: AssertionResult<_>) = NotPassed (Skipped message)
