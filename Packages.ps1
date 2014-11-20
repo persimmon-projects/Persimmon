@@ -29,6 +29,8 @@ mkdir nuget-packages
 
 mv .\*.nupkg nuget-packages
 
-ls .\nuget-packages\*.nupkg | %{
+ls .\nuget-packages\*.nupkg | ?{
+  -not $_.Name.Contains('.symbols.')
+} | %{
   echo "..\.nuget\nuget.exe push $_" >> .\nuget-packages\Push-All.ps1
 }
