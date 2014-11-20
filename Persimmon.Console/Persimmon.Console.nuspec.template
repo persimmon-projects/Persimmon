@@ -3,10 +3,6 @@
   <metadata>
     <id>$id$</id>
     <version>$version$</version>
-    <dependencies>
-      <dependency id="Persimmon" version="$version$" />
-      <dependency id="Persimmon.Runner" version="$version$" />
-    </dependencies>
     <title>$title$</title>
     <authors>bleis-tift, Gab-km, pocketberserker</authors>
     <owners>bleis-tift, Gab-km, pocketberserker</owners>
