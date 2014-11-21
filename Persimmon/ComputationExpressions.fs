@@ -68,7 +68,8 @@ type ParameterizeBuilder() =
     source
     |> Seq.map (fun x ->
         let ret = f x
-        TestCase<_>({ ret.Metadata with Parameters = toList x }, ret.Run) :> TestObject)
+        let parameters = x |> toList
+        TestCase<_>({ ret.Metadata with Parameters = parameters }, fun () -> ret.Run().ReplaceParameters(parameters)) :> TestObject)
 
 type TrapBuilder () =
   member __.Zero () = ()

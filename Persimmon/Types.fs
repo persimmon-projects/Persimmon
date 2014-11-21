@@ -150,6 +150,11 @@ and TestResult<'T> =
     /// If the test has no parameters then the value is empty list.
     member this.Parameters = this.Metadata.Parameters
 
+    member this.ReplaceParameters(parameters) =
+      match this with
+      | Error (meta, errs, res) -> Error ({ meta with Parameters = parameters }, errs, res)
+      | Done (meta, res) -> Done ({ meta with Parameters = parameters }, res)
+
     /// Convert TestResult<'T> to TestResult<obj>.
     member this.BoxTypeParam() =
       match this with
