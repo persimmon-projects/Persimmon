@@ -10,6 +10,11 @@ The first idea was brought by @Gab-km and @bleis-tift.
 
 ``master`` branch, >= Mono 3.10, OSX(Travis) [![Build Status](https://travis-ci.org/persimmon-projects/Persimmon.svg?branch=master)](https://travis-ci.org/persimmon-projects/Persimmon)
 
+## NuGet page link
+
+* [Persimmon](https://www.nuget.org/packages/Persimmon/)
+* [Persimmon.Console](https://www.nuget.org/packages/Persimmon.Console)
+
 ## Origin of a name
 
 This library was devised in the Japanese fall.
