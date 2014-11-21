@@ -15,3 +15,6 @@ let skip message (target: TestCase<'T>) : TestCase<'T> =
 
 /// Trap the exception and convert to AssertionResult<exn>.
 let trap = TrapBuilder()
+
+module UseTestNameByReflection =
+  let test = TestBuilder("")

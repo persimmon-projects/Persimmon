@@ -26,26 +26,26 @@ module private Impl =
     else
       None
 
-  let persimmonTests (f: unit -> obj) (typ: Type) = seq {
+  let persimmonTests (f: unit -> obj) (typ: Type) name = seq {
     let testObjType = typeof<TestObject>
     match typ with
     | SubTypeOf testObjType _ ->
-        yield f () :?> TestObject
+        yield (f () :?> TestObject).SetNameIfNeed(name)
     | ArrayType elemType when typedefis<TestCase<_>>(elemType) || elemType = typeof<TestObject> ->
-        yield! (f (), elemType) |> RuntimeArray.map (fun x -> x :?> TestObject |> box)
+        yield! (f (), elemType) |> RuntimeArray.map (fun x -> (x :?> TestObject).SetNameIfNeed(name) |> box)
     | GenericType (genTypeDef, _) when genTypeDef = typedefof<TestCase<_>> ->
-        yield f () :?> TestObject
+        yield (f () :?> TestObject).SetNameIfNeed(name)
     | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ seq> && (typedefis<TestCase<_>>(elemType) || elemType = typeof<TestObject>) ->
-        yield! (f (), elemType) |> RuntimeSeq.map (fun x -> x :?> TestObject |> box)
+        yield! (f (), elemType) |> RuntimeSeq.map (fun x -> (x :?> TestObject).SetNameIfNeed(name) |> box)
     | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ list> && (typedefis<TestCase<_>>(elemType) || elemType = typeof<TestObject>) ->
-        yield! (f (), elemType) |> RuntimeList.map (fun x -> x :?> TestObject |> box)
+        yield! (f (), elemType) |> RuntimeList.map (fun x -> (x :?> TestObject).SetNameIfNeed(name) |> box)
     | _ -> ()
   }
 
   let persimmonTestProps (p: PropertyInfo) =
-    persimmonTests (fun () -> p.GetValue(null, null)) p.PropertyType
+    persimmonTests (fun () -> p.GetValue(null, null)) p.PropertyType p.Name
   let persimmonTestMethods (m: MethodInfo) =
-    persimmonTests (fun () -> m.Invoke(null, [||])) m.ReturnType
+    persimmonTests (fun () -> m.Invoke(null, [||])) m.ReturnType m.Name
 
   let rec testObjects (typ: Type) =
     seq {
