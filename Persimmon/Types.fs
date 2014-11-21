@@ -60,11 +60,11 @@ with
 /// Derived class of this class are only two classes,
 /// they are Context and TestCase<'T>.
 /// When the TestObject is executed becomes TestResult.
-/// This is a marker abstract class.
 /// You should use the ActivePatterns
 /// if you want to process derived objects through this class.
 [<AbstractClass>]
-type TestObject internal () = class end
+type TestObject internal () =
+  abstract member SetNameIfNeed: string -> TestObject
 
 /// This marker interface represents a test result.
 /// You should use the ActivePatterns
@@ -75,6 +75,9 @@ type ITestResult = interface end
 /// We can use this class for grouping of the tests.
 type Context(name: string, children: TestObject list) =
   inherit TestObject ()
+
+  override __.SetNameIfNeed(newName: string) =
+    Context((if name = "" then newName else name), children) :> TestObject
 
   /// The context name.
   member __.Name = name
@@ -117,6 +120,9 @@ type TestCase<'T>(metadata: TestMetadata, body: unit -> TestResult<'T>) =
 
   new (name, parameters, body) = TestCase<_>({ Name = name; Parameters = parameters }, body)
 
+  override __.SetNameIfNeed(newName: string) =
+    TestCase<'T>({ metadata with Name = if metadata.Name = "" then newName else metadata.Name }, body) :> TestObject
+
   member internal __.Metadata = metadata
 
   /// The test name. It doesn't contain the parameters.
@@ -127,7 +133,10 @@ type TestCase<'T>(metadata: TestMetadata, body: unit -> TestResult<'T>) =
   /// If the test has no parameters then the value is empty list.
   member __.Parameters = metadata.Parameters
   /// Execute the test.
-  member __.Run() = body ()
+  member __.Run() = 
+    match body () with
+    | Error (_, errs, res) -> Error (metadata, errs, res)
+    | Done (_, res) -> Done (metadata, res)
 
   override __.ToString() =
     sprintf "TestCase<%s>(%A)" (typeof<'T>.Name) metadata
@@ -149,11 +158,6 @@ and TestResult<'T> =
     /// The test parameters.
     /// If the test has no parameters then the value is empty list.
     member this.Parameters = this.Metadata.Parameters
-
-    member this.ReplaceParameters(parameters) =
-      match this with
-      | Error (meta, errs, res) -> Error ({ meta with Parameters = parameters }, errs, res)
-      | Done (meta, res) -> Done ({ meta with Parameters = parameters }, res)
 
     /// Convert TestResult<'T> to TestResult<obj>.
     member this.BoxTypeParam() =
