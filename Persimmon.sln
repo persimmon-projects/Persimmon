@@ -23,6 +23,10 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.Sample", "Persimm
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.Runner", "Persimmon.Runner\Persimmon.Runner.fsproj", "{585B95FD-6B0C-4B45-A4CF-F44098A8BA49}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.FsCheck", "Persimmon.FsCheck\Persimmon.FsCheck.fsproj", "{2AF6EAEA-3F9F-423B-895F-F81822881BB3}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.FsCheck.Tests", "Persimmon.FsCheck.Tests\Persimmon.FsCheck.Tests.fsproj", "{267CB7A7-879D-4823-BF9B-5265FA35A862}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +53,14 @@ Global
 		{585B95FD-6B0C-4B45-A4CF-F44098A8BA49}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{585B95FD-6B0C-4B45-A4CF-F44098A8BA49}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{585B95FD-6B0C-4B45-A4CF-F44098A8BA49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2AF6EAEA-3F9F-423B-895F-F81822881BB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AF6EAEA-3F9F-423B-895F-F81822881BB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AF6EAEA-3F9F-423B-895F-F81822881BB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AF6EAEA-3F9F-423B-895F-F81822881BB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{267CB7A7-879D-4823-BF9B-5265FA35A862}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{267CB7A7-879D-4823-BF9B-5265FA35A862}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{267CB7A7-879D-4823-BF9B-5265FA35A862}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{267CB7A7-879D-4823-BF9B-5265FA35A862}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
