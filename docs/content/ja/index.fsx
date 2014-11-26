@@ -4,9 +4,12 @@
 #I "../../../Persimmon/bin/Release"
 
 (**
+<div class="blog-post">
+
 Persimmon
 =========
 
 TODO: ドキュメントを書く
 
+</div>
 *)

@@ -7,42 +7,51 @@
     <meta name="description" content="@Description">
     <meta name="author" content="@Properties["project-author"]">
 
-    <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
 
     <link type="text/css" rel="stylesheet" href="@Root/content/style.css" />
   </head>
   <body>
     <div class="container">
-      <div class="masthead">
-        <ul class="nav nav-pills pull-right">
-        </ul>
-        <h3 class="muted"><a href="@Root/index.html">@Properties["project-name"]</a></h3>
+      <div class="blog-header">
+        <h2 class="blog-title"><a href="@Root/index.html">@Properties["project-name"]</a></h2>
       </div>
       <hr />
       <div class="row">
-        <div class="span9" id="main">
+        <div class="col-sm-9 blog-main" id="main">
           @RenderBody()
         </div>
-        <div class="span3">
-          <a href="@Root/index.html">
-            <img src="@Root/images/logo.png" style="width:99px;height:55px;margin:10px 0px 0px 35px;border-style:none;" />
-          </a>
+        <div class="col-sm-3 blog-sidebar" id="menu">
+          <div class="sidebar-module sidebar-module-inset">
+            <a href="@Root/index.html">
+              <img src="@Root/images/logo.png" style="width:150px;margin:10px" />
+            </a>
+          </div>
 
-          <ul class="nav nav-list" id="menu">
-            <li class="nav-header">@Properties["project-name"]</li>
-            <li class="divider"></li>
-            <li><a href="@Properties["project-nuget"]">Get Library via NuGet</a></li>
-            <li><a href="@Properties["project-github"]">Source Code on GitHub</a></li>
-            <li><a href="@Properties["project-github"]/blob/master/LICENSE">License (MIT)</a></li>
-            <!--
-            <li><a href="@Properties["project-github"]/blob/master/RELEASE_NOTES.md">Release Notes</a></li>
-            -->
+          <div class="sidebar-module">
+            <h4>@Properties["project-name"]</h4>
+            <ul class="list-unstyled">
+              <li><a href="@Properties["project-nuget"]">Get Library via NuGet</a></li>
+              <li><a href="@Properties["project-github"]/blob/master/LICENSE">License (MIT)</a></li>
+              <!--
+              <li><a href="@Properties["project-github"]/blob/master/RELEASE_NOTES.md">Release Notes</a></li>
+              -->
+            </ul>
+          </div>
 
-            <li class="nav-header">Tutorials</li>
+          <div class="sidebar-module">
+            <h4>Getting Started</h4>
+            <ul class="list-unstyled">
+              <li><a href="@Root/Tutorial.html">Tutotial</a></li>
+            </ul>
+          </div>
 
-            <li class="nav-header">Reference</li>
-            <!--<li><a href="@Root/reference/index.html">API Reference</a></li>-->
-          </ul>
+          <div class="sidebar-module">
+            <h4>Reference</h4>
+            <ul class="list-unstyled">
+              <li><a href="@Root/reference/index.html">API Reference</a></li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
