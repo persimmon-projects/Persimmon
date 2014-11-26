@@ -25,7 +25,6 @@
     <Target Name="Build">
         <CallTarget Targets="BuildDocs"/>
     </Target>
-
     <Target Name="CleanDocs">
         <RemoveDir Directories="$(MSBuildThisFileDirectory)..\output"/>
     </Target>
