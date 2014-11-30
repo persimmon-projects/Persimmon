@@ -23,7 +23,7 @@ let rec countErrors = function
 | TestResult tr ->
     match tr with
     | Error _ -> 1
-    | Done (_, res) ->
+    | Done (_, res, _) ->
         let typicalRes = AssertionResult.NonEmptyList.typicalResult res
         match typicalRes with
         | NotPassed (Violated _) -> 1
