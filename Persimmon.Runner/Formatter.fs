@@ -117,17 +117,17 @@ module Formatter =
     module Summary =
       let empty = { Run = 0; Skipped = 0; Violated = 0; Error = 0; Duration = TimeSpan.Zero }
 
-    let rec private collectSummary summary = function
-    | EndMarker -> summary
-    | ContextResult ctx ->
-        ctx.Children |> Seq.fold collectSummary summary
-    | TestResult (Error (_, _, _, d)) ->
-        { summary with Run = summary.Run + 1; Error = summary.Error + 1; Duration = summary.Duration + d }
-    | TestResult (Done (_, res, d)) ->
-        match res |> AssertionResult.NonEmptyList.typicalResult with
-        | Passed _ -> { summary with Run = summary.Run + 1; Duration = summary.Duration + d }
-        | NotPassed (Skipped _) -> { summary with Run = summary.Run + 1; Skipped = summary.Skipped + 1; Duration = summary.Duration + d }
-        | NotPassed (Violated _) -> { summary with Run = summary.Run + 1; Violated = summary.Violated + 1; Duration = summary.Duration + d }
+      let rec collectSummary summary = function
+      | EndMarker -> summary
+      | ContextResult ctx ->
+          ctx.Children |> Seq.fold collectSummary summary
+      | TestResult (Error (_, _, _, d)) ->
+          { summary with Run = summary.Run + 1; Error = summary.Error + 1; Duration = summary.Duration + d }
+      | TestResult (Done (_, res, d)) ->
+          match res |> AssertionResult.NonEmptyList.typicalResult with
+          | Passed _ -> { summary with Run = summary.Run + 1; Duration = summary.Duration + d }
+          | NotPassed (Skipped _) -> { summary with Run = summary.Run + 1; Skipped = summary.Skipped + 1; Duration = summary.Duration + d }
+          | NotPassed (Violated _) -> { summary with Run = summary.Run + 1; Violated = summary.Violated + 1; Duration = summary.Duration + d }
 
     let normal =
       { new IFormatter<ITestResult seq> with
@@ -136,7 +136,7 @@ module Formatter =
               seq {
                 yield! results |> Seq.collect (toStrs 0)
                 yield bar 70 '=' "summary"
-                let summary = results |> Seq.fold collectSummary Summary.empty
+                let summary = results |> Seq.fold Summary.collectSummary Summary.empty
                 yield string summary
               }
             end
@@ -148,3 +148,75 @@ module Formatter =
           member __.Format(message: string) = 
             Writable.stringSeq (Seq.singleton message)
           }
+
+  module XmlFormatter =
+
+    open System.Xml
+    open System.Xml.Linq
+    open SummaryFormatter
+
+    let private xname name = XName.Get(name)
+
+    let private toXDocument result =
+      let rec inner (acc: XElement) = function
+      | EndMarker -> acc
+      | ContextResult ctx ->
+        let name =
+          match acc.Attribute(xname "name") with
+          | null -> ctx.Name
+          | x ->
+            x.Remove()
+            sprintf "%s.%s" x.Value ctx.Name
+        let nameAttr = XAttribute(xname "name", name)
+        acc.Add(nameAttr)
+        let suite = ctx.Children |> Seq.fold inner acc
+        suite
+      | TestResult tr ->
+        let testCase = XElement(xname "testcase", XAttribute(xname "name", tr.FullName))
+        match tr with
+        | Error (meta, es, res, duration) as e ->
+          testCase.Add(
+            XElement(xname "error",
+              XAttribute(xname "type", e.GetType().FullName),
+              // TODO: fix message
+              XAttribute(xname "message", res.ToString() + es.ToString())),
+            XAttribute(xname "time", duration.ToString()))
+        | Done (meta, res, duration) ->
+          match res |> AssertionResult.NonEmptyList.typicalResult with
+          | Passed _ ->
+            testCase.Add(
+              XAttribute(xname "time", duration.ToString()))
+          | NotPassed (Skipped message) ->
+            testCase.Add(
+              XElement(xname "skipped", message),
+              XAttribute(xname "time", duration.ToString()))
+          | NotPassed (Violated message as v) ->
+            testCase.Add(
+              XElement(xname "failure",
+                XAttribute(xname "type", v.GetType().FullName),
+                // TODO: fix message
+                XAttribute(xname "message", message)),
+              XAttribute(xname "time", duration.ToString()))
+        acc.Add(testCase)
+        acc
+      let suite = XElement(xname "testsuite")
+      inner suite result
+
+    let addSummary results (suites: XElement) =
+      let summary = results |> Seq.fold Summary.collectSummary Summary.empty
+      suites.Add(
+        XAttribute(xname "tests", summary.Run),
+        XAttribute(xname "failures", summary.Violated),
+        XAttribute(xname "errors", summary.Error),
+        XAttribute(xname "time", summary.Duration.ToString()))
+      suites
+
+    let junitStyle =
+      { new IFormatter<ITestResult seq> with
+        member __.Format(results: ITestResult seq) =
+          let xdocument = XDocument(XElement(xname "testsuites", results |> Seq.map toXDocument) |> addSummary results)
+          let xmlDocument = XmlDocument()
+          use reader = xdocument.CreateReader()
+          xmlDocument.Load(reader)
+          Writable.xdocument(xmlDocument)
+        }

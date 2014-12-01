@@ -17,10 +17,15 @@ let entryPoint (args: Args) =
     | Some file -> new StreamWriter(file.FullName, false, Encoding.UTF8) :> TextWriter
     | None -> Console.Error
 
+  let requireFileName, formatter =
+    match args.Format with
+    | JUnitStyleXml -> true, Formatter.XmlFormatter.junitStyle
+    | Normal -> false, Formatter.SummaryFormatter.normal
+
   use reporter =
     new Reporter(
       new Printer<_>(progress, Formatter.ProgressFormatter.dot),
-      new Printer<_>(output, Formatter.SummaryFormatter.normal),
+      new Printer<_>(output, formatter),
       new Printer<_>(error, Formatter.ErrorFormatter.normal))
 
   if args.Help then
@@ -30,6 +35,9 @@ let entryPoint (args: Args) =
   if founds |> List.isEmpty then
     reporter.ReportError("input is empty.")
     -1
+  elif requireFileName && Option.isNone args.Output then
+    reporter.ReportError("xml format option require 'output' option.")
+    -2
   elif notFounds |> List.isEmpty then
     let asms = founds |> List.map (fun f -> Assembly.LoadFile(f.FullName))
     // collect and run
