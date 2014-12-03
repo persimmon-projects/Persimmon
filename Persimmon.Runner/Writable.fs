@@ -1,7 +1,7 @@
 ﻿namespace Persimmon.Output
 
 open System.IO
-open System.Xml
+open System.Xml.Linq
 
 /// This interface represents something that can write to TextWriter.
 type IWritable =
@@ -35,7 +35,7 @@ module Writable =
         }
 
   /// Create IWritable that writes xml to TextWriter.
-  let xdocument (xdoc: XmlDocument) =
+  let xdocument (xdoc: XDocument) =
     { new IWritable with
         member __.WriteTo(writer: TextWriter) =
           xdoc.Save(writer)

@@ -215,8 +215,5 @@ module Formatter =
       { new IFormatter<ITestResult seq> with
         member __.Format(results: ITestResult seq) =
           let xdocument = XDocument(XElement(xname "testsuites", results |> Seq.map toXDocument) |> addSummary results)
-          let xmlDocument = XmlDocument()
-          use reader = xdocument.CreateReader()
-          xmlDocument.Load(reader)
-          Writable.xdocument(xmlDocument)
+          Writable.xdocument(xdocument)
         }
