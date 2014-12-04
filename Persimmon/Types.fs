@@ -137,8 +137,7 @@ type TestCase<'T>(metadata: TestMetadata, body: unit -> TestResult<'T>) =
   member __.Parameters = metadata.Parameters
   /// Execute the test.
   member __.Run() = 
-    let watch = Stopwatch()
-    watch.Start()
+    let watch = Stopwatch.StartNew()
     let result = body ()
     watch.Stop()
     match result with
@@ -234,8 +233,7 @@ module TestCase =
           fun () ->
             match x.Run() with
             | Done (meta, (Passed unit, []), duration) ->
-                let watch = Stopwatch()
-                watch.Start()
+                let watch = Stopwatch.StartNew()
                 try (rest unit).Run() |> TestResult.addDuration duration
                 with e ->
                   watch.Stop()
@@ -249,13 +247,12 @@ module TestCase =
                   assertionResults
                   |> NonEmptyList.toList
                   |> AssertionResult.List.onlyNotPassed
-                let watch = Stopwatch()
+                let watch = Stopwatch.StartNew()
                 try
                   match notPassed with
                   | [] -> failwith "oops!"
                   | head::tail ->
                       assert (typeof<'T> = typeof<unit>)
-                      watch.Start()
                       // continue the test!
                       let testRes = (rest Unchecked.defaultof<'T>).Run()
                       testRes
@@ -269,10 +266,9 @@ module TestCase =
                 // even if the assertion is not passed,
                 // the test is continuable.
                 // So, continue the test.
-                let watch = Stopwatch()
+                let watch = Stopwatch.StartNew()
                 try
                   assert (typeof<'T> = typeof<unit>)
-                  watch.Start()
                   // continue th test!
                   let testRes = (rest Unchecked.defaultof<'T>).Run()
                   match results with
@@ -292,8 +288,7 @@ module TestCase =
           fun () ->
             match x.Run() with
             | Done (meta, (Passed value, []), duration) ->
-                let watch = Stopwatch()
-                watch.Start()
+                let watch = Stopwatch.StartNew()
                 try (rest value).Run()
                 with e ->
                   watch.Stop()
