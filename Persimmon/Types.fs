@@ -1,5 +1,8 @@
 ﻿namespace Persimmon
 
+open System
+open System.Diagnostics
+
 /// The cause of not passed assertion.
 type NotPassedCause =
     /// The assertion is not passed because it is skipped.
@@ -134,9 +137,12 @@ type TestCase<'T>(metadata: TestMetadata, body: unit -> TestResult<'T>) =
   member __.Parameters = metadata.Parameters
   /// Execute the test.
   member __.Run() = 
-    match body () with
-    | Error (_, errs, res) -> Error (metadata, errs, res)
-    | Done (_, res) -> Done (metadata, res)
+    let watch = Stopwatch.StartNew()
+    let result = body ()
+    watch.Stop()
+    match result with
+    | Error (_, errs, res, d) -> Error (metadata, errs, res, d + watch.Elapsed)
+    | Done (_, res, d) -> Done (metadata, res, d + watch.Elapsed)
 
   override __.ToString() =
     sprintf "TestCase<%s>(%A)" (typeof<'T>.Name) metadata
@@ -145,12 +151,12 @@ type TestCase<'T>(metadata: TestMetadata, body: unit -> TestResult<'T>) =
 /// After running tests, the TestCase objects become the TestResult objects.
 and TestResult<'T> =
     /// This case represents the error.
-  | Error of TestMetadata * exn list * NotPassedCause list
+  | Error of TestMetadata * exn list * NotPassedCause list * TimeSpan
     /// This case represents that all of the assertions is finished.
-  | Done of TestMetadata * NonEmptyList<AssertionResult<'T>>
+  | Done of TestMetadata * NonEmptyList<AssertionResult<'T>> * TimeSpan
   with
     member private this.Metadata =
-      match this with Error (x, _, _) | Done (x, _) -> x
+      match this with Error (x, _, _, _) | Done (x, _, _) -> x
     /// The test name. It doesn't contain the parameters.
     member this.Name = this.Metadata.Name
     /// The test name(if the test has parameters then the value contains them).
@@ -162,9 +168,9 @@ and TestResult<'T> =
     /// Convert TestResult<'T> to TestResult<obj>.
     member this.BoxTypeParam() =
       match this with
-      | Error (meta, es, res) -> Error (meta, es, res)
-      | Done (meta, res) ->
-          Done (meta, res |> NonEmptyList.map (function Passed x -> Passed (box x) | NotPassed x -> NotPassed x))
+      | Error (meta, es, res, d) -> Error (meta, es, res, d)
+      | Done (meta, res, d) ->
+          Done (meta, res |> NonEmptyList.map (function Passed x -> Passed (box x) | NotPassed x -> NotPassed x), d)
 
     interface ITestResult
 
@@ -181,16 +187,20 @@ module TestResult =
   let endMarker = { new ITestResult }
 
   let addAssertionResult x = function
-  | Done (metadata, (Passed _, [])) -> Done (metadata, NonEmptyList.singleton x)
-  | Done (metadata, results) -> Done (metadata, NonEmptyList.cons x results)
-  | Error (metadata, es, results) -> Error (metadata, es, match x with Passed _ -> results | NotPassed x -> x::results)
+  | Done (metadata, (Passed _, []), d) -> Done (metadata, NonEmptyList.singleton x, d)
+  | Done (metadata, results, d) -> Done (metadata, NonEmptyList.cons x results, d)
+  | Error (metadata, es, results, d) -> Error (metadata, es, (match x with Passed _ -> results | NotPassed x -> x::results), d)
 
   let addAssertionResults (xs: NonEmptyList<AssertionResult<_>>) = function
-  | Done (metadata, (Passed _, [])) -> Done (metadata, xs)
-  | Done (metadata, results) ->
-      Done (metadata, NonEmptyList.appendList xs (results |> NonEmptyList.toList |> AssertionResult.List.onlyNotPassed |> NotPassedCause.List.toAssertionResultList))
-  | Error (metadata, es, results) ->
-      Error (metadata, es, (xs |> NonEmptyList.toList |> AssertionResult.List.onlyNotPassed)@results)
+  | Done (metadata, (Passed _, []), d) -> Done (metadata, xs, d)
+  | Done (metadata, results, d) ->
+      Done (metadata, NonEmptyList.appendList xs (results |> NonEmptyList.toList |> AssertionResult.List.onlyNotPassed |> NotPassedCause.List.toAssertionResultList), d)
+  | Error (metadata, es, results, d) ->
+      Error (metadata, es, (xs |> NonEmptyList.toList |> AssertionResult.List.onlyNotPassed)@results, d)
+
+  let addDuration x = function
+  | Done (metadata, results, d) -> Done (metadata, results, d + x)
+  | Error (metadata, es, results, ts) -> Error (metadata, es, results, ts + x)
 
 /// This DU represents the type of the test case.
 /// If the test has some return values, then the type of the test case is HasValueTest.
@@ -206,11 +216,11 @@ type TestCaseType<'T> =
 module TestCase =
   let make name parameters x =
     let meta = { Name = name; Parameters = parameters }
-    TestCase(meta, fun () -> Done (meta, NonEmptyList.singleton x))
+    TestCase(meta, fun () -> Done (meta, NonEmptyList.singleton x, TimeSpan.Zero))
 
   let makeError name parameters exn =
     let meta = { Name = name; Parameters = parameters }
-    TestCase(meta, fun () -> Error (meta, [exn], []))
+    TestCase(meta, fun () -> Error (meta, [exn], [], TimeSpan.Zero))
 
   let addNotPassed notPassedCause (x: TestCase<_>) =
     TestCase(x.Metadata, fun () -> x.Run() |> TestResult.addAssertionResult (NotPassed notPassedCause))
@@ -222,10 +232,13 @@ module TestCase =
           x.Metadata,
           fun () ->
             match x.Run() with
-            | Done (meta, (Passed unit, [])) ->
-                try (rest unit).Run()
-                with e -> Error (meta, [e], [])
-            | Done (meta, assertionResults) ->
+            | Done (meta, (Passed unit, []), duration) ->
+                let watch = Stopwatch.StartNew()
+                try (rest unit).Run() |> TestResult.addDuration duration
+                with e ->
+                  watch.Stop()
+                  Error (meta, [e], [], duration + watch.Elapsed)
+            | Done (meta, assertionResults, duration) ->
                 // If the TestCase does not have any values,
                 // even if the assertion is not passed,
                 // the test is continuable.
@@ -234,6 +247,7 @@ module TestCase =
                   assertionResults
                   |> NonEmptyList.toList
                   |> AssertionResult.List.onlyNotPassed
+                let watch = Stopwatch.StartNew()
                 try
                   match notPassed with
                   | [] -> failwith "oops!"
@@ -241,13 +255,18 @@ module TestCase =
                       assert (typeof<'T> = typeof<unit>)
                       // continue the test!
                       let testRes = (rest Unchecked.defaultof<'T>).Run()
-                      testRes |> TestResult.addAssertionResults (NonEmptyList.make (NotPassed head) (tail |> List.map NotPassed))
-                with e -> Error (meta, [e], notPassed)
-            | Error (meta, es, results) ->
+                      testRes
+                      |> TestResult.addAssertionResults (NonEmptyList.make (NotPassed head) (tail |> List.map NotPassed))
+                      |> TestResult.addDuration duration
+                with e ->
+                  watch.Stop()
+                  Error (meta, [e], notPassed, duration + watch.Elapsed)
+            | Error (meta, es, results, duration) ->
                 // If the TestCase does not have any values,
                 // even if the assertion is not passed,
                 // the test is continuable.
                 // So, continue the test.
+                let watch = Stopwatch.StartNew()
                 try
                   assert (typeof<'T> = typeof<unit>)
                   // continue th test!
@@ -255,19 +274,26 @@ module TestCase =
                   match results with
                   | [] -> testRes
                   | head::tail ->
-                      testRes |> TestResult.addAssertionResults (NonEmptyList.make (NotPassed head) (tail |> List.map NotPassed))
+                      testRes
+                      |> TestResult.addAssertionResults (NonEmptyList.make (NotPassed head) (tail |> List.map NotPassed))
+                      |> TestResult.addDuration duration
                 with
-                  e -> Error (meta, e::es, results)
+                  e ->
+                    watch.Stop()
+                    Error (meta, e::es, results, duration + watch.Elapsed)
         )
     | HasValueTest x ->
         TestCase(
           x.Metadata,
           fun () ->
             match x.Run() with
-            | Done (meta, (Passed value, [])) ->
+            | Done (meta, (Passed value, []), duration) ->
+                let watch = Stopwatch.StartNew()
                 try (rest value).Run()
-                with e -> Error (meta, [e], [])
-            | Done (meta, assertionResults) ->
+                with e ->
+                  watch.Stop()
+                  Error (meta, [e], [], duration + watch.Elapsed)
+            | Done (meta, assertionResults, duration) ->
                 // If the TestCase has some values,
                 // the test is not continuable.
                 let notPassed =
@@ -276,9 +302,9 @@ module TestCase =
                   |> AssertionResult.List.onlyNotPassed
                 match notPassed with
                 | [] -> failwith "oops!"
-                | head::tail -> Done (meta, NonEmptyList.make (NotPassed head) (tail |> List.map NotPassed))
-            | Error (meta, es, results) ->
+                | head::tail -> Done (meta, NonEmptyList.make (NotPassed head) (tail |> List.map NotPassed), duration)
+            | Error (meta, es, results, duration) ->
                 // If the TestCase has some values,
                 // the test is not continuable.
-                Error (meta, es, results)
+                Error (meta, es, results, duration)
         )

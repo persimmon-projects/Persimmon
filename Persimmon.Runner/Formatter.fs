@@ -18,7 +18,7 @@ module Formatter =
             | TestResult tr ->
                 match tr with
                 | Error _ -> Writable.char 'E'
-                | Done (_, res) ->
+                | Done (_, res, _) ->
                     let typicalRes = res |> AssertionResult.NonEmptyList.typicalResult
                     match typicalRes with
                     | Passed _ -> Writable.char '.'
@@ -79,7 +79,7 @@ module Formatter =
         }
     | TestResult tr ->
         match tr with
-        | Error (meta, es, res) ->
+        | Error (meta, es, res, _) ->
             seq {
               let indent = indentStr indent
               yield indent + "FATAL ERROR: " + meta.FullName
@@ -89,7 +89,7 @@ module Formatter =
               yield indent + (bar (70 - indent.Length) '-' "exceptions")
               yield! es |> List.rev |> exnsToStrs indent
             }
-        | Done (meta, res) ->
+        | Done (meta, res, _) ->
             seq {
               let indent = indentStr indent
               match res |> AssertionResult.NonEmptyList.typicalResult with
@@ -107,26 +107,27 @@ module Formatter =
       Skipped: int
       Violated: int
       Error: int
+      Duration: TimeSpan
     }
     with
       override this.ToString() =
-        sprintf "run: %d, error: %d, violated: %d, skipped: %d" this.Run this.Error this.Violated this.Skipped
+        sprintf "run: %d, error: %d, violated: %d, skipped: %d, duration: %O" this.Run this.Error this.Violated this.Skipped this.Duration
 
     [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
     module Summary =
-      let empty = { Run = 0; Skipped = 0; Violated = 0; Error = 0 }
+      let empty = { Run = 0; Skipped = 0; Violated = 0; Error = 0; Duration = TimeSpan.Zero }
 
     let rec private collectSummary summary = function
     | EndMarker -> summary
     | ContextResult ctx ->
         ctx.Children |> Seq.fold collectSummary summary
-    | TestResult (Error _) ->
-        { summary with Run = summary.Run + 1; Error = summary.Error + 1 }
-    | TestResult (Done (_, res)) ->
+    | TestResult (Error (_, _, _, d)) ->
+        { summary with Run = summary.Run + 1; Error = summary.Error + 1; Duration = summary.Duration + d }
+    | TestResult (Done (_, res, d)) ->
         match res |> AssertionResult.NonEmptyList.typicalResult with
-        | Passed _ -> { summary with Run = summary.Run + 1 }
-        | NotPassed (Skipped _) -> { summary with Run = summary.Run + 1; Skipped = summary.Skipped + 1 }
-        | NotPassed (Violated _) -> { summary with Run = summary.Run + 1; Violated = summary.Violated + 1 }
+        | Passed _ -> { summary with Run = summary.Run + 1; Duration = summary.Duration + d }
+        | NotPassed (Skipped _) -> { summary with Run = summary.Run + 1; Skipped = summary.Skipped + 1; Duration = summary.Duration + d }
+        | NotPassed (Violated _) -> { summary with Run = summary.Run + 1; Violated = summary.Violated + 1; Duration = summary.Duration + d }
 
     let normal =
       { new IFormatter<ITestResult seq> with
