@@ -9,7 +9,37 @@
 Persimmon
 =========
 
-TODO: write documents
+<div class="row" style="width: 70%; margin: 0 auto;">
+  <div class="span1"></div>
+  <div class="span6">
+    <div class="well well-sm" id="nuget">
+      Persimmon and Persimmon.Runner can be <a href="https://www.nuget.org/packages/Persimmon">installed from NuGet</a>:
+      <pre>PM> Install-Package Persimmon
+PM> Install-Package Persimmon.Runner</pre>
+    </div>
+  </div>
+  <div class="span1"></div>
+</div>
+
+Documentation
+-------------
+
+The documentation is also available in [Japanese](ja/index.html).
+
+* [Getting Started](GettingStarted.html) to get started.
+
+* To explain [Features](Features.html)
+
+More information
+----------------
+
+The project is hosted on [GitHub][github] where you can [report issues][issues], fork the project and submit pull requests.
+The library is available under the MIT License,
+For more information see the [License file][license] in the GitHub repository.
+
+[github]: https://github.com/persimmon-projects/Persimmon/
+[issues]: https://github.com/persimmon-projects/Persimmon/issues
+[license]: https://github.com/persimmon-projects/Persimmon/blob/master/LICENSE
 
 </div>
 *)
