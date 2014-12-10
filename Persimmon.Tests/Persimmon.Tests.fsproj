@@ -60,7 +60,9 @@
   </Target>
   <ItemGroup>
     <Content Include="app.config" />
+    <Compile Include="Helper.fs" />
     <Compile Include="PersimmonTest.fs" />
+    <Compile Include="SideEffectTest.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
