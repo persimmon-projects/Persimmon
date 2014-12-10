@@ -35,3 +35,13 @@ let runAllTests reporter (tests: TestObject list) =
   let rootResults = tests |> List.map (runTests reporter)
   let errors = rootResults |> List.sumBy countErrors
   { Errors = errors; ExecutedRootTestResults = rootResults }
+
+let asyncRunAllTests reporter (tests: TestObject list) =
+  let asyncRun test = async {
+    return runTests reporter test
+  }
+  async {
+    let! rootResults = tests |> List.map asyncRun |> Async.Parallel
+    let errors = List.ofArray rootResults |> List.sumBy countErrors
+    return { Errors = errors; ExecutedRootTestResults = rootResults }
+  }
