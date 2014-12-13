@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <dependencies>
+      <dependency id="Persimmon" version="1.0.0-beta1" />
+    </dependencies>
+    <title>$title$</title>
+    <authors>bleis-tift, Gab-km, pocketberserker</authors>
+    <owners>bleis-tift, Gab-km, pocketberserker</owners>
+    <licenseUrl>https://github.com/persimmon-projects/Persimmon/tree/$version$/LICENSE</licenseUrl>
+    <iconUrl>https://raw.githubusercontent.com/persimmon-projects/Persimmon/$version$/docs/files/images/logo.png</iconUrl>
+    <projectUrl>https://github.com/persimmon-projects/Persimmon</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>script runner for Persimmon</description>
+    <tags>f# test testing script</tags>
+  </metadata>
+</package>

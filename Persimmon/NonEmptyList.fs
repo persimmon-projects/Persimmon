@@ -28,3 +28,6 @@ module NonEmptyList =
   let toList (list: NonEmptyList<'T>) =
     let head, tail = list
     [ yield head; yield! tail ]
+  let forall pred (list:NonEmptyList<'T>) =
+    let head, tail = list
+    pred head && List.forall pred tail
