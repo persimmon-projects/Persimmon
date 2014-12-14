@@ -24,7 +24,7 @@ open FSharp.MetadataFormat
 
 let (@@) path1 path2 = Path.Combine(path1, path2)
 
-#if RELEASE
+#if Release
 let root = website
 let configuration = "Release"
 #else
