@@ -63,6 +63,7 @@
     <Compile Include="Helper.fs" />
     <Compile Include="PersimmonTest.fs" />
     <Compile Include="SideEffectTest.fs" />
+    <Compile Include="AsyncTest.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

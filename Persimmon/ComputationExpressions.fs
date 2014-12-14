@@ -83,3 +83,12 @@ type TrapBuilder () =
       fail "Expect thrown exn but not"
     with
       e -> pass e
+
+type AsyncRunBuilder() =
+  member __.Yield(()) = ()
+  [<CustomOperation("it")>]
+  member __.It((), a: Async<'T>) = a
+  member __.Run(a) =
+    match a |> Async.Catch |> Async.RunSynchronously with
+    | Choice1Of2 r -> TestCase.make "" [] (Passed r)
+    | Choice2Of2 e -> TestCase.makeError "" [] e 
