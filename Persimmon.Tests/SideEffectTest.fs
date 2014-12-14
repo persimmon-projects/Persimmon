@@ -59,3 +59,19 @@ module SideEffectTest =
     do! ``foo bar test`` |> shouldPassed ()
     do! assertEquals 2 !sideEffect2
   }
+
+  let ``before Effect test`` () =
+    let beforeEffect = ref 0
+    testWithBefore (fun () -> incr beforeEffect) {
+      do! assertEquals 1 !beforeEffect
+    }
+
+  let ``after Effect test`` =
+    let afterEffect = ref 0
+    let inner =
+      testWithAfter (fun () -> incr afterEffect) {
+        return ()
+      }
+    test {
+      do! assertEquals 1 !afterEffect
+    }

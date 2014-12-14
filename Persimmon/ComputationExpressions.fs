@@ -92,3 +92,21 @@ type AsyncRunBuilder() =
     match a |> Async.Catch |> Async.RunSynchronously with
     | Choice1Of2 r -> TestCase.make "" [] (Passed r)
     | Choice2Of2 e -> TestCase.makeError "" [] e 
+
+type TestWithBeforeOrAfterBuilder (name: string, before: (unit -> unit) option, after: (unit -> unit) option) =
+  let test = TestBuilder(name)
+  member __.Return(x) = test.Return(x)
+  member __.ReturnFrom(x) = test.ReturnFrom(x)
+  member __.Source(x: AssertionResult<unit>) = UnitAssertionResult x
+  member __.Source(x: AssertionResult<_>) = NonUnitAssertionResult x
+  member __.Source(x: TestCase<unit>) = UnitTestCase x
+  member __.Source(x: TestCase<_>) = NonUnitTestCase x
+  member __.Bind(x, f: 'T -> TestCase<'U>) = test.Bind(x, f)
+  member __.Delay(f) = test.Delay(f)
+  member __.Run(f: unit -> TestCase<'T>) =
+    TestCaseWithBeforeOrAfter(test {
+      before |> Option.iter (fun f -> f ())
+      let res = f ()
+      after |> Option.iter (fun f -> f ())
+      return! res.BoxTypeParam()
+    })

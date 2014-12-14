@@ -12,7 +12,8 @@ type RunResult = {
 let runTests (reporter: Reporter) (test: TestObject) =
   match test with
   | Context ctx -> ctx.Run(reporter.ReportProgress) :> ITestResult
-  | TestCase tc ->
+  | TestCase tc
+  | TestCaseWithBeforeOrAfter tc -> 
       let result = tc.Run()
       reporter.ReportProgress(result)
       result :> ITestResult
