@@ -56,20 +56,42 @@ module private Util =
 type ParameterizeBuilder() =
   member __.Delay(f: unit -> _) = f
   member __.Run(f) = f ()
-  member __.Yield(()) = Seq.empty
-  member __.Yield(x) = Seq.singleton x
-  member __.YieldFrom(xs: _ seq) = xs
+  member __.Yield(()) = (Empty, Seq.empty)
+  member __.Yield(x) = (Empty, Seq.singleton x)
   [<CustomOperation("case")>]
-  member inline __.Case(source, case) = seq { yield! source; yield case }
+  member inline __.Case((action, source), case) = (action, seq { yield! source; yield case })
   [<CustomOperation("source")>]
-  member __.Source (source1, source2) = Seq.append source1 source2
+  member __.Source ((action, source1), source2) = (action, Seq.append source1 source2)
   [<CustomOperation("run")>]
-  member __.RunTests(source: _ seq, f: _ -> TestCase<_>) =
+  member __.RunTests((action, source: _ seq), f: _ -> TestCase<'T>) =
     source
     |> Seq.map (fun x ->
+      let ret = TestBuilder("") {
+        do match action with | Before b | BeforeAfter(b, _) -> b () | _ -> ()
         let ret = f x
-        let metadata = { ret.Metadata with Parameters = x |> toList }
-        TestCase<_>(metadata, ret.Run) :> TestObject)
+        do match action with | After a | BeforeAfter(_, a) -> a () | _ -> ()
+        return! ret
+      }
+      let metadata = { ret.Metadata with Parameters = x |> toList }
+      TestCase<_>(metadata, ret.Run).BoxTypeParam() :> TestObject)
+  [<CustomOperation("before")>]
+  member __.Before((action, source: _ seq), before: unit -> unit) =
+    let action =
+      match action with
+      | Empty -> Before before
+      | Before b1 -> Before (b1 >> before)
+      | After after -> BeforeAfter(before, after)
+      | BeforeAfter(b1, after) -> BeforeAfter(b1 >> before, after)
+    (action, source)
+  [<CustomOperation("after")>]
+  member __.After((action, source: _ seq), after: unit -> unit) =
+    let action =
+      match action with
+      | Empty -> After after
+      | Before before -> BeforeAfter(before, after)
+      | After a1 -> After (a1 >> after)
+      | BeforeAfter(before, a1) -> BeforeAfter(before, a1 >> after)
+    (action, source)
 
 type TrapBuilder () =
   member __.Zero () = ()

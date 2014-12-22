@@ -315,3 +315,9 @@ type TestCaseWithBeforeOrAfter internal (testCase: TestCase<obj>) =
   override __.SetNameIfNeed(newName: string) =
     let tc = TestCase<obj>({ testCase.Metadata with Name = if testCase.Metadata.Name = "" then newName else testCase.Metadata.Name }, testCase.Run)
     TestCaseWithBeforeOrAfter(tc) :> TestObject
+
+type Action =
+  | Empty
+  | Before of (unit -> unit)
+  | After of (unit -> unit)
+  | BeforeAfter of (unit -> unit) * (unit -> unit)

@@ -75,3 +75,25 @@ module SideEffectTest =
     test {
       do! assertEquals 1 !afterEffect
     }
+
+  let ``parameterize test with before`` =
+    let beforeEffect = ref 0
+    let inner n = test {
+      do! assertEquals (n + 1) !beforeEffect
+    }
+    parameterize {
+      source [0 .. 1]
+      before (fun () -> incr beforeEffect)
+      run inner
+    }
+
+  let ``parameterize test with after`` =
+    let afterEffect = ref 0
+    let inner n = test {
+      do! assertEquals n !afterEffect
+    }
+    parameterize {
+      source [0 .. 1]
+      after (fun () -> incr afterEffect)
+      run inner
+    }
