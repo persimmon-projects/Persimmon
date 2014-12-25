@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Getting Started
+</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A unit test framework for F# using computation expressions.">
+    <meta name="author" content="persimmon-projects">
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
+
+    <link type="text/css" rel="stylesheet" href="/Persimmon/content/style.css" />
+    <link rel="shortcut icon" href="/Persimmon/images/favicon.ico" type="image/vnd.microsoft.icon" />
+    <link rel="icon" href="/Persimmon/images/favicon.ico" type="image/vnd.microsoft.icon" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="blog-header">
+        <h2 class="blog-title"><a href="/Persimmon/index.html">Persimmon</a></h2>
+      </div>
+      <hr />
+      <div class="row">
+        <div class="col-sm-9 blog-main" id="main">
+          
+<div class="blog-post">
+
+<h1>Getting Started</h1>
+
+<p>An overview of Persimmon, how to download and use.</p>
+
+<h2>Creating project(or Getting sample project)</h2>
+
+<p>Now create a project (and enable NuGet Package Restore) or download <a href="https://github.com/persimmon-projects/Persimmon.Demo">sample project</a>.</p>
+
+<h2>Getting Persimmon console runner</h2>
+
+<p>Run the command below:</p>
+
+<table class="pre"><tr><td><pre lang="powershell">.\.nuget\NuGet.exe Install Persimmon.Console -OutputDirectory tools -ExcludeVersion</pre></td></tr></table>
+
+<h2>The first step</h2>
+
+<p>You can write the tests by using <code>test</code> computation expression and assertion functions.</p>
+
+<pre class="fssnip">
+<span class="k">open</span> <span onmouseout="hideTip(event, 'fs1', 1)" onmouseover="showTip(event, 'fs1', 1)" class="i">Persimmon</span>
+
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs2', 2)" onmouseover="showTip(event, 'fs2', 2)" class="i">``some variable name``</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs3', 3)" onmouseover="showTip(event, 'fs3', 3)" class="i">test</span> <span class="s">&quot;</span><span class="s">first</span><span class="s"> </span><span class="s">test</span><span class="s"> </span><span class="s">example</span><span class="s">&quot;</span> {
+    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs4', 4)" onmouseover="showTip(event, 'fs4', 4)" class="i">assertEquals</span> <span class="n">0</span> (<span class="n">4</span> <span class="o">%</span> <span class="n">2</span>)
+}</pre>
+
+
+<h2>Executing test</h2>
+
+<p>Run the command below:</p>
+
+<table class="pre"><tr><td><pre lang="powershell">.\tools\Persimmon.Console\tools\Persimmon.Console.exe &#39;input file path&#39;</pre></td></tr></table>
+
+<h2>Testing exceptions</h2>
+
+<p><code>trap</code> computation expression can catch exceptions.</p>
+
+<pre class="fssnip">
+<span class="k">exception</span> <span onmouseout="hideTip(event, 'fs5', 5)" onmouseover="showTip(event, 'fs5', 5)" class="i">MyException</span>
+
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs6', 6)" onmouseover="showTip(event, 'fs6', 6)" class="i">``exception test``</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs3', 7)" onmouseover="showTip(event, 'fs3', 7)" class="i">test</span> <span class="s">&quot;</span><span class="s">exn</span><span class="s"> </span><span class="s">test</span><span class="s">&quot;</span> {
+  <span class="k">let</span> <span onmouseout="hideTip(event, 'fs7', 8)" onmouseover="showTip(event, 'fs7', 8)" class="i">f</span> () <span class="o">=</span>
+    <span onmouseout="hideTip(event, 'fs8', 9)" onmouseover="showTip(event, 'fs8', 9)" class="i">raise</span> <span onmouseout="hideTip(event, 'fs5', 10)" onmouseover="showTip(event, 'fs5', 10)" class="i">MyException</span>
+    <span class="n">42</span>
+  <span class="k">let!</span> <span onmouseout="hideTip(event, 'fs9', 11)" onmouseover="showTip(event, 'fs9', 11)" class="i">e</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs10', 12)" onmouseover="showTip(event, 'fs10', 12)" class="i">trap</span> { <span onmouseout="hideTip(event, 'fs11', 13)" onmouseover="showTip(event, 'fs11', 13)" class="k">it</span> (<span onmouseout="hideTip(event, 'fs7', 14)" onmouseover="showTip(event, 'fs7', 14)" class="i">f</span> ()) }
+  <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs4', 15)" onmouseover="showTip(event, 'fs4', 15)" class="i">assertEquals</span> <span class="s">&quot;</span><span class="s">&quot;</span> <span onmouseout="hideTip(event, 'fs9', 16)" onmouseover="showTip(event, 'fs9', 16)" class="i">e</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs12', 17)" onmouseover="showTip(event, 'fs12', 17)" class="i">Message</span>
+  <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs4', 18)" onmouseover="showTip(event, 'fs4', 18)" class="i">assertEquals</span> <span onmouseout="hideTip(event, 'fs13', 19)" onmouseover="showTip(event, 'fs13', 19)" class="i">typeof</span><span class="o">&lt;</span><span onmouseout="hideTip(event, 'fs5', 20)" onmouseover="showTip(event, 'fs5', 20)" class="i">MyException</span><span class="o">&gt;</span> (<span onmouseout="hideTip(event, 'fs9', 21)" onmouseover="showTip(event, 'fs9', 21)" class="i">e</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs14', 22)" onmouseover="showTip(event, 'fs14', 22)" class="i">GetType</span>())
+  <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs4', 23)" onmouseover="showTip(event, 'fs4', 23)" class="i">assertEquals</span> <span class="s">&quot;</span><span class="s">&quot;</span> (<span onmouseout="hideTip(event, 'fs9', 24)" onmouseover="showTip(event, 'fs9', 24)" class="i">e</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs15', 25)" onmouseover="showTip(event, 'fs15', 25)" class="i">StackTrace</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs16', 26)" onmouseover="showTip(event, 'fs16', 26)" class="i">Substring</span>(<span class="n">0</span>, <span class="n">5</span>))
+}</pre>
+
+
+<h2>Parameterized tests</h2>
+
+<p>Persimmon supports parameterized tests.</p>
+
+<pre class="fssnip">
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs17', 27)" onmouseover="showTip(event, 'fs17', 27)" class="i">``case parameterize test``</span> <span class="o">=</span>
+  <span class="k">let</span> <span onmouseout="hideTip(event, 'fs18', 28)" onmouseover="showTip(event, 'fs18', 28)" class="i">parameterizeTest</span> (<span onmouseout="hideTip(event, 'fs19', 29)" onmouseover="showTip(event, 'fs19', 29)" class="i">x</span>, <span onmouseout="hideTip(event, 'fs20', 30)" onmouseover="showTip(event, 'fs20', 30)" class="i">y</span>) <span class="o">=</span> <span onmouseout="hideTip(event, 'fs3', 31)" onmouseover="showTip(event, 'fs3', 31)" class="i">test</span> <span class="s">&quot;</span><span class="s">case</span><span class="s"> </span><span class="s">parameterize</span><span class="s"> </span><span class="s">test</span><span class="s">&quot;</span> {
+    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs4', 32)" onmouseover="showTip(event, 'fs4', 32)" class="i">assertEquals</span> <span onmouseout="hideTip(event, 'fs19', 33)" onmouseover="showTip(event, 'fs19', 33)" class="i">x</span> <span onmouseout="hideTip(event, 'fs20', 34)" onmouseover="showTip(event, 'fs20', 34)" class="i">y</span>
+  }
+  <span onmouseout="hideTip(event, 'fs21', 35)" onmouseover="showTip(event, 'fs21', 35)" class="i">parameterize</span> {
+    <span onmouseout="hideTip(event, 'fs22', 36)" onmouseover="showTip(event, 'fs22', 36)" class="k">case</span> (<span class="n">1</span>, <span class="n">1</span>)
+    <span onmouseout="hideTip(event, 'fs22', 37)" onmouseover="showTip(event, 'fs22', 37)" class="k">case</span> (<span class="n">1</span>, <span class="n">2</span>)
+    <span onmouseout="hideTip(event, 'fs23', 38)" onmouseover="showTip(event, 'fs23', 38)" class="k">run</span> <span onmouseout="hideTip(event, 'fs18', 39)" onmouseover="showTip(event, 'fs18', 39)" class="i">parameterizeTest</span>
+  }
+
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs24', 40)" onmouseover="showTip(event, 'fs24', 40)" class="i">inputs</span> <span class="o">=</span> [ <span class="n">2</span> <span class="o">..</span> <span class="n">2</span> <span class="o">..</span> <span class="n">20</span> ]
+
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs25', 41)" onmouseover="showTip(event, 'fs25', 41)" class="i">``source parameterize test``</span> <span class="o">=</span>
+  <span class="k">let</span> <span onmouseout="hideTip(event, 'fs26', 42)" onmouseover="showTip(event, 'fs26', 42)" class="i">parameterizeTest</span> <span onmouseout="hideTip(event, 'fs27', 43)" onmouseover="showTip(event, 'fs27', 43)" class="i">x</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs3', 44)" onmouseover="showTip(event, 'fs3', 44)" class="i">test</span> <span class="s">&quot;</span><span class="s">source</span><span class="s"> </span><span class="s">parameterize</span><span class="s"> </span><span class="s">test</span><span class="s">&quot;</span> {
+    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs4', 45)" onmouseover="showTip(event, 'fs4', 45)" class="i">assertEquals</span> <span class="n">0</span> (<span onmouseout="hideTip(event, 'fs27', 46)" onmouseover="showTip(event, 'fs27', 46)" class="i">x</span> <span class="o">%</span> <span class="n">2</span>)
+  }
+  <span onmouseout="hideTip(event, 'fs21', 47)" onmouseover="showTip(event, 'fs21', 47)" class="i">parameterize</span> {
+    <span onmouseout="hideTip(event, 'fs28', 48)" onmouseover="showTip(event, 'fs28', 48)" class="k">source</span> <span onmouseout="hideTip(event, 'fs24', 49)" onmouseover="showTip(event, 'fs24', 49)" class="i">inputs</span>
+    <span onmouseout="hideTip(event, 'fs23', 50)" onmouseover="showTip(event, 'fs23', 50)" class="k">run</span> <span onmouseout="hideTip(event, 'fs26', 51)" onmouseover="showTip(event, 'fs26', 51)" class="i">parameterizeTest</span>
+  }</pre>
+
+
+<h2>Omitting test name</h2>
+
+<p>Open <code>UseTestNameByReflection</code> module:</p>
+
+<pre class="fssnip">
+<span class="k">open</span> <span onmouseout="hideTip(event, 'fs29', 52)" onmouseover="showTip(event, 'fs29', 52)" class="i">UseTestNameByReflection</span></pre>
+
+
+</div>
+
+<div class="tip" id="fs1">namespace Persimmon</div>
+<div class="tip" id="fs2">val ( some variable name ) : TestCase&lt;unit&gt;<br /><br />Full name: GettingStarted.( some variable name )</div>
+<div class="tip" id="fs3">val test : name:string -&gt; TestBuilder<br /><br />Full name: Persimmon.Syntax.test</div>
+<div class="tip" id="fs4">val assertEquals : expected:&#39;a -&gt; actual:&#39;a -&gt; AssertionResult&lt;unit&gt; (requires equality)<br /><br />Full name: Persimmon.Assertions.assertEquals</div>
+<div class="tip" id="fs5">exception MyException<br /><br />Full name: GettingStarted.MyException</div>
+<div class="tip" id="fs6">val ( exception test ) : TestCase&lt;unit&gt;<br /><br />Full name: GettingStarted.( exception test )</div>
+<div class="tip" id="fs7">val f : (unit -&gt; int)</div>
+<div class="tip" id="fs8">val raise : exn:System.Exception -&gt; &#39;T<br /><br />Full name: Microsoft.FSharp.Core.Operators.raise</div>
+<div class="tip" id="fs9">val e : exn</div>
+<div class="tip" id="fs10">val trap : TrapBuilder<br /><br />Full name: Persimmon.Syntax.trap</div>
+<div class="tip" id="fs11">custom operation: it (&#39;a)<br /><br />Calls TrapBuilder.It </div>
+<div class="tip" id="fs12">property System.Exception.Message: string</div>
+<div class="tip" id="fs13">val typeof&lt;&#39;T&gt; : System.Type<br /><br />Full name: Microsoft.FSharp.Core.Operators.typeof</div>
+<div class="tip" id="fs14">System.Exception.GetType() : System.Type</div>
+<div class="tip" id="fs15">property System.Exception.StackTrace: string</div>
+<div class="tip" id="fs16">System.String.Substring(startIndex: int) : string<br />System.String.Substring(startIndex: int, length: int) : string</div>
+<div class="tip" id="fs17">val ( case parameterize test ) : seq&lt;TestObject&gt;<br /><br />Full name: GettingStarted.( case parameterize test )</div>
+<div class="tip" id="fs18">val parameterizeTest : (&#39;a * &#39;a -&gt; TestCase&lt;unit&gt;) (requires equality)</div>
+<div class="tip" id="fs19">val x : &#39;a (requires equality)</div>
+<div class="tip" id="fs20">val y : &#39;a (requires equality)</div>
+<div class="tip" id="fs21">val parameterize : ParameterizeBuilder<br /><br />Full name: Persimmon.Syntax.parameterize</div>
+<div class="tip" id="fs22">custom operation: case (&#39;a)<br /><br />Calls ParameterizeBuilder.Case </div>
+<div class="tip" id="fs23">custom operation: run (&#39;a -&gt; TestCase&lt;&#39;b&gt;)<br /><br />Calls ParameterizeBuilder.RunTests </div>
+<div class="tip" id="fs24">val inputs : int list<br /><br />Full name: GettingStarted.inputs</div>
+<div class="tip" id="fs25">val ( source parameterize test ) : seq&lt;TestObject&gt;<br /><br />Full name: GettingStarted.( source parameterize test )</div>
+<div class="tip" id="fs26">val parameterizeTest : (int -&gt; TestCase&lt;unit&gt;)</div>
+<div class="tip" id="fs27">val x : int</div>
+<div class="tip" id="fs28">custom operation: source (seq&lt;&#39;a&gt;)<br /><br />Calls ParameterizeBuilder.Source </div>
+<div class="tip" id="fs29">module UseTestNameByReflection<br /><br />from Persimmon.Syntax</div>
+
+        </div>
+        <div class="col-sm-3 blog-sidebar" id="menu">
+          <div class="sidebar-module sidebar-module-inset">
+            <a href="/Persimmon/index.html">
+              <img src="/Persimmon/images/logo.png" style="width:150px;margin:10px" />
+            </a>
+          </div>
+
+          <div class="sidebar-module">
+            <h4>Persimmon</h4>
+            <ul class="list-unstyled">
+              <li><a href="https://www.nuget.org/packages/Persimmon/">Get Library via NuGet</a></li>
+              <li><a href="https://github.com/persimmon-projects/Persimmon/blob/master/LICENSE">License (MIT)</a></li>
+              <!--
+              <li><a href="https://github.com/persimmon-projects/Persimmon/blob/master/RELEASE_NOTES.md">Release Notes</a></li>
+              -->
+            </ul>
+          </div>
+
+          <div class="sidebar-module">
+            <h4>Tutorial</h4>
+            <ul class="list-unstyled">
+              <li><a href="/Persimmon/GettingStarted.html">Getting Started</a></li>
+              <li><a href="/Persimmon/Features.html">Features</a></li>
+            </ul>
+          </div>
+
+          <div class="sidebar-module">
+            <h4>Reference</h4>
+            <ul class="list-unstyled">
+              <li><a href="/Persimmon/reference/index.html">API Reference</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <a href="https://github.com/persimmon-projects/Persimmon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
+  </body>
+  </html>
