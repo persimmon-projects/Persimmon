@@ -31,6 +31,9 @@
 
 <h1>TestCaseType<'T></h1>
 <div class="xmldoc">
+<p>This DU represents the type of the test case.
+If the test has some return values, then the type of the test case is HasValueTest.
+If not, then it is NoValueTest.</p>
 </div>
   <h3>Union Cases</h3>
   <table class="table table-bordered member-list">
@@ -53,7 +56,9 @@
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
+          <p>The TestCase has some return values.
+It means that the TestCase is not TestCase<unit>.</p>
+
         </td>
       </tr>
       <tr>
@@ -71,7 +76,9 @@
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
+          <p>The TestCase does not have any return values.
+It means that the TestCase is TestCase<unit>.</p>
+
         </td>
       </tr>
     </tbody>
