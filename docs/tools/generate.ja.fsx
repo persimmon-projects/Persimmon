@@ -53,7 +53,8 @@ let rec copyDir sourceDirName outputDirName =
   let files = dir.GetFiles()
   for file in files do
     let path = outputDirName @@ file.Name
-    file.CopyTo(path, false) |> ignore
+    if not <| File.Exists(path) then
+      file.CopyTo(path) |> ignore
 
   for subdir in dirs do
     outputDirName @@ subdir.Name |> copyDir subdir.FullName

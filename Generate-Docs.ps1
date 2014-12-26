@@ -3,7 +3,7 @@ param($configuration='Debug')
 $projectName = '.\docs\tools\Persimmon.Docs.proj'
 
 $project = cat $projectName
-$project = $project.Replace('generate.fsx', 'generate.ja.fsx')
+$project = $project.Replace('generate.fsx', 'generate.ja.fsx').Replace('output\%', 'output\ja\%')
 
 $projectNameJa = '.\docs\tools\Persimmon.Docs.ja.proj'
 $project | Out-File -Encoding UTF8 $projectNameJa

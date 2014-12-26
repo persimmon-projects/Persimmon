@@ -14,10 +14,10 @@
         <Exec Command="&quot;$(MSBuildThisFileDirectory)..\..\.nuget\nuget.exe&quot; Install &quot;$(MSBuildThisFileDirectory)packages.config&quot; -OutputDirectory &quot;%(PackageDir.FullPath)&quot; -ExcludeVersion"/>
     </Target>
     <Target Name="CopyFiles">
-        <Copy SourceFiles="@(Contents)"
-              DestinationFiles="@(Contents->'$(MSBuildThisFileDirectory)..\output\%(RecursiveDir)%(Filename)%(Extension)')"/>
         <Copy SourceFiles="@(Styles)"
               DestinationFiles="@(Styles->'$(MSBuildThisFileDirectory)..\output\content\%(RecursiveDir)%(Filename)%(Extension)')"/>
+        <Copy SourceFiles="@(Contents)"
+              DestinationFiles="@(Contents->'$(MSBuildThisFileDirectory)..\output\%(RecursiveDir)%(Filename)%(Extension)')"/>
     </Target>
     <Target Name="BuildDocs"
             DependsOnTargets="InstallPackages;CopyFiles">
