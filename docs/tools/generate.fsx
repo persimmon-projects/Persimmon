@@ -51,7 +51,7 @@ let buildReference () =
   System.IO.Directory.CreateDirectory(outputDir) |> ignore
   for lib in referenceBinaries do
     MetadataFormat.Generate(
-      bin @@ lib,
+      __SOURCE_DIRECTORY__ @@  "../.." @@ Path.GetFileNameWithoutExtension(lib) @@ "bin" @@ configuration @@ lib,
       outputDir,
       layoutRoots,
       parameters = ("root", root)::info,
