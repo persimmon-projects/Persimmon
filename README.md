@@ -1,6 +1,6 @@
 # Persimmon
 
-Persimmon is a unit test library using computation expression of F#.
+Persimmon is a unit test framework for F# using computation expressions.
 
 The first idea was brought by @Gab-km and @bleis-tift.
 
@@ -14,6 +14,12 @@ The first idea was brought by @Gab-km and @bleis-tift.
 
 * [Persimmon](https://www.nuget.org/packages/Persimmon/)
 * [Persimmon.Console](https://www.nuget.org/packages/Persimmon.Console)
+
+## Documentation
+
+* [English](http://persimmon-projects.github.io/Persimmon/)
+* [Japanese](http://persimmon-projects.github.io/Persimmon/ja/)
+* [API Reference(English only)](http://persimmon-projects.github.io/Persimmon/reference/)
 
 ## Origin of a name
 
