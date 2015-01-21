@@ -14,3 +14,4 @@ module NonEmptyList =
   val map: ('T -> 'U) -> NonEmptyList<'T> -> NonEmptyList<'U>
   val iter: ('T -> unit) -> NonEmptyList<'T> -> unit
   val toList: NonEmptyList<'T> -> 'T list
+  val forall: ('T -> bool) -> NonEmptyList<'T> -> bool

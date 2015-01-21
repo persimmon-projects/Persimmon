@@ -2,6 +2,7 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe Persimmon.sln /prope
 
 .\.nuget\nuget.exe pack .\Persimmon\Persimmon.fsproj -Symbols -Properties VisualStudioVersion=12.0
 .\.nuget\nuget.exe pack .\Persimmon.Runner\Persimmon.Runner.fsproj -Symbols -Properties VisualStudioVersion=12.0
+.\.nuget\nuget.exe pack .\Persimmon.Script\Persimmon.Script.fsproj -Symbols -Properties VisualStudioVersion=12.0
 
 $fsproj = [xml] (cat Persimmon.Console\Persimmon.Console.fsproj)
 

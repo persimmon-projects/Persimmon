@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon", "Persimmon\Persimmon.fsproj", "{F1D851FD-A776-4204-B287-5C14C3AA198C}"
 EndProject
@@ -22,6 +22,10 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.Sample", "Persimmon.Sample\Persimmon.Sample.fsproj", "{17ECB810-C2D1-4B01-AC10-42447EF6E591}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.Runner", "Persimmon.Runner\Persimmon.Runner.fsproj", "{585B95FD-6B0C-4B45-A4CF-F44098A8BA49}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.Script", "Persimmon.Script\Persimmon.Script.fsproj", "{5350367C-C03C-4E05-9D46-6ADB64F8BC6A}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.Script.Tests", "Persimmon.Script.Tests\Persimmon.Script.Tests.fsproj", "{5CC5FE08-D88A-436E-83A8-57CDACD8E2CE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,6 +53,14 @@ Global
 		{585B95FD-6B0C-4B45-A4CF-F44098A8BA49}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{585B95FD-6B0C-4B45-A4CF-F44098A8BA49}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{585B95FD-6B0C-4B45-A4CF-F44098A8BA49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5350367C-C03C-4E05-9D46-6ADB64F8BC6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5350367C-C03C-4E05-9D46-6ADB64F8BC6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5350367C-C03C-4E05-9D46-6ADB64F8BC6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5350367C-C03C-4E05-9D46-6ADB64F8BC6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5CC5FE08-D88A-436E-83A8-57CDACD8E2CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CC5FE08-D88A-436E-83A8-57CDACD8E2CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CC5FE08-D88A-436E-83A8-57CDACD8E2CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CC5FE08-D88A-436E-83A8-57CDACD8E2CE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
