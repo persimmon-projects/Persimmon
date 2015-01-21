@@ -13,7 +13,9 @@ The first idea was brought by @Gab-km and @bleis-tift.
 ## NuGet page link
 
 * [Persimmon](https://www.nuget.org/packages/Persimmon/)
-* [Persimmon.Console](https://www.nuget.org/packages/Persimmon.Console)
+* [Persimmon.Console](https://www.nuget.org/packages/Persimmon.Console/)
+* [Persimmon.Runner](https://www.nuget.org/packages/Persimmon.Runner/)
+* [Persimmon.Script](https://www.nuget.org/packages/Persimmon.Script/)
 
 ## Documentation
 
