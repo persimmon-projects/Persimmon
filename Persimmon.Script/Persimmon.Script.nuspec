@@ -4,7 +4,7 @@
     <id>$id$</id>
     <version>$version$</version>
     <dependencies>
-      <dependency id="Persimmon" version="1.0.0-beta1" />
+      <dependency id="Persimmon" version="$version$" />
     </dependencies>
     <title>$title$</title>
     <authors>bleis-tift, Gab-km, pocketberserker</authors>
