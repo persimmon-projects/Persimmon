@@ -42,7 +42,8 @@
 
 <p>以下のコマンドを実行しましょう。</p>
 
-<table class="pre"><tr><td><pre lang="powershell">.\.nuget\NuGet.exe Install Persimmon.Console -OutputDirectory tools -ExcludeVersion</pre></td></tr></table>
+<table class="pre"><tr><td><pre lang="powershell">.\.nuget\NuGet.exe Install Persimmon.Console -OutputDirectory tools -ExcludeVersion
+</pre></td></tr></table>
 
 <h2>はじめの一歩</h2>
 
@@ -51,33 +52,36 @@
 <pre class="fssnip">
 <span class="k">open</span> <span onmouseout="hideTip(event, 'fs1', 1)" onmouseover="showTip(event, 'fs1', 1)" class="i">Persimmon</span>
 
-<span class="k">let</span> <span onmouseout="hideTip(event, 'fs2', 2)" onmouseover="showTip(event, 'fs2', 2)" class="i">``some variable name``</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs3', 3)" onmouseover="showTip(event, 'fs3', 3)" class="i">test</span> <span class="s">&quot;</span><span class="s">first</span><span class="s"> </span><span class="s">test</span><span class="s"> </span><span class="s">example</span><span class="s">&quot;</span> {
-    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs4', 4)" onmouseover="showTip(event, 'fs4', 4)" class="i">assertEquals</span> <span class="n">0</span> (<span class="n">4</span> <span class="o">%</span> <span class="n">2</span>)
-}</pre>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs2', 2)" onmouseover="showTip(event, 'fs2', 2)" class="i">``some variable name``</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs3', 3)" onmouseover="showTip(event, 'fs3', 3)" class="f">test</span> <span class="s">&quot;first test example&quot;</span> {
+    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs4', 4)" onmouseover="showTip(event, 'fs4', 4)" class="f">assertEquals</span> <span class="n">0</span> (<span class="n">4</span> <span class="o">%</span> <span class="n">2</span>)
+}
+</pre>
 
 
 <h2>テストの実行</h2>
 
 <p>以下のコマンドを実行しましょう。</p>
 
-<table class="pre"><tr><td><pre lang="powershell">.\tools\Persimmon.Console\tools\Persimmon.Console.exe &#39;input file path&#39;</pre></td></tr></table>
+<table class="pre"><tr><td><pre lang="powershell">.\tools\Persimmon.Console\tools\Persimmon.Console.exe &#39;input file path&#39;
+</pre></td></tr></table>
 
 <h2>例外テスト</h2>
 
 <p><code>trap</code> は例外をキャッチできます。</p>
 
 <pre class="fssnip">
-<span class="k">exception</span> <span onmouseout="hideTip(event, 'fs5', 5)" onmouseover="showTip(event, 'fs5', 5)" class="i">MyException</span>
+<span class="k">exception</span> <span onmouseout="hideTip(event, 'fs5', 5)" onmouseover="showTip(event, 'fs5', 5)" class="t">MyException</span>
 
-<span class="k">let</span> <span onmouseout="hideTip(event, 'fs6', 6)" onmouseover="showTip(event, 'fs6', 6)" class="i">``exception test``</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs3', 7)" onmouseover="showTip(event, 'fs3', 7)" class="i">test</span> <span class="s">&quot;</span><span class="s">exn</span><span class="s"> </span><span class="s">test</span><span class="s">&quot;</span> {
-  <span class="k">let</span> <span onmouseout="hideTip(event, 'fs7', 8)" onmouseover="showTip(event, 'fs7', 8)" class="i">f</span> () <span class="o">=</span>
-    <span onmouseout="hideTip(event, 'fs8', 9)" onmouseover="showTip(event, 'fs8', 9)" class="i">raise</span> <span onmouseout="hideTip(event, 'fs5', 10)" onmouseover="showTip(event, 'fs5', 10)" class="i">MyException</span>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs6', 6)" onmouseover="showTip(event, 'fs6', 6)" class="i">``exception test``</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs3', 7)" onmouseover="showTip(event, 'fs3', 7)" class="f">test</span> <span class="s">&quot;exn test&quot;</span> {
+  <span class="k">let</span> <span onmouseout="hideTip(event, 'fs7', 8)" onmouseover="showTip(event, 'fs7', 8)" class="f">f</span> () <span class="o">=</span>
+    <span onmouseout="hideTip(event, 'fs8', 9)" onmouseover="showTip(event, 'fs8', 9)" class="f">raise</span> <span onmouseout="hideTip(event, 'fs5', 10)" onmouseover="showTip(event, 'fs5', 10)" class="t">MyException</span>
     <span class="n">42</span>
-  <span class="k">let!</span> <span onmouseout="hideTip(event, 'fs9', 11)" onmouseover="showTip(event, 'fs9', 11)" class="i">e</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs10', 12)" onmouseover="showTip(event, 'fs10', 12)" class="i">trap</span> { <span onmouseout="hideTip(event, 'fs11', 13)" onmouseover="showTip(event, 'fs11', 13)" class="k">it</span> (<span onmouseout="hideTip(event, 'fs7', 14)" onmouseover="showTip(event, 'fs7', 14)" class="i">f</span> ()) }
-  <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs4', 15)" onmouseover="showTip(event, 'fs4', 15)" class="i">assertEquals</span> <span class="s">&quot;</span><span class="s">&quot;</span> <span onmouseout="hideTip(event, 'fs9', 16)" onmouseover="showTip(event, 'fs9', 16)" class="i">e</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs12', 17)" onmouseover="showTip(event, 'fs12', 17)" class="i">Message</span>
-  <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs4', 18)" onmouseover="showTip(event, 'fs4', 18)" class="i">assertEquals</span> <span onmouseout="hideTip(event, 'fs13', 19)" onmouseover="showTip(event, 'fs13', 19)" class="i">typeof</span><span class="o">&lt;</span><span onmouseout="hideTip(event, 'fs5', 20)" onmouseover="showTip(event, 'fs5', 20)" class="i">MyException</span><span class="o">&gt;</span> (<span onmouseout="hideTip(event, 'fs9', 21)" onmouseover="showTip(event, 'fs9', 21)" class="i">e</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs14', 22)" onmouseover="showTip(event, 'fs14', 22)" class="i">GetType</span>())
-  <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs4', 23)" onmouseover="showTip(event, 'fs4', 23)" class="i">assertEquals</span> <span class="s">&quot;</span><span class="s">&quot;</span> (<span onmouseout="hideTip(event, 'fs9', 24)" onmouseover="showTip(event, 'fs9', 24)" class="i">e</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs15', 25)" onmouseover="showTip(event, 'fs15', 25)" class="i">StackTrace</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs16', 26)" onmouseover="showTip(event, 'fs16', 26)" class="i">Substring</span>(<span class="n">0</span>, <span class="n">5</span>))
-}</pre>
+  <span class="k">let!</span> <span onmouseout="hideTip(event, 'fs9', 11)" onmouseover="showTip(event, 'fs9', 11)" class="i">e</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs10', 12)" onmouseover="showTip(event, 'fs10', 12)" class="i">trap</span> { <span onmouseout="hideTip(event, 'fs11', 13)" onmouseover="showTip(event, 'fs11', 13)" class="k">it</span> (<span onmouseout="hideTip(event, 'fs7', 14)" onmouseover="showTip(event, 'fs7', 14)" class="f">f</span> ()) }
+  <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs4', 15)" onmouseover="showTip(event, 'fs4', 15)" class="f">assertEquals</span> <span class="s">&quot;&quot;</span> <span onmouseout="hideTip(event, 'fs9', 16)" onmouseover="showTip(event, 'fs9', 16)" class="i">e</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs12', 17)" onmouseover="showTip(event, 'fs12', 17)" class="i">Message</span>
+  <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs4', 18)" onmouseover="showTip(event, 'fs4', 18)" class="f">assertEquals</span> <span onmouseout="hideTip(event, 'fs13', 19)" onmouseover="showTip(event, 'fs13', 19)" class="i">typeof</span><span class="o">&lt;</span><span onmouseout="hideTip(event, 'fs5', 20)" onmouseover="showTip(event, 'fs5', 20)" class="t">MyException</span><span class="o">&gt;</span> (<span onmouseout="hideTip(event, 'fs9', 21)" onmouseover="showTip(event, 'fs9', 21)" class="i">e</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs14', 22)" onmouseover="showTip(event, 'fs14', 22)" class="f">GetType</span>())
+  <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs4', 23)" onmouseover="showTip(event, 'fs4', 23)" class="f">assertEquals</span> <span class="s">&quot;&quot;</span> (<span onmouseout="hideTip(event, 'fs9', 24)" onmouseover="showTip(event, 'fs9', 24)" class="i">e</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs15', 25)" onmouseover="showTip(event, 'fs15', 25)" class="i">StackTrace</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs16', 26)" onmouseover="showTip(event, 'fs16', 26)" class="f">Substring</span>(<span class="n">0</span>, <span class="n">5</span>))
+}
+</pre>
 
 
 <h2>テストのパラメータ化</h2>
@@ -86,25 +90,26 @@
 
 <pre class="fssnip">
 <span class="k">let</span> <span onmouseout="hideTip(event, 'fs17', 27)" onmouseover="showTip(event, 'fs17', 27)" class="i">``case parameterize test``</span> <span class="o">=</span>
-  <span class="k">let</span> <span onmouseout="hideTip(event, 'fs18', 28)" onmouseover="showTip(event, 'fs18', 28)" class="i">parameterizeTest</span> (<span onmouseout="hideTip(event, 'fs19', 29)" onmouseover="showTip(event, 'fs19', 29)" class="i">x</span>, <span onmouseout="hideTip(event, 'fs20', 30)" onmouseover="showTip(event, 'fs20', 30)" class="i">y</span>) <span class="o">=</span> <span onmouseout="hideTip(event, 'fs3', 31)" onmouseover="showTip(event, 'fs3', 31)" class="i">test</span> <span class="s">&quot;</span><span class="s">case</span><span class="s"> </span><span class="s">parameterize</span><span class="s"> </span><span class="s">test</span><span class="s">&quot;</span> {
-    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs4', 32)" onmouseover="showTip(event, 'fs4', 32)" class="i">assertEquals</span> <span onmouseout="hideTip(event, 'fs19', 33)" onmouseover="showTip(event, 'fs19', 33)" class="i">x</span> <span onmouseout="hideTip(event, 'fs20', 34)" onmouseover="showTip(event, 'fs20', 34)" class="i">y</span>
+  <span class="k">let</span> <span onmouseout="hideTip(event, 'fs18', 28)" onmouseover="showTip(event, 'fs18', 28)" class="f">parameterizeTest</span> (<span onmouseout="hideTip(event, 'fs19', 29)" onmouseover="showTip(event, 'fs19', 29)" class="i">x</span>, <span onmouseout="hideTip(event, 'fs20', 30)" onmouseover="showTip(event, 'fs20', 30)" class="i">y</span>) <span class="o">=</span> <span onmouseout="hideTip(event, 'fs3', 31)" onmouseover="showTip(event, 'fs3', 31)" class="f">test</span> <span class="s">&quot;case parameterize test&quot;</span> {
+    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs4', 32)" onmouseover="showTip(event, 'fs4', 32)" class="f">assertEquals</span> <span onmouseout="hideTip(event, 'fs19', 33)" onmouseover="showTip(event, 'fs19', 33)" class="i">x</span> <span onmouseout="hideTip(event, 'fs20', 34)" onmouseover="showTip(event, 'fs20', 34)" class="i">y</span>
   }
   <span onmouseout="hideTip(event, 'fs21', 35)" onmouseover="showTip(event, 'fs21', 35)" class="i">parameterize</span> {
     <span onmouseout="hideTip(event, 'fs22', 36)" onmouseover="showTip(event, 'fs22', 36)" class="k">case</span> (<span class="n">1</span>, <span class="n">1</span>)
     <span onmouseout="hideTip(event, 'fs22', 37)" onmouseover="showTip(event, 'fs22', 37)" class="k">case</span> (<span class="n">1</span>, <span class="n">2</span>)
-    <span onmouseout="hideTip(event, 'fs23', 38)" onmouseover="showTip(event, 'fs23', 38)" class="k">run</span> <span onmouseout="hideTip(event, 'fs18', 39)" onmouseover="showTip(event, 'fs18', 39)" class="i">parameterizeTest</span>
+    <span onmouseout="hideTip(event, 'fs23', 38)" onmouseover="showTip(event, 'fs23', 38)" class="k">run</span> <span onmouseout="hideTip(event, 'fs18', 39)" onmouseover="showTip(event, 'fs18', 39)" class="f">parameterizeTest</span>
   }
 
 <span class="k">let</span> <span onmouseout="hideTip(event, 'fs24', 40)" onmouseover="showTip(event, 'fs24', 40)" class="i">inputs</span> <span class="o">=</span> [ <span class="n">2</span> <span class="o">..</span> <span class="n">2</span> <span class="o">..</span> <span class="n">20</span> ]
 
 <span class="k">let</span> <span onmouseout="hideTip(event, 'fs25', 41)" onmouseover="showTip(event, 'fs25', 41)" class="i">``source parameterize test``</span> <span class="o">=</span>
-  <span class="k">let</span> <span onmouseout="hideTip(event, 'fs26', 42)" onmouseover="showTip(event, 'fs26', 42)" class="i">parameterizeTest</span> <span onmouseout="hideTip(event, 'fs27', 43)" onmouseover="showTip(event, 'fs27', 43)" class="i">x</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs3', 44)" onmouseover="showTip(event, 'fs3', 44)" class="i">test</span> <span class="s">&quot;</span><span class="s">source</span><span class="s"> </span><span class="s">parameterize</span><span class="s"> </span><span class="s">test</span><span class="s">&quot;</span> {
-    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs4', 45)" onmouseover="showTip(event, 'fs4', 45)" class="i">assertEquals</span> <span class="n">0</span> (<span onmouseout="hideTip(event, 'fs27', 46)" onmouseover="showTip(event, 'fs27', 46)" class="i">x</span> <span class="o">%</span> <span class="n">2</span>)
+  <span class="k">let</span> <span onmouseout="hideTip(event, 'fs26', 42)" onmouseover="showTip(event, 'fs26', 42)" class="f">parameterizeTest</span> <span onmouseout="hideTip(event, 'fs27', 43)" onmouseover="showTip(event, 'fs27', 43)" class="i">x</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs3', 44)" onmouseover="showTip(event, 'fs3', 44)" class="f">test</span> <span class="s">&quot;source parameterize test&quot;</span> {
+    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs4', 45)" onmouseover="showTip(event, 'fs4', 45)" class="f">assertEquals</span> <span class="n">0</span> (<span onmouseout="hideTip(event, 'fs27', 46)" onmouseover="showTip(event, 'fs27', 46)" class="i">x</span> <span class="o">%</span> <span class="n">2</span>)
   }
   <span onmouseout="hideTip(event, 'fs21', 47)" onmouseover="showTip(event, 'fs21', 47)" class="i">parameterize</span> {
     <span onmouseout="hideTip(event, 'fs28', 48)" onmouseover="showTip(event, 'fs28', 48)" class="k">source</span> <span onmouseout="hideTip(event, 'fs24', 49)" onmouseover="showTip(event, 'fs24', 49)" class="i">inputs</span>
-    <span onmouseout="hideTip(event, 'fs23', 50)" onmouseover="showTip(event, 'fs23', 50)" class="k">run</span> <span onmouseout="hideTip(event, 'fs26', 51)" onmouseover="showTip(event, 'fs26', 51)" class="i">parameterizeTest</span>
-  }</pre>
+    <span onmouseout="hideTip(event, 'fs23', 50)" onmouseover="showTip(event, 'fs23', 50)" class="k">run</span> <span onmouseout="hideTip(event, 'fs26', 51)" onmouseover="showTip(event, 'fs26', 51)" class="f">parameterizeTest</span>
+  }
+</pre>
 
 
 <h2>テスト名の省略</h2>
@@ -112,7 +117,8 @@
 <p><code>UseTestNameByReflection</code> モジュールを open してください:</p>
 
 <pre class="fssnip">
-<span class="k">open</span> <span onmouseout="hideTip(event, 'fs29', 52)" onmouseover="showTip(event, 'fs29', 52)" class="i">UseTestNameByReflection</span></pre>
+<span class="k">open</span> <span onmouseout="hideTip(event, 'fs29', 52)" onmouseover="showTip(event, 'fs29', 52)" class="i">UseTestNameByReflection</span>
+</pre>
 
 
 </div>

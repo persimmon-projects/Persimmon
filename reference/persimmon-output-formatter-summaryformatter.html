@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>TestCaseType<'T> - Persimmon</title>
+    <title>SummaryFormatter - Persimmon</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="persimmon-projects">
@@ -30,56 +30,64 @@
 
 
 
-<h1>TestCaseType<'T></h1>
+<h1>SummaryFormatter</h1>
 <div class="xmldoc">
-<p>This DU represents the type of the test case.
-If the test has some return values, then the type of the test case is HasValueTest.
-If not, then it is NoValueTest.</p>
 </div>
-  <h3>Union Cases</h3>
+
+<!-- Render nested types and modules, if there are any -->
+  <h2>Nested types and modules</h2>
+  <div>
+      <table class="table table-bordered type-list">
+    <thead>
+      <tr><td>Type</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td class="type-name">
+            <a href="persimmon-output-formatter-summaryformatter-summary.html">Summary</a>
+          </td>
+          <td class="xmldoc"></td>
+        </tr>
+    </tbody>
+  </table>
+  <table class="table table-bordered module-list">
+    <thead>
+      <tr><td>Module</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td class="module-name">
+            <a href="persimmon-output-formatter-summaryformatter-summarymodule.html">Summary</a>
+          </td>
+          <td class="xmldoc"></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+  <h3>Functions and values</h3>
   <table class="table table-bordered member-list">
     <thead>
-      <tr><td>Union Case</td><td>Description</td></tr>
+      <tr><td>Function or value</td><td>Description</td></tr>
     </thead>
     <tbody>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '106', 106)" onmouseover="showTip(event, '106', 106)">
-            HasValueTest(TestCase&lt;&#39;T&gt;)
+          <code onmouseout="hideTip(event, '36', 36)" onmouseover="showTip(event, '36', 36)">
+            normal 
           </code>
-          <div class="tip" id="106">
-            <strong>Signature:</strong> TestCase&lt;&#39;T&gt;<br />
+          <div class="tip" id="36">
+            <strong>Signature:</strong> IFormatter&lt;seq&lt;ITestResult&gt;&gt;<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/Types.fs#L214-214" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon.Runner/Formatter.fs#L132-132" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          <p>The TestCase has some return values.
-It means that the TestCase is not TestCase<unit>.</p>
-
-        </td>
-      </tr>
-      <tr>
-        <td class="member-name">
-
-          <code onmouseout="hideTip(event, '107', 107)" onmouseover="showTip(event, '107', 107)">
-            NoValueTest(TestCase&lt;&#39;T&gt;)
-          </code>
-          <div class="tip" id="107">
-            <strong>Signature:</strong> TestCase&lt;&#39;T&gt;<br />
-                      </div>
-        </td>
-        <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/Types.fs#L211-211" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          <p>The TestCase does not have any return values.
-It means that the TestCase is TestCase<unit>.</p>
-
+          
         </td>
       </tr>
     </tbody>

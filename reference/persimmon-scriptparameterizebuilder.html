@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>TestCase<'T> - Persimmon</title>
+    <title>ScriptParameterizeBuilder - Persimmon</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="persimmon-projects">
@@ -30,10 +30,8 @@
 
 
 
-<h1>TestCase<'T></h1>
+<h1>ScriptParameterizeBuilder</h1>
 <div class="xmldoc">
-<p>This class represents a test that has not been run yet.
-In order to run the test represented this class, use the "Run" method.</p>
 </div>
   <h3>Constructors</h3>
   <table class="table table-bordered member-list">
@@ -44,33 +42,15 @@ In order to run the test represented this class, use the "Run" method.</p>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '99', 99)" onmouseover="showTip(event, '99', 99)">
-            new(name, parameters, body)
+          <code onmouseout="hideTip(event, '129', 129)" onmouseover="showTip(event, '129', 129)">
+            new()
           </code>
-          <div class="tip" id="99">
-            <strong>Signature:</strong> (name:string * parameters:obj list * body:(unit -&gt; TestResult&lt;&#39;T&gt;)) -&gt; TestCase&lt;&#39;T&gt;<br />
+          <div class="tip" id="129">
+            <strong>Signature:</strong> unit -&gt; ScriptParameterizeBuilder<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/Types.fs#L124-124" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          
-        </td>
-      </tr>
-      <tr>
-        <td class="member-name">
-
-          <code onmouseout="hideTip(event, '100', 100)" onmouseover="showTip(event, '100', 100)">
-            new(metadata, body)
-          </code>
-          <div class="tip" id="100">
-            <strong>Signature:</strong> (metadata:TestMetadata * body:(unit -&gt; TestResult&lt;&#39;T&gt;)) -&gt; TestCase&lt;&#39;T&gt;<br />
-                      </div>
-        </td>
-        <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/Types.fs#L121-121" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon.Script/Runner.fs#L15-15" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -88,97 +68,127 @@ In order to run the test represented this class, use the "Run" method.</p>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '101', 101)" onmouseover="showTip(event, '101', 101)">
-            BoxTypeParam()
+          <code onmouseout="hideTip(event, '130', 130)" onmouseover="showTip(event, '130', 130)">
+            Case(source, case)
           </code>
-          <div class="tip" id="101">
-            <strong>Signature:</strong> unit -&gt; TestCase&lt;obj&gt;<br />
-                      </div>
+          <div class="tip" id="130">
+            <strong>Signature:</strong> (source:seq&lt;&#39;?36003&gt; * case:&#39;?36003) -&gt; seq&lt;&#39;?36003&gt;<br />
+                          <strong>Type parameters:</strong> '?36003          </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/Types.fs#L180-180" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon.Script/Runner.fs#L21-21" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          <p>Convert TestCase<'T> to TestCase<obj>.</p>
-
+          
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '102', 102)" onmouseover="showTip(event, '102', 102)">
-            FullName
+          <code onmouseout="hideTip(event, '131', 131)" onmouseover="showTip(event, '131', 131)">
+            Delay(f)
           </code>
-          <div class="tip" id="102">
-            <strong>Signature:</strong> string<br />
-                      </div>
+          <div class="tip" id="131">
+            <strong>Signature:</strong> (f:(unit -&gt; &#39;?35995)) -&gt; unit -&gt; &#39;?35995<br />
+                          <strong>Type parameters:</strong> '?35995          </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/Types.fs#L134-134" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon.Script/Runner.fs#L16-16" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          <p>The test name(if the test has parameters then the value contains them).</p>
-
+          
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '103', 103)" onmouseover="showTip(event, '103', 103)">
-            Name
+          <code onmouseout="hideTip(event, '132', 132)" onmouseover="showTip(event, '132', 132)">
+            Run(f)
           </code>
-          <div class="tip" id="103">
-            <strong>Signature:</strong> string<br />
-                      </div>
+          <div class="tip" id="132">
+            <strong>Signature:</strong> (f:(unit -&gt; &#39;?35997)) -&gt; &#39;?35997<br />
+                          <strong>Type parameters:</strong> '?35997          </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/Types.fs#L132-132" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon.Script/Runner.fs#L17-17" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          <p>The test name. It doesn't contain the parameters.</p>
-
+          
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '104', 104)" onmouseover="showTip(event, '104', 104)">
-            Parameters
+          <code onmouseout="hideTip(event, '133', 133)" onmouseover="showTip(event, '133', 133)">
+            RunTests(source, f)
           </code>
-          <div class="tip" id="104">
-            <strong>Signature:</strong> obj list<br />
-                      </div>
+          <div class="tip" id="133">
+            <strong>Signature:</strong> (source:seq&lt;&#39;?36007&gt; * f:(&#39;?36007 -&gt; TestCase&lt;&#39;T&gt;)) -&gt; TestCase&lt;obj&gt; list<br />
+                          <strong>Type parameters:</strong> '?36007, 'T          </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/Types.fs#L137-137" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon.Script/Runner.fs#L25-25" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          <p>The test parameters.
-If the test has no parameters then the value is empty list.</p>
-
+          
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '105', 105)" onmouseover="showTip(event, '105', 105)">
-            Run()
+          <code onmouseout="hideTip(event, '134', 134)" onmouseover="showTip(event, '134', 134)">
+            Source(source1, source2)
           </code>
-          <div class="tip" id="105">
-            <strong>Signature:</strong> unit -&gt; TestResult&lt;&#39;T&gt;<br />
-                      </div>
+          <div class="tip" id="134">
+            <strong>Signature:</strong> (source1:seq&lt;&#39;?36005&gt; * source2:seq&lt;&#39;?36005&gt;) -&gt; seq&lt;&#39;?36005&gt;<br />
+                          <strong>Type parameters:</strong> '?36005          </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/Types.fs#L139-139" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon.Script/Runner.fs#L23-23" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          <p>Execute the test.</p>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
 
+          <code onmouseout="hideTip(event, '135', 135)" onmouseover="showTip(event, '135', 135)">
+            Yield(xs)
+          </code>
+          <div class="tip" id="135">
+            <strong>Signature:</strong> xs:seq&lt;&#39;?36001&gt; -&gt; seq&lt;seq&lt;&#39;?36001&gt;&gt;<br />
+                          <strong>Type parameters:</strong> '?36001          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon.Script/Runner.fs#L19-19" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '136', 136)" onmouseover="showTip(event, '136', 136)">
+            Yield()
+          </code>
+          <div class="tip" id="136">
+            <strong>Signature:</strong> unit -&gt; seq&lt;&#39;?35999&gt;<br />
+                          <strong>Type parameters:</strong> '?35999          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon.Script/Runner.fs#L18-18" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
         </td>
       </tr>
     </tbody>

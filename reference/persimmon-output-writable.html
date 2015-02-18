@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>TestCase<'T> - Persimmon</title>
+    <title>Writable - Persimmon</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="persimmon-projects">
@@ -30,154 +30,130 @@
 
 
 
-<h1>TestCase<'T></h1>
+<h1>Writable</h1>
 <div class="xmldoc">
-<p>This class represents a test that has not been run yet.
-In order to run the test represented this class, use the "Run" method.</p>
+<p>Some implementations of the IWritable.</p>
 </div>
-  <h3>Constructors</h3>
+
+<!-- Render nested types and modules, if there are any -->
+
+  <h3>Functions and values</h3>
   <table class="table table-bordered member-list">
     <thead>
-      <tr><td>Constructor</td><td>Description</td></tr>
+      <tr><td>Function or value</td><td>Description</td></tr>
     </thead>
     <tbody>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '99', 99)" onmouseover="showTip(event, '99', 99)">
-            new(name, parameters, body)
+          <code onmouseout="hideTip(event, '41', 41)" onmouseover="showTip(event, '41', 41)">
+            char ch
           </code>
-          <div class="tip" id="99">
-            <strong>Signature:</strong> (name:string * parameters:obj list * body:(unit -&gt; TestResult&lt;&#39;T&gt;)) -&gt; TestCase&lt;&#39;T&gt;<br />
+          <div class="tip" id="41">
+            <strong>Signature:</strong> ch:char -&gt; IWritable<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/Types.fs#L124-124" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon.Runner/Writable.fs#L17-17" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
-        </td>
-      </tr>
-      <tr>
-        <td class="member-name">
-
-          <code onmouseout="hideTip(event, '100', 100)" onmouseover="showTip(event, '100', 100)">
-            new(metadata, body)
-          </code>
-          <div class="tip" id="100">
-            <strong>Signature:</strong> (metadata:TestMetadata * body:(unit -&gt; TestResult&lt;&#39;T&gt;)) -&gt; TestCase&lt;&#39;T&gt;<br />
-                      </div>
-        </td>
-        <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/Types.fs#L121-121" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <h3>Instance members</h3>
-  <table class="table table-bordered member-list">
-    <thead>
-      <tr><td>Instance member</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="member-name">
-
-          <code onmouseout="hideTip(event, '101', 101)" onmouseover="showTip(event, '101', 101)">
-            BoxTypeParam()
-          </code>
-          <div class="tip" id="101">
-            <strong>Signature:</strong> unit -&gt; TestCase&lt;obj&gt;<br />
-                      </div>
-        </td>
-        <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/Types.fs#L180-180" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          <p>Convert TestCase<'T> to TestCase<obj>.</p>
+          <p>Create IWritable that writes one character to TextWriter.</p>
 
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '102', 102)" onmouseover="showTip(event, '102', 102)">
-            FullName
+          <code onmouseout="hideTip(event, '42', 42)" onmouseover="showTip(event, '42', 42)">
+            doNothing 
           </code>
-          <div class="tip" id="102">
-            <strong>Signature:</strong> string<br />
+          <div class="tip" id="42">
+            <strong>Signature:</strong> IWritable<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/Types.fs#L134-134" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon.Runner/Writable.fs#L13-13" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          <p>The test name(if the test has parameters then the value contains them).</p>
+          <p>This does not write anything to TextWriter.</p>
 
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '103', 103)" onmouseover="showTip(event, '103', 103)">
-            Name
+          <code onmouseout="hideTip(event, '43', 43)" onmouseover="showTip(event, '43', 43)">
+            group writables
           </code>
-          <div class="tip" id="103">
-            <strong>Signature:</strong> string<br />
+          <div class="tip" id="43">
+            <strong>Signature:</strong> writables:seq&lt;IWritable&gt; -&gt; IWritable<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/Types.fs#L132-132" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon.Runner/Writable.fs#L45-45" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          <p>The test name. It doesn't contain the parameters.</p>
+          <p>Create IWritable that is a grouping of multiple IWritable.</p>
 
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '104', 104)" onmouseover="showTip(event, '104', 104)">
-            Parameters
+          <code onmouseout="hideTip(event, '44', 44)" onmouseover="showTip(event, '44', 44)">
+            newline 
           </code>
-          <div class="tip" id="104">
-            <strong>Signature:</strong> obj list<br />
+          <div class="tip" id="44">
+            <strong>Signature:</strong> IWritable<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/Types.fs#L137-137" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon.Runner/Writable.fs#L24-24" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          <p>The test parameters.
-If the test has no parameters then the value is empty list.</p>
+          <p>Create IWritable that writes newline to TextWriter.</p>
 
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '105', 105)" onmouseover="showTip(event, '105', 105)">
-            Run()
+          <code onmouseout="hideTip(event, '45', 45)" onmouseover="showTip(event, '45', 45)">
+            stringSeq strs
           </code>
-          <div class="tip" id="105">
-            <strong>Signature:</strong> unit -&gt; TestResult&lt;&#39;T&gt;<br />
+          <div class="tip" id="45">
+            <strong>Signature:</strong> strs:seq&lt;string&gt; -&gt; IWritable<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/Types.fs#L139-139" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon.Runner/Writable.fs#L31-31" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          <p>Execute the test.</p>
+          <p>Create IWritable that writes lines to TextWriter.</p>
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '46', 46)" onmouseover="showTip(event, '46', 46)">
+            xdocument xdoc
+          </code>
+          <div class="tip" id="46">
+            <strong>Signature:</strong> xdoc:XDocument -&gt; IWritable<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon.Runner/Writable.fs#L38-38" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Create IWritable that writes xml to TextWriter.</p>
 
         </td>
       </tr>

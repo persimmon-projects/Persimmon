@@ -45,19 +45,20 @@
 <p>By using Computation Expressions, we can write the tests more concisely, flexibly, and safely than the other existing testing frameworks for F#.</p>
 
 <pre class="fssnip">
-<span class="k">let</span> <span onmouseout="hideTip(event, 'fs5', 6)" onmouseover="showTip(event, 'fs5', 6)" class="i">f</span> <span onmouseout="hideTip(event, 'fs6', 7)" onmouseover="showTip(event, 'fs6', 7)" class="i">n</span> <span class="o">=</span>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs5', 6)" onmouseover="showTip(event, 'fs5', 6)" class="f">f</span> <span onmouseout="hideTip(event, 'fs6', 7)" onmouseover="showTip(event, 'fs6', 7)" class="i">n</span> <span class="o">=</span>
   <span class="k">if</span> <span onmouseout="hideTip(event, 'fs6', 8)" onmouseover="showTip(event, 'fs6', 8)" class="i">n</span> <span class="o">&gt;</span> <span class="n">0</span> <span class="k">then</span> <span onmouseout="hideTip(event, 'fs6', 9)" onmouseover="showTip(event, 'fs6', 9)" class="i">n</span> <span class="o">*</span> <span class="n">2</span>
-  <span class="k">else</span> <span onmouseout="hideTip(event, 'fs7', 10)" onmouseover="showTip(event, 'fs7', 10)" class="i">failwith</span> <span class="s">&quot;</span><span class="s">oops</span><span class="s">!</span><span class="s">&quot;</span>
+  <span class="k">else</span> <span onmouseout="hideTip(event, 'fs7', 10)" onmouseover="showTip(event, 'fs7', 10)" class="f">failwith</span> <span class="s">&quot;oops!&quot;</span>
 
 <span class="k">let</span> <span onmouseout="hideTip(event, 'fs8', 11)" onmouseover="showTip(event, 'fs8', 11)" class="i">tests</span> <span class="o">=</span> [
-  <span onmouseout="hideTip(event, 'fs9', 12)" onmouseover="showTip(event, 'fs9', 12)" class="i">test</span> <span class="s">&quot;</span><span class="s">(</span><span class="s">f</span><span class="s"> </span><span class="s">21</span><span class="s">)</span><span class="s"> </span><span class="s">should</span><span class="s"> </span><span class="s">be</span><span class="s"> </span><span class="s">equal</span><span class="s"> </span><span class="s">to</span><span class="s"> </span><span class="s">42</span><span class="s">&quot;</span> {
-    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs10', 13)" onmouseover="showTip(event, 'fs10', 13)" class="i">assertEquals</span> <span class="n">42</span> (<span onmouseout="hideTip(event, 'fs5', 14)" onmouseover="showTip(event, 'fs5', 14)" class="i">f</span> <span class="n">21</span>)
+  <span onmouseout="hideTip(event, 'fs9', 12)" onmouseover="showTip(event, 'fs9', 12)" class="f">test</span> <span class="s">&quot;(f 21) should be equal to 42&quot;</span> {
+    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs10', 13)" onmouseover="showTip(event, 'fs10', 13)" class="f">assertEquals</span> <span class="n">42</span> (<span onmouseout="hideTip(event, 'fs5', 14)" onmouseover="showTip(event, 'fs5', 14)" class="f">f</span> <span class="n">21</span>)
   }
-  <span onmouseout="hideTip(event, 'fs9', 15)" onmouseover="showTip(event, 'fs9', 15)" class="i">test</span> <span class="s">&quot;</span><span class="s">(</span><span class="s">f</span><span class="s"> </span><span class="s">0</span><span class="s">)</span><span class="s"> </span><span class="s">should</span><span class="s"> </span><span class="s">raise</span><span class="s"> </span><span class="s">exn</span><span class="s">&quot;</span> {
-    <span class="k">let!</span> <span onmouseout="hideTip(event, 'fs11', 16)" onmouseover="showTip(event, 'fs11', 16)" class="i">e</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs12', 17)" onmouseover="showTip(event, 'fs12', 17)" class="i">trap</span> { <span onmouseout="hideTip(event, 'fs13', 18)" onmouseover="showTip(event, 'fs13', 18)" class="k">it</span> (<span onmouseout="hideTip(event, 'fs5', 19)" onmouseover="showTip(event, 'fs5', 19)" class="i">f</span> <span class="n">0</span>) }
-    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs10', 20)" onmouseover="showTip(event, 'fs10', 20)" class="i">assertEquals</span> (<span onmouseout="hideTip(event, 'fs14', 21)" onmouseover="showTip(event, 'fs14', 21)" class="i">typeof</span><span class="o">&lt;</span><span onmouseout="hideTip(event, 'fs15', 22)" onmouseover="showTip(event, 'fs15', 22)" class="i">exn</span><span class="o">&gt;</span>) (<span onmouseout="hideTip(event, 'fs11', 23)" onmouseover="showTip(event, 'fs11', 23)" class="i">e</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs16', 24)" onmouseover="showTip(event, 'fs16', 24)" class="i">GetType</span>())
+  <span onmouseout="hideTip(event, 'fs9', 15)" onmouseover="showTip(event, 'fs9', 15)" class="f">test</span> <span class="s">&quot;(f 0) should raise exn&quot;</span> {
+    <span class="k">let!</span> <span onmouseout="hideTip(event, 'fs11', 16)" onmouseover="showTip(event, 'fs11', 16)" class="i">e</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs12', 17)" onmouseover="showTip(event, 'fs12', 17)" class="i">trap</span> { <span onmouseout="hideTip(event, 'fs13', 18)" onmouseover="showTip(event, 'fs13', 18)" class="k">it</span> (<span onmouseout="hideTip(event, 'fs5', 19)" onmouseover="showTip(event, 'fs5', 19)" class="f">f</span> <span class="n">0</span>) }
+    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs10', 20)" onmouseover="showTip(event, 'fs10', 20)" class="f">assertEquals</span> (<span onmouseout="hideTip(event, 'fs14', 21)" onmouseover="showTip(event, 'fs14', 21)" class="i">typeof</span><span class="o">&lt;</span><span onmouseout="hideTip(event, 'fs15', 22)" onmouseover="showTip(event, 'fs15', 22)" class="t">exn</span><span class="o">&gt;</span>) (<span onmouseout="hideTip(event, 'fs11', 23)" onmouseover="showTip(event, 'fs11', 23)" class="i">e</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs16', 24)" onmouseover="showTip(event, 'fs16', 24)" class="f">GetType</span>())
   }
-]</pre>
+]
+</pre>
 
 
 <h2>Mark a test</h2>
@@ -74,23 +75,24 @@ However, Persimmon doesn't use them to mark the tests.</p>
 <p>Its can accept several tests and return a new test.</p>
 
 <pre class="fssnip">
-<span class="k">let</span> <span onmouseout="hideTip(event, 'fs17', 25)" onmouseover="showTip(event, 'fs17', 25)" class="i">getSomeData</span> <span onmouseout="hideTip(event, 'fs18', 26)" onmouseover="showTip(event, 'fs18', 26)" class="i">x</span> <span onmouseout="hideTip(event, 'fs19', 27)" onmouseover="showTip(event, 'fs19', 27)" class="i">y</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs9', 28)" onmouseover="showTip(event, 'fs9', 28)" class="i">test</span> <span class="s">&quot;</span><span class="s">&quot;</span> {
-  <span class="k">let</span> <span onmouseout="hideTip(event, 'fs20', 29)" onmouseover="showTip(event, 'fs20', 29)" class="i">provider</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs4', 30)" onmouseover="showTip(event, 'fs4', 30)" class="i">getProvider</span> <span onmouseout="hideTip(event, 'fs18', 31)" onmouseover="showTip(event, 'fs18', 31)" class="i">x</span>
-  <span class="k">let</span> <span onmouseout="hideTip(event, 'fs21', 32)" onmouseover="showTip(event, 'fs21', 32)" class="i">res</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs20', 33)" onmouseover="showTip(event, 'fs20', 33)" class="i">provider</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs22', 34)" onmouseover="showTip(event, 'fs22', 34)" class="i">getSomeData</span> <span onmouseout="hideTip(event, 'fs19', 35)" onmouseover="showTip(event, 'fs19', 35)" class="i">y</span>
-  <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs23', 36)" onmouseover="showTip(event, 'fs23', 36)" class="i">assertNotEquals</span> <span class="s">&quot;</span><span class="s">&quot;</span> <span onmouseout="hideTip(event, 'fs21', 37)" onmouseover="showTip(event, 'fs21', 37)" class="i">res</span>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs17', 25)" onmouseover="showTip(event, 'fs17', 25)" class="f">getSomeData</span> <span onmouseout="hideTip(event, 'fs18', 26)" onmouseover="showTip(event, 'fs18', 26)" class="i">x</span> <span onmouseout="hideTip(event, 'fs19', 27)" onmouseover="showTip(event, 'fs19', 27)" class="i">y</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs9', 28)" onmouseover="showTip(event, 'fs9', 28)" class="f">test</span> <span class="s">&quot;&quot;</span> {
+  <span class="k">let</span> <span onmouseout="hideTip(event, 'fs20', 29)" onmouseover="showTip(event, 'fs20', 29)" class="i">provider</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs4', 30)" onmouseover="showTip(event, 'fs4', 30)" class="f">getProvider</span> <span onmouseout="hideTip(event, 'fs18', 31)" onmouseover="showTip(event, 'fs18', 31)" class="i">x</span>
+  <span class="k">let</span> <span onmouseout="hideTip(event, 'fs21', 32)" onmouseover="showTip(event, 'fs21', 32)" class="i">res</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs20', 33)" onmouseover="showTip(event, 'fs20', 33)" class="i">provider</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs22', 34)" onmouseover="showTip(event, 'fs22', 34)" class="f">getSomeData</span> <span onmouseout="hideTip(event, 'fs19', 35)" onmouseover="showTip(event, 'fs19', 35)" class="i">y</span>
+  <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs23', 36)" onmouseover="showTip(event, 'fs23', 36)" class="f">assertNotEquals</span> <span class="s">&quot;&quot;</span> <span onmouseout="hideTip(event, 'fs21', 37)" onmouseover="showTip(event, 'fs21', 37)" class="i">res</span>
   <span class="k">return</span> <span onmouseout="hideTip(event, 'fs21', 38)" onmouseover="showTip(event, 'fs21', 38)" class="i">res</span>
 }
 
 <span class="k">let</span> <span onmouseout="hideTip(event, 'fs24', 39)" onmouseover="showTip(event, 'fs24', 39)" class="i">composedTests</span> <span class="o">=</span> [
-  <span onmouseout="hideTip(event, 'fs9', 40)" onmouseover="showTip(event, 'fs9', 40)" class="i">test</span> <span class="s">&quot;</span><span class="s">test1</span><span class="s">&quot;</span> {
-    <span class="k">let!</span> <span onmouseout="hideTip(event, 'fs25', 41)" onmouseover="showTip(event, 'fs25', 41)" class="i">data</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs17', 42)" onmouseover="showTip(event, 'fs17', 42)" class="i">getSomeData</span> [(<span class="n">10</span>, <span class="s">&quot;</span><span class="s">ten</span><span class="s">&quot;</span>); (<span class="n">3</span>, <span class="s">&quot;</span><span class="s">three</span><span class="s">&quot;</span>)] <span class="n">3</span>
-    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs10', 43)" onmouseover="showTip(event, 'fs10', 43)" class="i">assertEquals</span> <span class="s">&quot;</span><span class="s">three</span><span class="s">&quot;</span> <span onmouseout="hideTip(event, 'fs25', 44)" onmouseover="showTip(event, 'fs25', 44)" class="i">data</span>
+  <span onmouseout="hideTip(event, 'fs9', 40)" onmouseover="showTip(event, 'fs9', 40)" class="f">test</span> <span class="s">&quot;test1&quot;</span> {
+    <span class="k">let!</span> <span onmouseout="hideTip(event, 'fs25', 41)" onmouseover="showTip(event, 'fs25', 41)" class="i">data</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs17', 42)" onmouseover="showTip(event, 'fs17', 42)" class="f">getSomeData</span> [(<span class="n">10</span>, <span class="s">&quot;ten&quot;</span>); (<span class="n">3</span>, <span class="s">&quot;three&quot;</span>)] <span class="n">3</span>
+    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs10', 43)" onmouseover="showTip(event, 'fs10', 43)" class="f">assertEquals</span> <span class="s">&quot;three&quot;</span> <span onmouseout="hideTip(event, 'fs25', 44)" onmouseover="showTip(event, 'fs25', 44)" class="i">data</span>
   }
-  <span onmouseout="hideTip(event, 'fs9', 45)" onmouseover="showTip(event, 'fs9', 45)" class="i">test</span> <span class="s">&quot;</span><span class="s">test2</span><span class="s">&quot;</span> {
-    <span class="k">let!</span> <span onmouseout="hideTip(event, 'fs25', 46)" onmouseover="showTip(event, 'fs25', 46)" class="i">data</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs17', 47)" onmouseover="showTip(event, 'fs17', 47)" class="i">getSomeData</span> [(<span class="n">10</span>, <span class="s">&quot;</span><span class="s">ten</span><span class="s">&quot;</span>); (<span class="n">3</span>, <span class="s">&quot;</span><span class="s">three</span><span class="s">&quot;</span>)] <span class="n">10</span>
-    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs10', 48)" onmouseover="showTip(event, 'fs10', 48)" class="i">assertEquals</span> <span class="s">&quot;</span><span class="s">ten</span><span class="s">&quot;</span> <span onmouseout="hideTip(event, 'fs25', 49)" onmouseover="showTip(event, 'fs25', 49)" class="i">data</span>
+  <span onmouseout="hideTip(event, 'fs9', 45)" onmouseover="showTip(event, 'fs9', 45)" class="f">test</span> <span class="s">&quot;test2&quot;</span> {
+    <span class="k">let!</span> <span onmouseout="hideTip(event, 'fs25', 46)" onmouseover="showTip(event, 'fs25', 46)" class="i">data</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs17', 47)" onmouseover="showTip(event, 'fs17', 47)" class="f">getSomeData</span> [(<span class="n">10</span>, <span class="s">&quot;ten&quot;</span>); (<span class="n">3</span>, <span class="s">&quot;three&quot;</span>)] <span class="n">10</span>
+    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs10', 48)" onmouseover="showTip(event, 'fs10', 48)" class="f">assertEquals</span> <span class="s">&quot;ten&quot;</span> <span onmouseout="hideTip(event, 'fs25', 49)" onmouseover="showTip(event, 'fs25', 49)" class="i">data</span>
   }
-]</pre>
+]
+</pre>
 
 
 <h2>Continuable assertion</h2>
@@ -102,12 +104,13 @@ This behaviour bring the advantage that a test doesn't sacrifice the amount of i
 <pre class="fssnip">
 <span class="c">// This test report two assertion violation.</span>
 <span class="k">let</span> <span onmouseout="hideTip(event, 'fs26', 50)" onmouseover="showTip(event, 'fs26', 50)" class="i">``some assertions test``</span> <span class="o">=</span> [
-  <span onmouseout="hideTip(event, 'fs9', 51)" onmouseover="showTip(event, 'fs9', 51)" class="i">test</span> <span class="s">&quot;</span><span class="s">test1</span><span class="s">&quot;</span> {
-    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs10', 52)" onmouseover="showTip(event, 'fs10', 52)" class="i">assertEquals</span> <span class="n">1</span> <span class="n">2</span> <span class="c">// execute and violate</span>
-    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs10', 53)" onmouseover="showTip(event, 'fs10', 53)" class="i">assertEquals</span> <span class="n">2</span> <span class="n">2</span> <span class="c">// continue to execute and pass</span>
-    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs10', 54)" onmouseover="showTip(event, 'fs10', 54)" class="i">assertEquals</span> <span class="n">3</span> <span class="n">4</span> <span class="c">// continue to execute and violate</span>
+  <span onmouseout="hideTip(event, 'fs9', 51)" onmouseover="showTip(event, 'fs9', 51)" class="f">test</span> <span class="s">&quot;test1&quot;</span> {
+    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs10', 52)" onmouseover="showTip(event, 'fs10', 52)" class="f">assertEquals</span> <span class="n">1</span> <span class="n">2</span> <span class="c">// execute and violate</span>
+    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs10', 53)" onmouseover="showTip(event, 'fs10', 53)" class="f">assertEquals</span> <span class="n">2</span> <span class="n">2</span> <span class="c">// continue to execute and pass</span>
+    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs10', 54)" onmouseover="showTip(event, 'fs10', 54)" class="f">assertEquals</span> <span class="n">3</span> <span class="n">4</span> <span class="c">// continue to execute and violate</span>
   }
-]</pre>
+]
+</pre>
 
 
 </div>
