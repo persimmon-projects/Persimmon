@@ -8,10 +8,9 @@ let info =
     "project-nuget", "https://www.nuget.org/packages/Persimmon/"]
 
 #I "../../packages/FSharp.Formatting/lib/net40"
-#I "../../packages/RazorEngine/lib/net40"
 #I "../../packages/FSharp.Compiler.Service/lib/net40"
-#r "../../packages/Microsoft.AspNet.Razor/lib/net40/System.Web.Razor.dll"
-#r "RazorEngine.dll"
+#I "../../packages/FSharpVSPowerTools.Core/lib/net45"
+#r "FSharpVSPowerTools.Core.dll"
 #r "FSharp.Compiler.Service.dll"
 #r "FSharp.Literate.dll"
 #r "FSharp.CodeFormat.dll"
