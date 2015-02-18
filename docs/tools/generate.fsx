@@ -1,4 +1,4 @@
-let referenceBinaries = [ "Persimmon.dll" ]
+let referenceBinaries = [ "Persimmon.dll"; "Persimmon.Runner.dll" ]
 let website = "/Persimmon"
 let githubLink = "https://github.com/persimmon-projects/Persimmon"
 let info =
@@ -48,15 +48,19 @@ let layoutRoots = [
 let buildReference () =
   let outputDir = output @@ "reference"
   System.IO.Directory.CreateDirectory(outputDir) |> ignore
-  for lib in referenceBinaries do
-    MetadataFormat.Generate(
-      __SOURCE_DIRECTORY__ @@  "../.." @@ Path.GetFileNameWithoutExtension(lib) @@ "bin" @@ configuration @@ lib,
-      outputDir,
-      layoutRoots,
-      parameters = ("root", root)::info,
-      sourceRepo = githubLink @@ "tree/master",
-      sourceFolder = __SOURCE_DIRECTORY__ @@ ".." @@ "..",
-      publicOnly = true)
+  MetadataFormat.Generate(
+    referenceBinaries |> List.map (fun lib -> __SOURCE_DIRECTORY__ @@  "../.." @@ Path.GetFileNameWithoutExtension(lib) @@ "bin" @@ configuration @@ lib),
+    outputDir,
+    layoutRoots,
+    otherFlags = [
+      "-r:System"
+      "-r:System.Core"
+      "-r:System.Linq"
+    ],
+    parameters = ("root", root)::info,
+    sourceRepo = githubLink @@ "tree/master",
+    sourceFolder = __SOURCE_DIRECTORY__ @@ ".." @@ "..",
+    publicOnly = true)
 
 let buildDocumentation () =
   let subdirs = Directory.EnumerateDirectories(content, "*", SearchOption.AllDirectories)
