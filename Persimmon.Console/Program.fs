@@ -39,7 +39,9 @@ let entryPoint (args: Args) =
     reporter.ReportError("xml format option require 'output' option.")
     -2
   elif notFounds |> List.isEmpty then
-    let asms = founds |> List.map (fun f -> Assembly.LoadFile(f.FullName))
+    let asms = founds |> List.map (fun f ->
+      let assemblyRef = AssemblyName.GetAssemblyName(f.FullName)
+      Assembly.Load(assemblyRef))
     // collect and run
     let tests = TestCollector.collectRootTestObjects asms
     let res = TestRunner.runAllTests reporter tests
