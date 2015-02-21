@@ -59,3 +59,18 @@ module PersimmonTest =
       do! test3 |> shouldNotPassed (NonEmptyList.singleton "Expect: \"x\"\nActual: \"other\"")
       do! test4 |> shouldNotPassed (NonEmptyList.singleton "Expect: \"x\"\nActual: \"other\"")
     }
+
+  let ``parameterize tests should be able to run`` =
+    let innerTests =
+      parameterize {
+        source [
+          (1, 1)
+          (1, 2)
+        ] into (x, y)
+        run (test "source parameterize test" {
+          do! assertEquals x y
+        })
+      }
+    test "parameterize tests should be able to run" {
+      do! innerTests |> shouldEqualErrorCount 1
+    }

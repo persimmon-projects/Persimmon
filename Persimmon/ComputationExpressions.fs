@@ -59,16 +59,17 @@ type ParameterizeBuilder() =
   member __.Yield(()) = Seq.empty
   member __.Yield(x) = Seq.singleton x
   member __.YieldFrom(xs: _ seq) = xs
-  [<CustomOperation("case")>]
+  member __.For(source, body) = seq { for v in source do yield! body v }
+  [<CustomOperation("case",  AllowIntoPattern=true)>]
   member inline __.Case(source, case) = seq { yield! source; yield case }
-  [<CustomOperation("source")>]
+  [<CustomOperation("source",  AllowIntoPattern=true)>]
   member __.Source (source1, source2) = Seq.append source1 source2
   [<CustomOperation("run")>]
-  member __.RunTests(source: _ seq, f: _ -> TestCase<_>) =
+  member __.RunTests(source: _ seq, [<ProjectionParameter>]f: _ -> TestCase<_>) =
     source
     |> Seq.map (fun x ->
         let ret = f x
-        let metadata = { ret.Metadata with Parameters = x |> toList }
+        let metadata = { ret.Metadata with Parameters = x |> toList |> List.rev }
         TestCase<_>(metadata, ret.Run) :> TestObject)
 
 type TrapBuilder () =
