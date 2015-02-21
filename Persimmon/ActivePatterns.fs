@@ -1,8 +1,9 @@
 ﻿module Persimmon.ActivePatterns
 
-let (|Context|TestCase|) (test: TestObject) =
+let (|Context|TestCase|TestCaseWithBeforeOrAfter|) (test: TestObject) =
   match test with
   | :? Context as ctx -> Context ctx
+  | :? TestCaseWithBeforeOrAfter as tc -> TestCaseWithBeforeOrAfter tc.Body
   | tc -> TestCase (tc.GetType().GetMethod("BoxTypeParam").Invoke(tc, [||]) :?> TestCase<obj>)
 
 let (|ContextResult|TestResult|EndMarker|) (res: ITestResult) =

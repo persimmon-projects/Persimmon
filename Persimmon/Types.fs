@@ -308,3 +308,16 @@ module TestCase =
                 // the test is not continuable.
                 Error (meta, es, results, duration)
         )
+
+type TestCaseWithBeforeOrAfter internal (testCase: TestCase<obj>) =
+  inherit TestObject()
+  member internal __.Body = testCase
+  override __.SetNameIfNeed(newName: string) =
+    let tc = TestCase<obj>({ testCase.Metadata with Name = if testCase.Metadata.Name = "" then newName else testCase.Metadata.Name }, testCase.Run)
+    TestCaseWithBeforeOrAfter(tc) :> TestObject
+
+type Action =
+  | Empty
+  | Before of (unit -> unit)
+  | After of (unit -> unit)
+  | BeforeAfter of (unit -> unit) * (unit -> unit)
