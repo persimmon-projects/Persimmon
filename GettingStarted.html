@@ -90,24 +90,23 @@
 
 <pre class="fssnip">
 <span class="k">let</span> <span onmouseout="hideTip(event, 'fs17', 27)" onmouseover="showTip(event, 'fs17', 27)" class="i">``case parameterize test``</span> <span class="o">=</span>
-  <span class="k">let</span> <span onmouseout="hideTip(event, 'fs18', 28)" onmouseover="showTip(event, 'fs18', 28)" class="f">parameterizeTest</span> (<span onmouseout="hideTip(event, 'fs19', 29)" onmouseover="showTip(event, 'fs19', 29)" class="i">x</span>, <span onmouseout="hideTip(event, 'fs20', 30)" onmouseover="showTip(event, 'fs20', 30)" class="i">y</span>) <span class="o">=</span> <span onmouseout="hideTip(event, 'fs3', 31)" onmouseover="showTip(event, 'fs3', 31)" class="f">test</span> <span class="s">&quot;case parameterize test&quot;</span> {
-    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs4', 32)" onmouseover="showTip(event, 'fs4', 32)" class="f">assertEquals</span> <span onmouseout="hideTip(event, 'fs19', 33)" onmouseover="showTip(event, 'fs19', 33)" class="i">x</span> <span onmouseout="hideTip(event, 'fs20', 34)" onmouseover="showTip(event, 'fs20', 34)" class="i">y</span>
-  }
-  <span onmouseout="hideTip(event, 'fs21', 35)" onmouseover="showTip(event, 'fs21', 35)" class="i">parameterize</span> {
-    <span onmouseout="hideTip(event, 'fs22', 36)" onmouseover="showTip(event, 'fs22', 36)" class="k">case</span> (<span class="n">1</span>, <span class="n">1</span>)
-    <span onmouseout="hideTip(event, 'fs22', 37)" onmouseover="showTip(event, 'fs22', 37)" class="k">case</span> (<span class="n">1</span>, <span class="n">2</span>)
-    <span onmouseout="hideTip(event, 'fs23', 38)" onmouseover="showTip(event, 'fs23', 38)" class="k">run</span> <span onmouseout="hideTip(event, 'fs18', 39)" onmouseover="showTip(event, 'fs18', 39)" class="f">parameterizeTest</span>
+  <span onmouseout="hideTip(event, 'fs18', 28)" onmouseover="showTip(event, 'fs18', 28)" class="i">parameterize</span> {
+    <span onmouseout="hideTip(event, 'fs19', 29)" onmouseover="showTip(event, 'fs19', 29)" class="k">case</span> (<span class="n">1</span>, <span class="n">1</span>)
+    <span onmouseout="hideTip(event, 'fs19', 30)" onmouseover="showTip(event, 'fs19', 30)" class="k">case</span> (<span class="n">1</span>, <span class="n">2</span>) <span class="i">into</span> (<span onmouseout="hideTip(event, 'fs20', 31)" onmouseover="showTip(event, 'fs20', 31)" class="i">x</span>, <span onmouseout="hideTip(event, 'fs21', 32)" onmouseover="showTip(event, 'fs21', 32)" class="i">y</span>)
+    <span onmouseout="hideTip(event, 'fs22', 33)" onmouseover="showTip(event, 'fs22', 33)" class="k">run</span> (<span onmouseout="hideTip(event, 'fs3', 34)" onmouseover="showTip(event, 'fs3', 34)" class="f">test</span> <span class="s">&quot;case parameterize test&quot;</span> {
+      <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs4', 35)" onmouseover="showTip(event, 'fs4', 35)" class="f">assertEquals</span> <span onmouseout="hideTip(event, 'fs20', 36)" onmouseover="showTip(event, 'fs20', 36)" class="i">x</span> <span onmouseout="hideTip(event, 'fs21', 37)" onmouseover="showTip(event, 'fs21', 37)" class="i">y</span>
+    })
   }
 
-<span class="k">let</span> <span onmouseout="hideTip(event, 'fs24', 40)" onmouseover="showTip(event, 'fs24', 40)" class="i">inputs</span> <span class="o">=</span> [ <span class="n">2</span> <span class="o">..</span> <span class="n">2</span> <span class="o">..</span> <span class="n">20</span> ]
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs23', 38)" onmouseover="showTip(event, 'fs23', 38)" class="i">inputs</span> <span class="o">=</span> [ <span class="n">2</span> <span class="o">..</span> <span class="n">2</span> <span class="o">..</span> <span class="n">20</span> ]
 
-<span class="k">let</span> <span onmouseout="hideTip(event, 'fs25', 41)" onmouseover="showTip(event, 'fs25', 41)" class="i">``source parameterize test``</span> <span class="o">=</span>
-  <span class="k">let</span> <span onmouseout="hideTip(event, 'fs26', 42)" onmouseover="showTip(event, 'fs26', 42)" class="f">parameterizeTest</span> <span onmouseout="hideTip(event, 'fs27', 43)" onmouseover="showTip(event, 'fs27', 43)" class="i">x</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs3', 44)" onmouseover="showTip(event, 'fs3', 44)" class="f">test</span> <span class="s">&quot;source parameterize test&quot;</span> {
-    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs4', 45)" onmouseover="showTip(event, 'fs4', 45)" class="f">assertEquals</span> <span class="n">0</span> (<span onmouseout="hideTip(event, 'fs27', 46)" onmouseover="showTip(event, 'fs27', 46)" class="i">x</span> <span class="o">%</span> <span class="n">2</span>)
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs24', 39)" onmouseover="showTip(event, 'fs24', 39)" class="i">``source parameterize test``</span> <span class="o">=</span>
+  <span class="k">let</span> <span onmouseout="hideTip(event, 'fs25', 40)" onmouseover="showTip(event, 'fs25', 40)" class="f">parameterizeTest</span> <span onmouseout="hideTip(event, 'fs20', 41)" onmouseover="showTip(event, 'fs20', 41)" class="i">x</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs3', 42)" onmouseover="showTip(event, 'fs3', 42)" class="f">test</span> <span class="s">&quot;source parameterize test&quot;</span> {
+    <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs4', 43)" onmouseover="showTip(event, 'fs4', 43)" class="f">assertEquals</span> <span class="n">0</span> (<span onmouseout="hideTip(event, 'fs20', 44)" onmouseover="showTip(event, 'fs20', 44)" class="i">x</span> <span class="o">%</span> <span class="n">2</span>)
   }
-  <span onmouseout="hideTip(event, 'fs21', 47)" onmouseover="showTip(event, 'fs21', 47)" class="i">parameterize</span> {
-    <span onmouseout="hideTip(event, 'fs28', 48)" onmouseover="showTip(event, 'fs28', 48)" class="k">source</span> <span onmouseout="hideTip(event, 'fs24', 49)" onmouseover="showTip(event, 'fs24', 49)" class="i">inputs</span>
-    <span onmouseout="hideTip(event, 'fs23', 50)" onmouseover="showTip(event, 'fs23', 50)" class="k">run</span> <span onmouseout="hideTip(event, 'fs26', 51)" onmouseover="showTip(event, 'fs26', 51)" class="f">parameterizeTest</span>
+  <span onmouseout="hideTip(event, 'fs18', 45)" onmouseover="showTip(event, 'fs18', 45)" class="i">parameterize</span> {
+    <span onmouseout="hideTip(event, 'fs26', 46)" onmouseover="showTip(event, 'fs26', 46)" class="k">source</span> <span onmouseout="hideTip(event, 'fs23', 47)" onmouseover="showTip(event, 'fs23', 47)" class="i">inputs</span> <span class="i">into</span> <span onmouseout="hideTip(event, 'fs20', 48)" onmouseover="showTip(event, 'fs20', 48)" class="i">x</span>
+    <span onmouseout="hideTip(event, 'fs22', 49)" onmouseover="showTip(event, 'fs22', 49)" class="k">run</span> (<span onmouseout="hideTip(event, 'fs25', 50)" onmouseover="showTip(event, 'fs25', 50)" class="f">parameterizeTest</span> <span onmouseout="hideTip(event, 'fs20', 51)" onmouseover="showTip(event, 'fs20', 51)" class="i">x</span>)
   }
 </pre>
 
@@ -117,7 +116,7 @@
 <p>Open <code>UseTestNameByReflection</code> module:</p>
 
 <pre class="fssnip">
-<span class="k">open</span> <span onmouseout="hideTip(event, 'fs29', 52)" onmouseover="showTip(event, 'fs29', 52)" class="i">UseTestNameByReflection</span>
+<span class="k">open</span> <span onmouseout="hideTip(event, 'fs27', 52)" onmouseover="showTip(event, 'fs27', 52)" class="i">UseTestNameByReflection</span>
 </pre>
 
 
@@ -140,18 +139,16 @@
 <div class="tip" id="fs15">property System.Exception.StackTrace: string</div>
 <div class="tip" id="fs16">System.String.Substring(startIndex: int) : string<br />System.String.Substring(startIndex: int, length: int) : string</div>
 <div class="tip" id="fs17">val ( case parameterize test ) : seq&lt;TestObject&gt;<br /><br />Full name: GettingStarted.( case parameterize test )</div>
-<div class="tip" id="fs18">val parameterizeTest : (&#39;a * &#39;a -&gt; TestCase&lt;unit&gt;) (requires equality)</div>
-<div class="tip" id="fs19">val x : &#39;a (requires equality)</div>
-<div class="tip" id="fs20">val y : &#39;a (requires equality)</div>
-<div class="tip" id="fs21">val parameterize : ParameterizeBuilder<br /><br />Full name: Persimmon.Syntax.parameterize</div>
-<div class="tip" id="fs22">custom operation: case (&#39;a)<br /><br />Calls ParameterizeBuilder.Case </div>
-<div class="tip" id="fs23">custom operation: run (&#39;a -&gt; TestCase&lt;&#39;b&gt;)<br /><br />Calls ParameterizeBuilder.RunTests </div>
-<div class="tip" id="fs24">val inputs : int list<br /><br />Full name: GettingStarted.inputs</div>
-<div class="tip" id="fs25">val ( source parameterize test ) : seq&lt;TestObject&gt;<br /><br />Full name: GettingStarted.( source parameterize test )</div>
-<div class="tip" id="fs26">val parameterizeTest : (int -&gt; TestCase&lt;unit&gt;)</div>
-<div class="tip" id="fs27">val x : int</div>
-<div class="tip" id="fs28">custom operation: source (seq&lt;&#39;a&gt;)<br /><br />Calls ParameterizeBuilder.Source </div>
-<div class="tip" id="fs29">module UseTestNameByReflection<br /><br />from Persimmon.Syntax</div>
+<div class="tip" id="fs18">val parameterize : ParameterizeBuilder<br /><br />Full name: Persimmon.Syntax.parameterize</div>
+<div class="tip" id="fs19">custom operation: case (&#39;a)<br /><br />Calls ParameterizeBuilder.Case </div>
+<div class="tip" id="fs20">val x : int</div>
+<div class="tip" id="fs21">val y : int</div>
+<div class="tip" id="fs22">custom operation: run (TestCase&lt;&#39;a&gt;)<br /><br />Calls ParameterizeBuilder.RunTests </div>
+<div class="tip" id="fs23">val inputs : int list<br /><br />Full name: GettingStarted.inputs</div>
+<div class="tip" id="fs24">val ( source parameterize test ) : seq&lt;TestObject&gt;<br /><br />Full name: GettingStarted.( source parameterize test )</div>
+<div class="tip" id="fs25">val parameterizeTest : (int -&gt; TestCase&lt;unit&gt;)</div>
+<div class="tip" id="fs26">custom operation: source (seq&lt;&#39;a&gt;)<br /><br />Calls ParameterizeBuilder.Source </div>
+<div class="tip" id="fs27">module UseTestNameByReflection<br /><br />from Persimmon.Syntax</div>
 
         </div>
         <div class="col-sm-3 blog-sidebar" id="menu">

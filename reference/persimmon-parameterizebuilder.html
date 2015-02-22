@@ -72,11 +72,11 @@
             Case(source, case)
           </code>
           <div class="tip" id="81">
-            <strong>Signature:</strong> (source:seq&lt;&#39;?35534&gt; * case:&#39;?35534) -&gt; seq&lt;&#39;?35534&gt;<br />
-                          <strong>Type parameters:</strong> '?35534          </div>
+            <strong>Signature:</strong> (source:seq&lt;&#39;?35705&gt; * case:&#39;?35705) -&gt; seq&lt;&#39;?35705&gt;<br />
+                          <strong>Type parameters:</strong> '?35705          </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/ComputationExpressions.fs#L63-63" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/ComputationExpressions.fs#L64-64" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -90,8 +90,8 @@
             Delay(f)
           </code>
           <div class="tip" id="82">
-            <strong>Signature:</strong> (f:(unit -&gt; &#39;?35524)) -&gt; unit -&gt; &#39;?35524<br />
-                          <strong>Type parameters:</strong> '?35524          </div>
+            <strong>Signature:</strong> (f:(unit -&gt; &#39;?35691)) -&gt; unit -&gt; &#39;?35691<br />
+                          <strong>Type parameters:</strong> '?35691          </div>
         </td>
         <td class="xmldoc">
             <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/ComputationExpressions.fs#L57-57" class="github-link">
@@ -105,11 +105,29 @@
         <td class="member-name">
 
           <code onmouseout="hideTip(event, '83', 83)" onmouseover="showTip(event, '83', 83)">
-            Run(f)
+            For(source, body)
           </code>
           <div class="tip" id="83">
-            <strong>Signature:</strong> (f:(unit -&gt; &#39;?35526)) -&gt; &#39;?35526<br />
-                          <strong>Type parameters:</strong> '?35526          </div>
+            <strong>Signature:</strong> (source:seq&lt;&#39;?35701&gt; * body:(&#39;?35701 -&gt; &#39;?35702)) -&gt; seq&lt;&#39;?35703&gt;<br />
+                          <strong>Type parameters:</strong> '?35701, '?35702, '?35703          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/ComputationExpressions.fs#L62-62" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '84', 84)" onmouseover="showTip(event, '84', 84)">
+            Run(f)
+          </code>
+          <div class="tip" id="84">
+            <strong>Signature:</strong> (f:(unit -&gt; &#39;?35693)) -&gt; &#39;?35693<br />
+                          <strong>Type parameters:</strong> '?35693          </div>
         </td>
         <td class="xmldoc">
             <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/ComputationExpressions.fs#L58-58" class="github-link">
@@ -122,33 +140,15 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '84', 84)" onmouseover="showTip(event, '84', 84)">
+          <code onmouseout="hideTip(event, '85', 85)" onmouseover="showTip(event, '85', 85)">
             RunTests(source, f)
           </code>
-          <div class="tip" id="84">
-            <strong>Signature:</strong> (source:seq&lt;&#39;?35538&gt; * f:(&#39;?35538 -&gt; TestCase&lt;&#39;?35539&gt;)) -&gt; seq&lt;TestObject&gt;<br />
-                          <strong>Type parameters:</strong> '?35538, '?35539          </div>
-        </td>
-        <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/ComputationExpressions.fs#L67-67" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          
-        </td>
-      </tr>
-      <tr>
-        <td class="member-name">
-
-          <code onmouseout="hideTip(event, '85', 85)" onmouseover="showTip(event, '85', 85)">
-            Source(source1, source2)
-          </code>
           <div class="tip" id="85">
-            <strong>Signature:</strong> (source1:seq&lt;&#39;?35536&gt; * source2:seq&lt;&#39;?35536&gt;) -&gt; seq&lt;&#39;?35536&gt;<br />
-                          <strong>Type parameters:</strong> '?35536          </div>
+            <strong>Signature:</strong> (source:seq&lt;&#39;?35709&gt; * f:(&#39;?35709 -&gt; TestCase&lt;&#39;?35710&gt;)) -&gt; seq&lt;TestObject&gt;<br />
+                          <strong>Type parameters:</strong> '?35709, '?35710          </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/ComputationExpressions.fs#L65-65" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/ComputationExpressions.fs#L68-68" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -159,11 +159,29 @@
         <td class="member-name">
 
           <code onmouseout="hideTip(event, '86', 86)" onmouseover="showTip(event, '86', 86)">
-            Yield(x)
+            Source(source1, source2)
           </code>
           <div class="tip" id="86">
-            <strong>Signature:</strong> x:&#39;?35530 -&gt; seq&lt;&#39;?35530&gt;<br />
-                          <strong>Type parameters:</strong> '?35530          </div>
+            <strong>Signature:</strong> (source1:seq&lt;&#39;?35707&gt; * source2:seq&lt;&#39;?35707&gt;) -&gt; seq&lt;&#39;?35707&gt;<br />
+                          <strong>Type parameters:</strong> '?35707          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/ComputationExpressions.fs#L66-66" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '87', 87)" onmouseover="showTip(event, '87', 87)">
+            Yield(x)
+          </code>
+          <div class="tip" id="87">
+            <strong>Signature:</strong> x:&#39;?35697 -&gt; seq&lt;&#39;?35697&gt;<br />
+                          <strong>Type parameters:</strong> '?35697          </div>
         </td>
         <td class="xmldoc">
             <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/ComputationExpressions.fs#L60-60" class="github-link">
@@ -176,12 +194,12 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '87', 87)" onmouseover="showTip(event, '87', 87)">
+          <code onmouseout="hideTip(event, '88', 88)" onmouseover="showTip(event, '88', 88)">
             Yield()
           </code>
-          <div class="tip" id="87">
-            <strong>Signature:</strong> unit -&gt; seq&lt;&#39;?35528&gt;<br />
-                          <strong>Type parameters:</strong> '?35528          </div>
+          <div class="tip" id="88">
+            <strong>Signature:</strong> unit -&gt; seq&lt;&#39;?35695&gt;<br />
+                          <strong>Type parameters:</strong> '?35695          </div>
         </td>
         <td class="xmldoc">
             <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/ComputationExpressions.fs#L59-59" class="github-link">
@@ -194,12 +212,12 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '88', 88)" onmouseover="showTip(event, '88', 88)">
+          <code onmouseout="hideTip(event, '89', 89)" onmouseover="showTip(event, '89', 89)">
             YieldFrom(xs)
           </code>
-          <div class="tip" id="88">
-            <strong>Signature:</strong> xs:seq&lt;&#39;?35532&gt; -&gt; seq&lt;&#39;?35532&gt;<br />
-                          <strong>Type parameters:</strong> '?35532          </div>
+          <div class="tip" id="89">
+            <strong>Signature:</strong> xs:seq&lt;&#39;?35699&gt; -&gt; seq&lt;&#39;?35699&gt;<br />
+                          <strong>Type parameters:</strong> '?35699          </div>
         </td>
         <td class="xmldoc">
             <a href="https://github.com/persimmon-projects/Persimmon/tree/master/Persimmon/ComputationExpressions.fs#L61-61" class="github-link">
