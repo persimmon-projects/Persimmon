@@ -73,6 +73,11 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <ProjectReference Include="..\Persimmon.Runner\Persimmon.Runner.fsproj">
+      <Name>Persimmon.Runner</Name>
+      <Project>{585b95fd-6b0c-4b45-a4cf-f44098a8ba49}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Persimmon\Persimmon.fsproj">
       <Name>Persimmon</Name>
       <Project>{f1d851fd-a776-4204-b287-5c14c3aa198c}</Project>

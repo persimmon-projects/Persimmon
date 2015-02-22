@@ -1,6 +1,9 @@
 ﻿namespace Persimmon.Tests
 
+open System.IO
 open Persimmon
+open Persimmon.Runner
+open Persimmon.Output
 
 module Helper =
 
@@ -25,3 +28,12 @@ module Helper =
         |> fun actual -> Done (m, (assertEquals expectedMessages actual, []), d)
     | Error (m, es, results, d) -> Error (m, es, results, d)
     TestCase({ Name = x.Name; Parameters = x.Parameters }, fun () -> inner (run x))
+
+  let shouldEqualErrorCount expected xs =
+    use reporter =
+      new Reporter(
+        new Printer<_>(new StringWriter(), Formatter.ProgressFormatter.dot),
+        new Printer<_>(new StringWriter(), Formatter.SummaryFormatter.normal),
+        new Printer<_>(new StringWriter(), Formatter.ErrorFormatter.normal))
+    (xs |> Seq.toList |> TestRunner.runAllTests reporter).Errors
+    |> assertEquals expected
