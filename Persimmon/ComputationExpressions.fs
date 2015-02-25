@@ -49,9 +49,9 @@ module private Util =
 
   let toList (x: 'a) =
     if FSharpType.IsTuple typeof<'a> then
-      FSharpValue.GetTupleFields (box x) |> Array.toList
+      FSharpValue.GetTupleFields (box x) |> Array.zip (FSharpType.GetTupleElements(typeof<'a>)) |> Array.toList
     else
-      [ box x ]
+      [ (typeof<'a>, box x) ]
 
 type ParameterizeBuilder() =
   member __.Delay(f: unit -> _) = f

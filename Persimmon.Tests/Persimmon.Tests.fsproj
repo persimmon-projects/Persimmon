@@ -64,6 +64,7 @@
     <Compile Include="PersimmonTest.fs" />
     <Compile Include="SideEffectTest.fs" />
     <Compile Include="AsyncTest.fs" />
+    <Compile Include="PrettyPrinterTest.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

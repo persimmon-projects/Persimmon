@@ -48,7 +48,7 @@ type TestMetadata = {
   Name: string
   /// The test parameters.
   /// If the test has no parameters then the value is empty list.
-  Parameters: obj list
+  Parameters: (Type * obj) list
 }
 with
   /// The test name(if the test has parameters then the value contains them).
@@ -57,7 +57,7 @@ with
     if this.Parameters.IsEmpty then
       this.Name
     else
-      sprintf "%s(%s)" this.Name (this.Parameters |> List.map string |> String.concat ", ")
+      sprintf "%s(%s)" this.Name (this.Parameters |> PrettyPrinter.printAll)
 
 /// The type that is treated as tests by Persimmon.
 /// Derived class of this class are only two classes,
