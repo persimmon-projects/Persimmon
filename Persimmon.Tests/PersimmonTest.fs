@@ -66,11 +66,52 @@ module PersimmonTest =
         source [
           (1, 1)
           (1, 2)
-        ] into (x, y)
-        run (test "source parameterize test" {
+        ]
+        run (fun (x, y) -> test "source parameterize test" {
           do! assertEquals x y
         })
       }
     test "parameterize tests should be able to run" {
       do! innerTests |> shouldEqualErrorCount 1
+    }
+
+  open ActivePatterns
+ 
+  let ``ordering parameters`` =
+    let getMetadata parameters =
+      parameters
+      |> Seq.map (function
+      | Context _ -> failwith "oops!"
+      | TestCase tc -> tc.Parameters)
+      |> Seq.head
+    let parameter1 =
+      parameterize {
+        source [
+          (1, 2)
+        ]
+        run (fun (y, x) -> test "parameter1" {
+          do! assertEquals x y
+        })
+      }
+      |> getMetadata
+    let parameter2 =
+      parameterize {
+        case (1, 2, 5)
+        run (fun (b, c, a) -> test "parameter2" {
+          do! assertEquals a (b + c)
+        })
+      }
+      |> getMetadata
+    let parameter3 =
+      parameterize {
+        source [ (1, 2, 5) ]
+        run (fun (b, c, a) -> test "parameter3" {
+          do! assertEquals a (b + c)
+        })
+      }
+      |> getMetadata
+    test "ordering parameters:" {
+      do! assertEquals "1, 2" (PrettyPrinter.printAll parameter1)
+      do! assertEquals "1, 2, 5" (PrettyPrinter.printAll parameter2)
+      do! assertEquals "1, 2, 5" (PrettyPrinter.printAll parameter3)
     }

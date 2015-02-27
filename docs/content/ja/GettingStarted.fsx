@@ -78,12 +78,13 @@ Persimmon は パラメータ化されたテストに対応しています。
 *)
 
 let ``case parameterize test`` =
+  let parameterizeTest (x, y) = test "case parameterize test" {
+    do! assertEquals x y
+  }
   parameterize {
     case (1, 1)
-    case (1, 2) into (x, y)
-    run (test "case parameterize test" {
-      do! assertEquals x y
-    })
+    case (1, 2)
+    run parameterizeTest
   }
 
 let inputs = [ 2 .. 2 .. 20 ]
@@ -93,8 +94,8 @@ let ``source parameterize test`` =
     do! assertEquals 0 (x % 2)
   }
   parameterize {
-    source inputs into x
-    run (parameterizeTest x)
+    source inputs
+    run parameterizeTest
   }
 
 (**
