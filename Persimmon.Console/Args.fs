@@ -70,7 +70,8 @@ module Args =
 --inputs:<files>
     comma separated input files.
 --format:[normal|xml]
-    TODO: write message...
+    config the output format.
+    'xml' format require '--output' option.
 --no-progress
     disabled the report of progress.
 --parallel
