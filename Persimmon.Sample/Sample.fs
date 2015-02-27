@@ -69,22 +69,22 @@ let tests4 = [
 let tests5 =
   parameterize {
     case (1, 1)
-    case (1, 2) into (x, y)
-    run (test "case parameterize test" {
+    case (1, 2)
+    run (fun (x, y) -> test "case parameterize test" {
       do! assertEquals x y
     })
   }
 
 let tests6 =
-  let innerTest x y = test "source parameterize test" {
+  let innerTest (x, y) = test "source parameterize test" {
     do! assertEquals x y
   }
   parameterize {
     source [
       (1, 1)
       (1, 2)
-    ] into (x, y)
-    run (innerTest x y)
+    ]
+    run innerTest
   }
 
 let context1 =
