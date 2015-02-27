@@ -48,7 +48,7 @@ In order to run the test represented this class, use the "Run" method.</p>
             new(name, parameters, body)
           </code>
           <div class="tip" id="100">
-            <strong>Signature:</strong> (name:string * parameters:obj list * body:(unit -&gt; TestResult&lt;&#39;T&gt;)) -&gt; TestCase&lt;&#39;T&gt;<br />
+            <strong>Signature:</strong> (name:string * parameters:(Type * obj) list * body:(unit -&gt; TestResult&lt;&#39;T&gt;)) -&gt; TestCase&lt;&#39;T&gt;<br />
                       </div>
         </td>
         <td class="xmldoc">
@@ -149,7 +149,7 @@ In order to run the test represented this class, use the "Run" method.</p>
             Parameters
           </code>
           <div class="tip" id="105">
-            <strong>Signature:</strong> obj list<br />
+            <strong>Signature:</strong> (Type * obj) list<br />
                       </div>
         </td>
         <td class="xmldoc">
