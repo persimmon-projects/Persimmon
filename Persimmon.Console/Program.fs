@@ -8,6 +8,24 @@ open Persimmon.Output
 
 let entryPoint (args: Args) =
   use progress = if args.NoProgress then IO.TextWriter.Null else Console.Out
+  let runAndReport: (Reporter -> TestObject list -> int) =
+    if args.Parallel then
+      fun reporter tests ->
+        async {
+          let! res = TestRunner.asyncRunAllTests reporter tests
+          // report
+          reporter.ReportProgress(TestResult.endMarker)
+          reporter.ReportSummary(res.ExecutedRootTestResults)
+          return res.Errors
+        }
+        |> Async.RunSynchronously
+    else
+      fun reporter tests ->
+        let res = TestRunner.runAllTests reporter tests
+        // report
+        reporter.ReportProgress(TestResult.endMarker)
+        reporter.ReportSummary(res.ExecutedRootTestResults)
+        res.Errors
   use output =
     match args.Output with
     | Some file -> new StreamWriter(file.FullName, false, Encoding.UTF8) :> TextWriter
@@ -44,11 +62,7 @@ let entryPoint (args: Args) =
       Assembly.Load(assemblyRef))
     // collect and run
     let tests = TestCollector.collectRootTestObjects asms
-    let res = TestRunner.runAllTests reporter tests
-    // report
-    reporter.ReportProgress(TestResult.endMarker)
-    reporter.ReportSummary(res.ExecutedRootTestResults)
-    res.Errors
+    runAndReport reporter tests
   else
     reporter.ReportError("file not found: " + (String.Join(", ", notFounds)))
     -2

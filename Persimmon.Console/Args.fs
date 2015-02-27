@@ -15,13 +15,14 @@ type Args = {
   Format: FormatType
 
   NoProgress: bool
+  Parallel: bool
 
   Help: bool
 }
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Args =
-  let empty = { Inputs = []; Output = None; Error = None; Format = Normal; NoProgress = false; Help = false }
+  let empty = { Inputs = []; Output = None; Error = None; Format = Normal; NoProgress = false; Parallel = false; Help = false }
 
   let private (|StartsWith|_|) (prefix: string) (target: string) =
     if target.StartsWith(prefix) then
@@ -40,6 +41,7 @@ module Args =
   let rec parse acc = function
   | [] -> acc
   | "--no-progress"::rest -> parse { acc with NoProgress = true } rest
+  | "--parallel"::rest -> parse { acc with Parallel = true } rest
   | "--help"::rest -> parse { acc with Help = true } rest
   | (StartsWith "--" (Split2By ":" (key, value)))::rest ->
       match key with
@@ -71,6 +73,8 @@ module Args =
     TODO: write message...
 --no-progress
     disabled the report of progress.
+--parallel
+    run the tests asynchronous.
 --help
     print this help message.
 ================
