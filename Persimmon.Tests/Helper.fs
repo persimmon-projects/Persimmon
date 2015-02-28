@@ -1,6 +1,7 @@
 ﻿namespace Persimmon.Tests
 
 open System.IO
+open System.Diagnostics
 open Persimmon
 open Persimmon.Runner
 open Persimmon.Output
@@ -33,7 +34,7 @@ module Helper =
     use reporter =
       new Reporter(
         new Printer<_>(new StringWriter(), Formatter.ProgressFormatter.dot),
-        new Printer<_>(new StringWriter(), Formatter.SummaryFormatter.normal),
+        new Printer<_>(new StringWriter(), Formatter.SummaryFormatter.normal (Stopwatch())),
         new Printer<_>(new StringWriter(), Formatter.ErrorFormatter.normal))
     (xs |> Seq.toList |> TestRunner.runAllTests reporter).Errors
     |> assertEquals expected

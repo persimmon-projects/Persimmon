@@ -1,18 +1,22 @@
 ﻿open System
 open System.IO
 open System.Text
+open System.Diagnostics
 open System.Reflection
 open Persimmon
 open Persimmon.Runner
 open Persimmon.Output
 
 let entryPoint (args: Args) =
+  let watch = Stopwatch()
   use progress = if args.NoProgress then IO.TextWriter.Null else Console.Out
   let runAndReport: (Reporter -> TestObject list -> int) =
     if args.Parallel then
       fun reporter tests ->
         async {
+          watch.Start()
           let! res = TestRunner.asyncRunAllTests reporter tests
+          watch.Stop()
           // report
           reporter.ReportProgress(TestResult.endMarker)
           reporter.ReportSummary(res.ExecutedRootTestResults)
@@ -21,7 +25,9 @@ let entryPoint (args: Args) =
         |> Async.RunSynchronously
     else
       fun reporter tests ->
+        watch.Start()
         let res = TestRunner.runAllTests reporter tests
+        watch.Stop()
         // report
         reporter.ReportProgress(TestResult.endMarker)
         reporter.ReportSummary(res.ExecutedRootTestResults)
@@ -37,8 +43,8 @@ let entryPoint (args: Args) =
 
   let requireFileName, formatter =
     match args.Format with
-    | JUnitStyleXml -> true, Formatter.XmlFormatter.junitStyle
-    | Normal -> false, Formatter.SummaryFormatter.normal
+    | JUnitStyleXml -> (true, Formatter.XmlFormatter.junitStyle watch)
+    | Normal -> (false, Formatter.SummaryFormatter.normal watch)
 
   use reporter =
     new Reporter(
