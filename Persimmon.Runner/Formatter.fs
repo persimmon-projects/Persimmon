@@ -5,6 +5,7 @@ type IFormatter<'T> =
 
 module Formatter =
   open System
+  open System.Diagnostics
   open Persimmon
   open Persimmon.ActivePatterns
 
@@ -122,21 +123,21 @@ module Formatter =
       | ContextResult ctx ->
           ctx.Children |> Seq.fold collectSummary summary
       | TestResult (Error (_, _, _, d)) ->
-          { summary with Run = summary.Run + 1; Error = summary.Error + 1; Duration = summary.Duration + d }
+          { summary with Run = summary.Run + 1; Error = summary.Error + 1 }
       | TestResult (Done (_, res, d)) ->
           match res |> AssertionResult.NonEmptyList.typicalResult with
-          | Passed _ -> { summary with Run = summary.Run + 1; Duration = summary.Duration + d }
-          | NotPassed (Skipped _) -> { summary with Run = summary.Run + 1; Skipped = summary.Skipped + 1; Duration = summary.Duration + d }
-          | NotPassed (Violated _) -> { summary with Run = summary.Run + 1; Violated = summary.Violated + 1; Duration = summary.Duration + d }
+          | Passed _ -> { summary with Run = summary.Run + 1 }
+          | NotPassed (Skipped _) -> { summary with Run = summary.Run + 1; Skipped = summary.Skipped + 1 }
+          | NotPassed (Violated _) -> { summary with Run = summary.Run + 1; Violated = summary.Violated + 1 }
 
-    let normal =
+    let normal (watch: Stopwatch) =
       { new IFormatter<ITestResult seq> with
           member x.Format(results: ITestResult seq): IWritable = 
             Writable.stringSeq begin
               seq {
                 yield! results |> Seq.collect (toStrs 0)
                 yield bar 70 '=' "summary"
-                let summary = results |> Seq.fold Summary.collectSummary Summary.empty
+                let summary = results |> Seq.fold Summary.collectSummary { Summary.empty with Duration = watch.Elapsed }
                 yield string summary
               }
             end
@@ -202,8 +203,8 @@ module Formatter =
       let suite = XElement(xname "testsuite")
       inner suite result
 
-    let addSummary results (suites: XElement) =
-      let summary = results |> Seq.fold Summary.collectSummary Summary.empty
+    let addSummary (watch: Stopwatch) results (suites: XElement) =
+      let summary = results |> Seq.fold Summary.collectSummary { Summary.empty with Duration = watch.Elapsed }
       suites.Add(
         XAttribute(xname "tests", summary.Run),
         XAttribute(xname "failures", summary.Violated),
@@ -211,9 +212,9 @@ module Formatter =
         XAttribute(xname "time", summary.Duration.ToString()))
       suites
 
-    let junitStyle =
+    let junitStyle watch =
       { new IFormatter<ITestResult seq> with
         member __.Format(results: ITestResult seq) =
-          let xdocument = XDocument(XElement(xname "testsuites", results |> Seq.map toXDocument) |> addSummary results)
+          let xdocument = XDocument(XElement(xname "testsuites", results |> Seq.map toXDocument) |> addSummary watch results)
           Writable.xdocument(xdocument)
         }
