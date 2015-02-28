@@ -73,11 +73,14 @@ module Formatter =
     let rec private toStrs indent = function
     | EndMarker -> Seq.empty
     | ContextResult ctx ->
-        seq {
-          yield (indentStr indent) + "begin " + ctx.Name
-          yield! ctx.Children |> Seq.collect (toStrs (indent + 1))
-          yield (indentStr indent) + "end " + ctx.Name
-        }
+        let rs = ctx.Children |> Seq.collect (toStrs (indent + 1))
+        if Seq.isEmpty rs then Seq.empty
+        else
+          seq {
+            yield (indentStr indent) + "begin " + ctx.Name
+            yield! rs
+            yield (indentStr indent) + "end " + ctx.Name
+          }
     | TestResult tr ->
         match tr with
         | Error (meta, es, res, _) ->
