@@ -13,6 +13,8 @@ module internal PrettyPrinter =
       if t.Name = "Unit" then "()"
       elif t.FullName.StartsWith("Microsoft.FSharp.Core.FSharpOption`1") then "None"
       else "null"
+    | :? bool as o -> sprintf "%b" o
+    | :? string as o -> sprintf "\"%s\"" o
     | _ ->
       let t = o.GetType()
       if FSharpType.IsRecord t then
@@ -45,8 +47,6 @@ module internal PrettyPrinter =
         |> sprintf "(%s)"
       else
         match o with
-        | :? bool as o -> sprintf "%b" o
-        | :? string as o -> sprintf "\"%s\"" o
         | :? IEnumerable as o ->
           let tmp = ResizeArray()
           let t = t.GetElementType()
