@@ -16,6 +16,25 @@ module PrettyPrinterTest =
     do! assertEquals "false" (print (typeof<bool>, false))
   }
 
+  let ``print char`` = test {
+    do! assertEquals "'a'" (print (typeof<char>, 'a'))
+    do! assertEquals "'λ'" (print (typeof<char>, '\u03bb'))
+  }
+
+  let ``print float32`` = test {
+    do! assertEquals "1" (print (typeof<float32>, 1.f))
+    do! assertEquals "1.111111" (print (typeof<float32>,  1.111111f))
+    do! assertEquals "NaN" (print (typeof<float32>,  Single.NaN))
+    do! assertEquals "+∞" (print (typeof<float32>, Single.PositiveInfinity))
+  }
+
+  let ``print float`` = test {
+    do! assertEquals "1" (print (typeof<float>, 1.))
+    do! assertEquals "1.1111111" (print (typeof<float>,  1.1111111))
+    do! assertEquals "NaN" (print (typeof<float>,  Double.NaN))
+    do! assertEquals "+∞" (print (typeof<float>, Double.PositiveInfinity))
+  }
+
   let ``printer should print string`` = test {
     do! assertEquals "\"\"" (print (typeof<string>, ""))
     do! assertEquals "\"a\"" (print (typeof<string>, "a"))

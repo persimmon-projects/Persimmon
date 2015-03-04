@@ -14,6 +14,13 @@ module internal PrettyPrinter =
       elif t.FullName.StartsWith("Microsoft.FSharp.Core.FSharpOption`1") then "None"
       else "null"
     | :? bool as o -> sprintf "%b" o
+    | :? char as o -> sprintf "'%c'" o
+    | :? float32 as o ->
+      if Single.IsNaN(o) then string o
+      else o.ToString()
+    | :? float as o ->
+      if Double.IsNaN(o) then string o
+      else o.ToString()
     | :? string as o -> sprintf "\"%s\"" o
     | _ ->
       let t = o.GetType()
