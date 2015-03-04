@@ -17,9 +17,13 @@ module internal PrettyPrinter =
     | :? char as o -> sprintf "'%c'" o
     | :? float32 as o ->
       if Single.IsNaN(o) then string o
+      elif Single.IsPositiveInfinity(o) then "+∞"
+      elif Single.IsNegativeInfinity(o) then "-∞"
       else o.ToString()
     | :? float as o ->
       if Double.IsNaN(o) then string o
+      elif Double.IsPositiveInfinity(o) then "+∞"
+      elif Double.IsNegativeInfinity(o) then "-∞"
       else o.ToString()
     | :? string as o -> sprintf "\"%s\"" o
     | _ ->
