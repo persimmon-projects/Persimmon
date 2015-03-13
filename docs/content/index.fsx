@@ -21,6 +21,14 @@ PM> Install-Package Persimmon.Runner</pre>
   <div class="span1"></div>
 </div>
 
+Latest version
+--------------
+
+* Persimmon [![NuGet Status](http://img.shields.io/nuget/v/Persimmon.svg?style=flat)](https://www.nuget.org/packages/Persimmon/)
+* Persimmon.Console [![NuGet Status](http://img.shields.io/nuget/v/Persimmon.Console.svg?style=flat)](https://www.nuget.org/packages/Persimmon.Console/)
+* Persimmon.Runner [![NuGet Status](http://img.shields.io/nuget/v/Persimmon.Runner.svg?style=flat)](https://www.nuget.org/packages/Persimmon.Runner/)
+* Persimmon.Script [![NuGet Status](http://img.shields.io/nuget/v/Persimmon.Script.svg?style=flat)](https://www.nuget.org/packages/Persimmon.Script/)
+
 Documentation
 -------------
 

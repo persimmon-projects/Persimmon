@@ -16,7 +16,7 @@ An overview of Persimmon, how to download and use.
 Creating project(or Getting sample project)
 -------------------------------------------
 
-Now create a project (and enable NuGet Package Restore) or download [sample project](https://github.com/persimmon-projects/Persimmon.Demo).
+Now create a project and install Persimmon from NuGet (and enable NuGet Package Restore), or download [sample project](https://github.com/persimmon-projects/Persimmon.Demo).
 
 Getting Persimmon console runner
 --------------------------------
