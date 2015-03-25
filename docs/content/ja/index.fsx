@@ -9,6 +9,8 @@
 Persimmon
 =========
 
+Persimmon は *F# のための* ユニットテストフレームワークです。
+
 <div class="row" style="width: 70%; margin: 0 auto;">
   <div class="span1"></div>
   <div class="span6">
@@ -24,10 +26,26 @@ PM> Install-Package Persimmon.Runner</pre>
 最新バージョン
 --------------
 
-* Persimmon [![NuGet Status](http://img.shields.io/nuget/v/Persimmon.svg?style=flat)](https://www.nuget.org/packages/Persimmon/)
-* Persimmon.Console [![NuGet Status](http://img.shields.io/nuget/v/Persimmon.Console.svg?style=flat)](https://www.nuget.org/packages/Persimmon.Console/)
-* Persimmon.Runner [![NuGet Status](http://img.shields.io/nuget/v/Persimmon.Runner.svg?style=flat)](https://www.nuget.org/packages/Persimmon.Runner/)
-* Persimmon.Script [![NuGet Status](http://img.shields.io/nuget/v/Persimmon.Script.svg?style=flat)](https://www.nuget.org/packages/Persimmon.Script/)
+<table class="table table-striped">
+  <tbody>
+    <tr>
+      <td>Persimmon</td>
+      <td><a href="https://www.nuget.org/packages/Persimmon/"><img src="http://img.shields.io/nuget/v/Persimmon.svg?style=flat" /></a></td>
+    </tr>
+    <tr>
+      <td>Persimmon.Console</td>
+      <td><a href="https://www.nuget.org/packages/Persimmon.Console/"><img src="http://img.shields.io/nuget/v/Persimmon.Console.svg?style=flat" /></a></td>
+    </tr>
+    <tr>
+      <td>Persimmon.Runner</td>
+      <td><a href="https://www.nuget.org/packages/Persimmon.Runner/"><img src="http://img.shields.io/nuget/v/Persimmon.Runner.svg?style=flat" /></a></td>
+    </tr>
+    <tr>
+      <td>Persimmon.Script</td>
+      <td><a href="https://www.nuget/org/packages/Persimmon.Script"><img src="http://img.shields.io/nuget/v/Persimmon.Script.svg?style=flat" /></a></td>
+    </tr>
+  </tbody>
+</table>
 
 ドキュメント
 ------------

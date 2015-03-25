@@ -1,12 +1,17 @@
 let referenceBinaries = [ "Persimmon.dll"; "Persimmon.Runner.dll"; "Persimmon.Script.dll" ]
 let website = "/Persimmon"
 let githubLink = "https://github.com/persimmon-projects/Persimmon"
+let nugetLink = "https://www.nuget.org/packages/Persimmon"
 let info =
   [ "project-name", "Persimmon"
     "project-author", "persimmon-projects"
     "project-summary", "A unit test framework for F# using computation expressions."
     "project-github", githubLink
-    "project-nuget", "https://www.nuget.org/packages/Persimmon/"]
+    "project-nuget", nugetLink + "/"
+    "console-project-nuget", nugetLink + ".Console/"
+    "runner-project-nuget", nugetLink + ".Runner/"
+    "script-project-nuget", nugetLink + ".Script/"
+  ]
 
 #I "../../packages/FSharp.Formatting/lib/net40"
 #I "../../packages/FSharp.Compiler.Service/lib/net40"
