@@ -1,5 +1,7 @@
 # Persimmon
 
+[![License][license-image]][license-url]
+
 Persimmon is a unit test framework for F# using computation expressions.
 
 The first idea was brought by @Gab-km and @bleis-tift.
@@ -26,3 +28,7 @@ The first idea was brought by @Gab-km and @bleis-tift.
 ## Origin of a name
 
 This library was devised in the Japanese fall.
+
+[license-url]: https://github.com/persimmon-projects/Persimmon/blob/master/LICENSE
+[license-image]: https://img.shields.io/github/license/persimmon-projects/Persimmon.svg
+
