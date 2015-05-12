@@ -38,3 +38,16 @@ module Helper =
         new Printer<_>(new StringWriter(), Formatter.ErrorFormatter.normal))
     (xs |> Seq.toList |> TestRunner.runAllTests reporter).Errors
     |> assertEquals expected
+
+  let shouldFirstRaise<'T, 'U when 'T :> exn> (x: TestCase<'U>) =
+    let inner = function
+    | Done (m, (Persimmon.Passed (actual: 'U), []), d) ->
+      Done (m, (fail (sprintf "Expect: raise %s\nActual: %A" (typeof<'T>.Name) actual), []), d)
+    | Done (m, results, d) -> Done (m, results |> NonEmptyList.map (function
+      | Passed _ -> Passed ()
+      | NotPassed x -> NotPassed x), d)
+    | Error (m, [], results, d) ->
+      Done (m, (fail (sprintf "Expect: raise %s\nActual: not raise exception" (typeof<'T>.Name)), []), d)
+    | Error (m, x::_, results, d) -> Done (m, (assertEquals typeof<'T> (x.GetType()), []), d)
+    TestCase({ Name = x.Name; Parameters = x.Parameters }, fun () -> inner (run x))
+
