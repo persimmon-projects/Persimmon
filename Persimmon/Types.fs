@@ -136,13 +136,13 @@ type TestCase<'T>(metadata: TestMetadata, body: unit -> TestResult<'T>) =
   /// If the test has no parameters then the value is empty list.
   member __.Parameters = metadata.Parameters
   /// Execute the test.
-  member __.Run() = 
+  member __.Run() =
     let watch = Stopwatch.StartNew()
     let result = body ()
     watch.Stop()
     match result with
-    | Error (_, errs, res, d) -> Error (metadata, errs, res, d + watch.Elapsed)
-    | Done (_, res, d) -> Done (metadata, res, d + watch.Elapsed)
+    | Error (_, errs, res, _) -> Error (metadata, errs, res, watch.Elapsed)
+    | Done (_, res, _) -> Done (metadata, res, watch.Elapsed)
 
   override __.ToString() =
     sprintf "TestCase<%s>(%A)" (typeof<'T>.Name) metadata
