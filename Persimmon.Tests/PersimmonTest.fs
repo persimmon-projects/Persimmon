@@ -76,7 +76,7 @@ module PersimmonTest =
     }
 
   open ActivePatterns
- 
+
   let ``ordering parameters`` =
     let getMetadata parameters =
       parameters
