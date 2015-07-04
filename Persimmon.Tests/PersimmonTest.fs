@@ -110,8 +110,39 @@ module PersimmonTest =
         })
       }
       |> getMetadata
-    test "ordering parameters:" {
+    test "ordering parameters" {
       do! assertEquals "1, 2" (PrettyPrinter.printAll parameter1)
       do! assertEquals "1, 2, 5" (PrettyPrinter.printAll parameter2)
       do! assertEquals "1, 2, 5" (PrettyPrinter.printAll parameter3)
+    }
+
+  type DisposableValue() =
+    let disposed = ref false
+    member __.Disposed = !disposed
+    interface System.IDisposable with
+      member __.Dispose() = disposed := true
+
+  let ``should dispose value`` =
+    let test1 = test "return disposed value" {
+      use s = new DisposableValue()
+      return s
+    }
+    test "should dispose value" {
+      let! value = test1
+      do! assertPred (value.Disposed)
+    }
+
+  exception TestException
+
+  let ``should dispose finally`` =
+    let value = new DisposableValue()
+    let test1 () = test "use and exception" {
+      use _ = value
+      return raise TestException
+    }
+    test "should dispose finally" {
+      do! assertPred (not <| value.Disposed)
+      let ex = test1 ()
+      do! shouldFirstRaise<TestException, unit> ex
+      do! assertPred value.Disposed
     }

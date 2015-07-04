@@ -1,5 +1,7 @@
 ﻿namespace Persimmon
 
+open System
+
 /// This type is used only in the library.
 type BindingValue<'T> =
   | UnitAssertionResult of AssertionResult<'T (* unit *)>
@@ -37,7 +39,9 @@ type TestBuilder(name: string) =
         TestCase.combine (NoValueTest case) f
     | NonUnitTestCase case ->
         TestCase.combine (HasValueTest case) f
-
+  member __.Using(x: #IDisposable, f: #IDisposable -> TestCase<_>) =
+    try f x
+    finally match box x with null -> () | _ -> x.Dispose()
   member __.Delay(f) = f
   member __.Run(f) =
     try f ()
