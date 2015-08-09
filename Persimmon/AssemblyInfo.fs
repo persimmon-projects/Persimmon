@@ -10,7 +10,7 @@ open System.Runtime.CompilerServices
 
 [<assembly: AssemblyVersion("1.0.0")>]
 [<assembly: AssemblyFileVersion("1.0.0")>]
-[<assembly: AssemblyInformationalVersion("1.0.0-beta6")>]
+[<assembly: AssemblyInformationalVersion("1.0.0-beta7")>]
 
 [<assembly: InternalsVisibleTo("Persimmon.Tests")>]
 
