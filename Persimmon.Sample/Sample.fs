@@ -107,6 +107,7 @@ type MyClass() =
     do! assertEquals 1 2
   }
 
-let helperTest x = test "not execute because this is not a zero parameter function" {
+// not execute because this is not a zero parameter function
+let helperTest x = assertions {
   do! assertEquals 1 x
 }
