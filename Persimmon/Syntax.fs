@@ -7,7 +7,7 @@ open System.Diagnostics
 let context name children = Context(name, children)
 
 /// Create the test case.
-let test name = TestBuilder(name)
+let test (name: string) = TestBuilder(name)
 /// Create the parameterized test case.
 let parameterize = ParameterizeBuilder()
 
@@ -31,5 +31,8 @@ let trap = TrapBuilder()
 
 let asyncRun = AsyncRunBuilder()
 
+/// Create the test case from assertions.
+let assertions = TestBuilder()
+
 module UseTestNameByReflection =
-  let test = TestBuilder("")
+  let test = TestBuilder()

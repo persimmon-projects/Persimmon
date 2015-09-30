@@ -9,7 +9,9 @@ type BindingValue<'T> =
   | UnitTestCase of TestCase<'T (* unit *)>
   | NonUnitTestCase of TestCase<'T>
 
-type TestBuilder(name: string) =
+type TestBuilder private (name: string option) =
+  new() = TestBuilder(None)
+  new(name: string) = TestBuilder(Some name)
   // return x
   member __.Return(x) = TestCase.make name [] (Passed x)
   // return! x
@@ -94,5 +96,5 @@ type AsyncRunBuilder() =
   member __.It((), a: Async<'T>) = a
   member __.Run(a) =
     match a |> Async.Catch |> Async.RunSynchronously with
-    | Choice1Of2 r -> TestCase.make "" [] (Passed r)
-    | Choice2Of2 e -> TestCase.makeError "" [] e 
+    | Choice1Of2 r -> TestCase.make None [] (Passed r)
+    | Choice2Of2 e -> TestCase.makeError None [] e 

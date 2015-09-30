@@ -43,9 +43,10 @@ module AssertionResult =
       )
 
 /// The metadata that is common to each test case and test result.
+[<StructuredFormatDisplay("{FullName}")>]
 type TestMetadata = {
   /// The test name. It doesn't contain the parameters.
-  Name: string
+  Name: string option
   /// The test parameters.
   /// If the test has no parameters then the value is empty list.
   Parameters: (Type * obj) list
@@ -54,10 +55,11 @@ with
   /// The test name(if the test has parameters then the value contains them).
   member this.FullName = this.ToString()
   override this.ToString() =
-    if this.Parameters.IsEmpty then
-      this.Name
-    else
-      sprintf "%s(%s)" this.Name (this.Parameters |> PrettyPrinter.printAll)
+    match this.Name with
+    | Some name when this.Parameters.IsEmpty -> name
+    | Some name ->
+      sprintf "%s(%s)" name (this.Parameters |> PrettyPrinter.printAll)
+    | None -> ""
 
 /// The type that is treated as tests by Persimmon.
 /// Derived class of this class are only two classes,
@@ -124,7 +126,7 @@ type TestCase<'T>(metadata: TestMetadata, body: unit -> TestResult<'T>) =
   new (name, parameters, body) = TestCase<_>({ Name = name; Parameters = parameters }, body)
 
   override __.SetNameIfNeed(newName: string) =
-    TestCase<'T>({ metadata with Name = if metadata.Name = "" then newName else metadata.Name }, body) :> TestObject
+    TestCase<'T>({ metadata with Name = match metadata.Name with None -> Some newName | _ -> metadata.Name }, body) :> TestObject
 
   member internal __.Metadata = metadata
 
