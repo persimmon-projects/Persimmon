@@ -30,8 +30,21 @@ type TestBuilder private (name: string option) =
   // let! a = (x: BindingValue<_>) in ...
   member __.Bind(x, f: 'T -> TestCase<'U>) =
     match x with
-    | UnitAssertionResult (Passed x)
-    | NonUnitAssertionResult (Passed x) -> f x // TODO: try-with
+    | UnitAssertionResult (Passed x) ->  f x // TODO: try-with
+    | NonUnitAssertionResult (Passed x) ->
+      let c = f x // TODO: try-with
+      match box x with
+      | :? exn as e ->
+        TestCase(c.Metadata, fun () ->
+          match c.Run() with
+          | Done (_, (Passed _, []), _) as d -> d
+          | Done (meta, assertionResults, duration) ->
+            match assertionResults |> NonEmptyList.toList |> AssertionResult.List.onlyNotPassed with
+            | [] -> failwith "oops!"
+            | notPassed -> Error (meta, [e], notPassed, duration)
+          | Error _ as e -> e
+        )
+      | _ -> c
     | UnitAssertionResult (NotPassed cause) ->
         assert (typeof<'T> = typeof<unit>)
         let res = f Unchecked.defaultof<'T> // TODO : try-with
