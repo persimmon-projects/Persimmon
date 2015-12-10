@@ -59,7 +59,7 @@ Composable test
 
 A test of Persimmon is composable.
 
-Its can accept several tests and return a new test.
+It can accept several tests and return a new test.
 
 *)
 
