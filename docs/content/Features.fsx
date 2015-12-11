@@ -20,7 +20,7 @@ Features
 Using Computation Expressions
 -----------------------------
 
-Persimmon uses of Computation Expressions to:
+Persimmon uses Computation Expressions to:
 
 * write a test
 * write a parameterized test
@@ -86,13 +86,13 @@ let composedTests = [
 Continuable assertion
 ---------------------
 
-An assetion of Persimmon (don't have a result) continues to execute remaining assertions even if it violated.
+An assetion of Persimmon (doesn't have a result) continues to execute remaining assertions even if it violated.
 And Persimmon can enumerate all violated assertions in the test.
-This behaviour bring the advantage that a test doesn't sacrifice the amount of information and can be simplified to write it.
+This behaviour brings the advantage that a test doesn't sacrifice the amount of information and can be simplified to write it.
 
 *)
 
-// This test report two assertion violation.
+// This test reports two assertion violations.
 let ``some assertions test`` = [
   test "test1" {
     do! assertEquals 1 2 // execute and violate
