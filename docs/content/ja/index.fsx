@@ -6,8 +6,7 @@
 (**
 <div class="blog-post">
 
-Persimmon
-=========
+# Persimmon
 
 Persimmon は *F# のための* ユニットテストフレームワークです。
 
@@ -23,8 +22,7 @@ PM> Install-Package Persimmon.Runner</pre>
   <div class="span1"></div>
 </div>
 
-最新バージョン
---------------
+## 最新バージョン
 
 <table class="table table-striped">
   <tbody>
@@ -47,8 +45,7 @@ PM> Install-Package Persimmon.Runner</pre>
   </tbody>
 </table>
 
-ドキュメント
-------------
+## ドキュメント
 
 この日本語ドキュメントは [最新の英語ドキュメント](../index.html) を反映できていない可能性があります。
 
@@ -56,8 +53,7 @@ PM> Install-Package Persimmon.Runner</pre>
 
 * [特徴](Features.html) について説明します。
 
-更なる情報
-----------
+## 更なる情報
 
 本プロジェクトは [issue の報告][issues] 、プロジェクトのフォーク、プルリクエストの送信を行うことができる [GitHub][github] にホストされています。
 本ライブラリは MIT ライセンスの下で利用可能です。

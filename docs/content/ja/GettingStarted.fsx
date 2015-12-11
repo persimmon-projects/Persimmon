@@ -8,26 +8,22 @@
 (**
 <div class="blog-post">
 
-はじめに
-========
+# はじめに
 
 Persimmon の概要、ダウンロードや使い方について。
 
-プロジェクトの作成（またはサンプルプロジェクトの取得）
-------------------------------------------------------
+## プロジェクトの作成（またはサンプルプロジェクトの取得）
 
 プロジェクトを作成して NuGet から Persimmon をインストールする (そして NuGet パッケージの復元を有効化する) か、 [サンプルプロジェクト](https://github.com/persimmon-projects/Persimmon.Demo) をダウンロードしてください。
 
-Persimmon コンソールランナーの入手
-----------------------------------
+## Persimmon コンソールランナーの入手
 
 以下のコマンドを実行しましょう。
 
     [lang=powershell]
     .\.nuget\NuGet.exe Install Persimmon.Console -OutputDirectory tools -ExcludeVersion
 
-はじめの一歩
-------------
+## はじめの一歩
 
  ``test`` コンピュテーション式とアサーションを用いてテストを書けます。
 
@@ -41,16 +37,14 @@ let ``some variable name`` = test "first test example" {
 
 (**
 
-テストの実行
-------------
+## テストの実行
 
 以下のコマンドを実行しましょう。
 
     [lang=powershell]
     .\tools\Persimmon.Console\tools\Persimmon.Console.exe 'input file path'
 
-テスト名の省略
---------------
+## テスト名の省略
 
 ``UseTestNameByReflection`` モジュールを open してください:
 
@@ -64,8 +58,7 @@ let ``first test name`` = test {
 
 (**
 
-例外テスト
-----------
+## 例外テスト
 
 ``trap`` は例外をキャッチできます。
 
@@ -85,8 +78,7 @@ let ``exception test`` = test {
 
 (**
 
-テストのパラメータ化
---------------------
+## テストのパラメータ化
 
 Persimmon は パラメータ化されたテストに対応しています。
 

@@ -14,11 +14,9 @@ let getProvider _ = Provider()
 (**
 <div class="blog-post">
 
-Features
-========
+# Features
 
-Using Computation Expressions
------------------------------
+## Using Computation Expressions
 
 Persimmon uses Computation Expressions to:
 
@@ -46,16 +44,14 @@ let tests = [
 
 (**
 
-Mark a test
------------
+## Mark a test
 
 In many testing frameworks, they mark tests with attributes or by their naming rules.
 However, Persimmon doesn't use them to mark the tests.
 
 Persimmon marks variables, properties, and methods (only ``unit`` argument) whose return types are ``TestObject`` or its subtypes.
 
-Composable test
----------------
+## Composable test
 
 A test of Persimmon is composable.
 
@@ -83,8 +79,7 @@ let composedTests = [
 
 (**
 
-Continuable assertion
----------------------
+## Continuable assertion
 
 An assetion of Persimmon (doesn't have a result) continues to execute remaining assertions even if it violated.
 And Persimmon can enumerate all violated assertions in the test.

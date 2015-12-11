@@ -8,26 +8,22 @@
 (**
 <div class="blog-post">
 
-Getting Started
-===============
+# Getting Started
 
 An overview of Persimmon, how to download and use.
 
-Creating project(or Getting sample project)
--------------------------------------------
+## Creating project(or Getting sample project)
 
 Now create a project and install Persimmon from NuGet (and enable NuGet Package Restore), or download [sample project](https://github.com/persimmon-projects/Persimmon.Demo).
 
-Getting Persimmon console runner
---------------------------------
+## Getting Persimmon console runner
 
 Run the command below:
 
     [lang=powershell]
     .\.nuget\NuGet.exe Install Persimmon.Console -OutputDirectory tools -ExcludeVersion
 
-The first step
---------------
+## The first step
 
 You can write the tests by using ``test`` computation expression and assertion functions.
 
@@ -41,16 +37,14 @@ let ``some variable name`` = test "first test example" {
 
 (**
 
-Executing test
---------------
+## Executing test
 
 Run the command below:
 
     [lang=powershell]
     .\tools\Persimmon.Console\tools\Persimmon.Console.exe 'input file path'
 
-Omitting test name
-------------------
+## Omitting test name
 
 Open ``UseTestNameByReflection`` module:
 
@@ -64,8 +58,7 @@ let ``first test example`` = test {
 
 (**
 
-Testing exceptions
-------------------
+## Testing exceptions
 
 ``trap`` computation expression can catch exceptions.
 
@@ -85,8 +78,7 @@ let ``exception test`` = test {
 
 (**
 
-Parameterized tests
--------------------
+## Parameterized tests
 
 Persimmon supports parameterized tests.
 

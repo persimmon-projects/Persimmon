@@ -6,8 +6,7 @@
 (**
 <div class="blog-post">
 
-Persimmon
-=========
+# Persimmon
 
 Persimmon is a unit testing framework *for F#*.
 
@@ -23,8 +22,7 @@ PM> Install-Package Persimmon.Runner</pre>
   <div class="span1"></div>
 </div>
 
-Latest version
---------------
+## Latest version
 
 <table class="table table-striped">
   <tbody>
@@ -47,8 +45,7 @@ Latest version
   </tbody>
 </table>
 
-Documentation
--------------
+## Documentation
 
 The documentation is also available in [Japanese](ja/index.html).
 
@@ -56,8 +53,7 @@ The documentation is also available in [Japanese](ja/index.html).
 
 * To explain [Features](Features.html)
 
-More information
-----------------
+## More information
 
 The project is hosted on [GitHub][github] where you can [report issues][issues], fork the project and submit pull requests.
 The library is available under the MIT License,
