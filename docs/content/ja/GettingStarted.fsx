@@ -49,6 +49,21 @@ let ``some variable name`` = test "first test example" {
     [lang=powershell]
     .\tools\Persimmon.Console\tools\Persimmon.Console.exe 'input file path'
 
+テスト名の省略
+--------------
+
+``UseTestNameByReflection`` モジュールを open してください:
+
+*)
+
+open UseTestNameByReflection
+
+let ``first test name`` = test {
+    do! assertEquals 0 (4 % 2)
+}
+
+(**
+
 例外テスト
 ----------
 
@@ -58,7 +73,7 @@ let ``some variable name`` = test "first test example" {
 
 exception MyException
 
-let ``exception test`` = test "exn test" {
+let ``exception test`` = test {
   let f () =
     raise MyException
     42
@@ -78,7 +93,7 @@ Persimmon は パラメータ化されたテストに対応しています。
 *)
 
 let ``case parameterize test`` =
-  let parameterizeTest (x, y) = test "case parameterize test" {
+  let parameterizeTest (x, y) = test {
     do! assertEquals x y
   }
   parameterize {
@@ -90,24 +105,13 @@ let ``case parameterize test`` =
 let inputs = [ 2 .. 2 .. 20 ]
 
 let ``source parameterize test`` =
-  let parameterizeTest x = test "source parameterize test" {
+  let parameterizeTest x = test {
     do! assertEquals 0 (x % 2)
   }
   parameterize {
     source inputs
     run parameterizeTest
   }
-
-(**
-
-テスト名の省略
---------------
-
-``UseTestNameByReflection`` モジュールを open してください:
-
-*)
-
-open UseTestNameByReflection
 
 (**
 

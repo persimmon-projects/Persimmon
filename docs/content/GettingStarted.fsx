@@ -49,6 +49,21 @@ Run the command below:
     [lang=powershell]
     .\tools\Persimmon.Console\tools\Persimmon.Console.exe 'input file path'
 
+Omitting test name
+------------------
+
+Open ``UseTestNameByReflection`` module:
+
+*)
+
+open UseTestNameByReflection
+
+let ``first test example`` = test {
+    do! assertEquals 0 (4 % 2)
+}
+
+(**
+
 Testing exceptions
 ------------------
 
@@ -58,7 +73,7 @@ Testing exceptions
 
 exception MyException
 
-let ``exception test`` = test "exn test" {
+let ``exception test`` = test {
   let f () =
     raise MyException
     42
@@ -78,7 +93,7 @@ Persimmon supports parameterized tests.
 *)
 
 let ``case parameterize test`` =
-  let parameterizeTest (x, y) = test "case parameterize test" {
+  let parameterizeTest (x, y) = test {
     do! assertEquals x y
   }
   parameterize {
@@ -90,24 +105,13 @@ let ``case parameterize test`` =
 let inputs = [ 2 .. 2 .. 20 ]
 
 let ``source parameterize test`` =
-  let parameterizeTest x = test "source parameterize test" {
+  let parameterizeTest x = test {
     do! assertEquals 0 (x % 2)
   }
   parameterize {
     source inputs
     run parameterizeTest
   }
-
-(**
-
-Omitting test name
-------------------
-
-Open ``UseTestNameByReflection`` module:
-
-*)
-
-open UseTestNameByReflection
 
 (**
 
