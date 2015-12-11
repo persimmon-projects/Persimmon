@@ -44,8 +44,7 @@
 
 <p>コンピュテーション式を用いることで、既存の F# のためのテスティングフレームワークよりも簡潔に、柔軟に、安全にテストを書けます。</p>
 
-<pre class="fssnip">
-<span class="k">let</span> <span onmouseout="hideTip(event, 'fs5', 6)" onmouseover="showTip(event, 'fs5', 6)" class="f">f</span> <span onmouseout="hideTip(event, 'fs6', 7)" onmouseover="showTip(event, 'fs6', 7)" class="i">n</span> <span class="o">=</span>
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span onmouseout="hideTip(event, 'fs5', 6)" onmouseover="showTip(event, 'fs5', 6)" class="f">f</span> <span onmouseout="hideTip(event, 'fs6', 7)" onmouseover="showTip(event, 'fs6', 7)" class="i">n</span> <span class="o">=</span>
   <span class="k">if</span> <span onmouseout="hideTip(event, 'fs6', 8)" onmouseover="showTip(event, 'fs6', 8)" class="i">n</span> <span class="o">&gt;</span> <span class="n">0</span> <span class="k">then</span> <span onmouseout="hideTip(event, 'fs6', 9)" onmouseover="showTip(event, 'fs6', 9)" class="i">n</span> <span class="o">*</span> <span class="n">2</span>
   <span class="k">else</span> <span onmouseout="hideTip(event, 'fs7', 10)" onmouseover="showTip(event, 'fs7', 10)" class="f">failwith</span> <span class="s">&quot;oops!&quot;</span>
 
@@ -58,8 +57,7 @@
     <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs10', 20)" onmouseover="showTip(event, 'fs10', 20)" class="f">assertEquals</span> (<span onmouseout="hideTip(event, 'fs14', 21)" onmouseover="showTip(event, 'fs14', 21)" class="i">typeof</span><span class="o">&lt;</span><span onmouseout="hideTip(event, 'fs15', 22)" onmouseover="showTip(event, 'fs15', 22)" class="t">exn</span><span class="o">&gt;</span>) (<span onmouseout="hideTip(event, 'fs11', 23)" onmouseover="showTip(event, 'fs11', 23)" class="i">e</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs16', 24)" onmouseover="showTip(event, 'fs16', 24)" class="f">GetType</span>())
   }
 ]
-</pre>
-
+</code></pre>
 
 <h2>テストのマーク</h2>
 
@@ -74,8 +72,7 @@
 
 <p>Persimmon のテストはいくつかのテストを受け取って新しいテストを返せます。</p>
 
-<pre class="fssnip">
-<span class="k">let</span> <span onmouseout="hideTip(event, 'fs17', 25)" onmouseover="showTip(event, 'fs17', 25)" class="f">getSomeData</span> <span onmouseout="hideTip(event, 'fs18', 26)" onmouseover="showTip(event, 'fs18', 26)" class="i">x</span> <span onmouseout="hideTip(event, 'fs19', 27)" onmouseover="showTip(event, 'fs19', 27)" class="i">y</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs9', 28)" onmouseover="showTip(event, 'fs9', 28)" class="f">test</span> <span class="s">&quot;&quot;</span> {
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span onmouseout="hideTip(event, 'fs17', 25)" onmouseover="showTip(event, 'fs17', 25)" class="f">getSomeData</span> <span onmouseout="hideTip(event, 'fs18', 26)" onmouseover="showTip(event, 'fs18', 26)" class="i">x</span> <span onmouseout="hideTip(event, 'fs19', 27)" onmouseover="showTip(event, 'fs19', 27)" class="i">y</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs9', 28)" onmouseover="showTip(event, 'fs9', 28)" class="f">test</span> <span class="s">&quot;&quot;</span> {
   <span class="k">let</span> <span onmouseout="hideTip(event, 'fs20', 29)" onmouseover="showTip(event, 'fs20', 29)" class="i">provider</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs4', 30)" onmouseover="showTip(event, 'fs4', 30)" class="f">getProvider</span> <span onmouseout="hideTip(event, 'fs18', 31)" onmouseover="showTip(event, 'fs18', 31)" class="i">x</span>
   <span class="k">let</span> <span onmouseout="hideTip(event, 'fs21', 32)" onmouseover="showTip(event, 'fs21', 32)" class="i">res</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs20', 33)" onmouseover="showTip(event, 'fs20', 33)" class="i">provider</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs22', 34)" onmouseover="showTip(event, 'fs22', 34)" class="f">getSomeData</span> <span onmouseout="hideTip(event, 'fs19', 35)" onmouseover="showTip(event, 'fs19', 35)" class="i">y</span>
   <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs23', 36)" onmouseover="showTip(event, 'fs23', 36)" class="f">assertNotEquals</span> <span class="s">&quot;&quot;</span> <span onmouseout="hideTip(event, 'fs21', 37)" onmouseover="showTip(event, 'fs21', 37)" class="i">res</span>
@@ -92,8 +89,7 @@
     <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs10', 48)" onmouseover="showTip(event, 'fs10', 48)" class="f">assertEquals</span> <span class="s">&quot;ten&quot;</span> <span onmouseout="hideTip(event, 'fs25', 49)" onmouseover="showTip(event, 'fs25', 49)" class="i">data</span>
   }
 ]
-</pre>
-
+</code></pre>
 
 <h2>継続可能なアサーション</h2>
 
@@ -101,8 +97,7 @@
 また Persimmon はテスト内のすべての違反したアサーションを列挙できます。
 この振る舞いは情報量を犠牲にせずにテストの記述を簡略化できるというという利点をもたらします。</p>
 
-<pre class="fssnip">
-<span class="c">// このテストは2つのアサーション違反をレポートします。</span>
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="c">// このテストは2つのアサーション違反をレポートします。</span>
 <span class="k">let</span> <span onmouseout="hideTip(event, 'fs26', 50)" onmouseover="showTip(event, 'fs26', 50)" class="i">``some assertions test``</span> <span class="o">=</span> [
   <span onmouseout="hideTip(event, 'fs9', 51)" onmouseover="showTip(event, 'fs9', 51)" class="f">test</span> <span class="s">&quot;test1&quot;</span> {
     <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs10', 52)" onmouseover="showTip(event, 'fs10', 52)" class="f">assertEquals</span> <span class="n">1</span> <span class="n">2</span> <span class="c">// 実行し違反する</span>
@@ -110,8 +105,7 @@
     <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs10', 54)" onmouseover="showTip(event, 'fs10', 54)" class="f">assertEquals</span> <span class="n">3</span> <span class="n">4</span> <span class="c">// 実行を続け違反する</span>
   }
 ]
-</pre>
-
+</code></pre>
 
 </div>
 
@@ -127,7 +121,7 @@
 <div class="tip" id="fs10">val assertEquals : expected:&#39;a -&gt; actual:&#39;a -&gt; AssertionResult&lt;unit&gt; (requires equality)<br /><br />Full name: Persimmon.Assertions.assertEquals</div>
 <div class="tip" id="fs11">val e : exn</div>
 <div class="tip" id="fs12">val trap : TrapBuilder<br /><br />Full name: Persimmon.Syntax.trap</div>
-<div class="tip" id="fs13">custom operation: it (&#39;a)<br /><br />Calls TrapBuilder.It </div>
+<div class="tip" id="fs13">custom operation: it (&#39;b)<br /><br />Calls TrapBuilder.It </div>
 <div class="tip" id="fs14">val typeof&lt;&#39;T&gt; : System.Type<br /><br />Full name: Microsoft.FSharp.Core.Operators.typeof</div>
 <div class="tip" id="fs15">type exn = System.Exception<br /><br />Full name: Microsoft.FSharp.Core.exn</div>
 <div class="tip" id="fs16">System.Exception.GetType() : System.Type</div>
@@ -137,7 +131,7 @@
 <div class="tip" id="fs20">val provider : Provider</div>
 <div class="tip" id="fs21">val res : string</div>
 <div class="tip" id="fs22">member Provider.getSomeData : &#39;a -&gt; string</div>
-<div class="tip" id="fs23">val assertNotEquals : notExpected:&#39;a -&gt; actual:&#39;a -&gt; AssertionResult&lt;unit&gt; (requires equality)<br /><br />Full name: Persimmon.Assertions.assertNotEquals</div>
+<div class="tip" id="fs23">val assertNotEquals : notExpected:&#39;c -&gt; actual:&#39;c -&gt; AssertionResult&lt;unit&gt; (requires equality)<br /><br />Full name: Persimmon.Assertions.assertNotEquals</div>
 <div class="tip" id="fs24">val composedTests : TestCase&lt;unit&gt; list<br /><br />Full name: Features.composedTests</div>
 <div class="tip" id="fs25">val data : string</div>
 <div class="tip" id="fs26">val ( some assertions test ) : TestCase&lt;unit&gt; list<br /><br />Full name: Features.( some assertions test )</div>
