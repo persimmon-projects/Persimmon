@@ -11,6 +11,12 @@ module PersimmonTest =
     }
     |> shouldPassed 1
 
+  let ``'pass' function should always pass in do-bang notation`` =
+    test "'pass' function should always pass in do-bang notation" {
+      do! pass ()
+    }
+    |> shouldPassed ()
+
   let ``'fail' function should always fail`` =
     let msg = "always fail"
     test "'fail' function should always fail" {
