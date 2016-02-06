@@ -1,9 +1,8 @@
 (*** hide ***)
 // このコードブロックは生成された HTML ドキュメントでは省略されます。ドキュメントで
 // 見せたくない補助的なものを定義するために使います。
-#I "../../../Persimmon/bin/Release"
-#I "../../../Persimmon.Runner/bin/Release"
-#r "Persimmon"
+#I "../../../src/Persimmon/bin/Release"
+#I "../../../src/Persimmon.Runner/bin/Release"
 open Persimmon
 
 type Provider() =

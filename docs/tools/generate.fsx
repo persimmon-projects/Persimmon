@@ -36,7 +36,7 @@ let root = "file://" + (__SOURCE_DIRECTORY__ @@ "../output")
 let configuration = "Debug"
 #endif
 
-let bin = __SOURCE_DIRECTORY__ @@ "../../Persimmon.Console/bin" @@ configuration
+let bin = __SOURCE_DIRECTORY__ @@ "../../src/Persimmon.Console/bin" @@ configuration
 let content = __SOURCE_DIRECTORY__ @@ "../content"
 let output = __SOURCE_DIRECTORY__ @@ "../output"
 let files = __SOURCE_DIRECTORY__ @@ "../files"
@@ -54,7 +54,7 @@ let buildReference () =
   let outputDir = output @@ "reference"
   System.IO.Directory.CreateDirectory(outputDir) |> ignore
   MetadataFormat.Generate(
-    referenceBinaries |> List.map (fun lib -> __SOURCE_DIRECTORY__ @@  "../.." @@ Path.GetFileNameWithoutExtension(lib) @@ "bin" @@ configuration @@ lib),
+    referenceBinaries |> List.map (fun lib -> __SOURCE_DIRECTORY__ @@  "../../src" @@ Path.GetFileNameWithoutExtension(lib) @@ "bin" @@ configuration @@ lib),
     outputDir,
     layoutRoots,
     otherFlags = [
@@ -64,7 +64,7 @@ let buildReference () =
     ],
     parameters = ("root", root)::info,
     sourceRepo = githubLink @@ "tree/master",
-    sourceFolder = __SOURCE_DIRECTORY__ @@ ".." @@ "..",
+    sourceFolder = __SOURCE_DIRECTORY__ @@ ".." @@ ".." @@ "src",
     publicOnly = true)
 
 let buildDocumentation () =

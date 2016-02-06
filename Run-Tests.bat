@@ -11,8 +11,8 @@ IF not exist packages\Persimmon.Console (
 echo CONFIGURATION: %CONFIGURATION%.
 
 echo run Persimmon.Tests.
-.\packages\Persimmon.Console\tools\Persimmon.Console.exe .\Persimmon.Tests\bin\%CONFIGURATION%/Persimmon.Tests.dll
+.\packages\Persimmon.Console\tools\Persimmon.Console.exe .\tests\Persimmon.Tests\bin\%CONFIGURATION%/Persimmon.Tests.dll
 echo ======================================================================
 
 echo run Persimmon.Script.Tests.
-.\packages\Persimmon.Console\tools\Persimmon.Console.exe .\Persimmon.Script.Tests\bin\%CONFIGURATION%/Persimmon.Script.Tests.dll
+.\packages\Persimmon.Console\tools\Persimmon.Console.exe .\tests\Persimmon.Script.Tests\bin\%CONFIGURATION%/Persimmon.Script.Tests.dll

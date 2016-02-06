@@ -2,7 +2,7 @@ process
 {
   $exitCode = 0
 
-  & .\Persimmon.Console\bin\$env:configuration\Persimmon.Console.exe --format:xml --output:results.xml .\Persimmon.Tests\bin\$env:configuration\Persimmon.Tests.dll .\Persimmon.Script.Tests\bin\$env:configuration\Persimmon.Script.Tests.dll
+  & .\src\Persimmon.Console\bin\$env:configuration\Persimmon.Console.exe --format:xml --output:results.xml .\tests\Persimmon.Tests\bin\$env:configuration\Persimmon.Tests.dll .\tests\Persimmon.Script.Tests\bin\$env:configuration\Persimmon.Script.Tests.dll
 
   if (-not $?)
   {
