@@ -45,8 +45,16 @@ module PrettyPrinterTest =
     do! assertEquals "[|1; 2; 3|]" (print (typeof<int []>, [| 1; 2; 3 |]))
   }
 
-  let ``printer should print list in a row`` = test {
-    do! assertEquals "[1; 2; 3]" (print (typeof<int list>, [ 1; 2; 3 ]))
+  type A = A of int * string
+
+  let ``printer should print list in a row`` = parameterize {
+    source [
+      List.map box [1; 2; 3], typeof<int list>, "[1; 2; 3]"
+      [A (2, "3")], typeof<A>, """[A(2, "3")]"""
+    ]
+    run (fun (value, typ, expected) -> test {
+      do! assertEquals expected (print (typ, value))
+    })
   }
 
   let ``printer should print seq in a row`` = test {

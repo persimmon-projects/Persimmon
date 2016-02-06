@@ -6,8 +6,14 @@ open Microsoft.FSharp.Reflection
 
 module internal PrettyPrinter =
 
+  let rec private printCollections printer (t: Type) (o: IEnumerable) =
+    let tmp = ResizeArray()
+    let t = t.GetElementType()
+    for x in o do tmp.Add(print (t, x))
+    tmp |> String.concat "; " |> printer
+
   // limitation: This function print "null" if Type.Name equals "Object" and object is () or None.
-  let rec print (t: Type, o: obj) =
+  and print (t: Type, o: obj) =
     match o with
     | null ->
       if t.Name = "Unit" then "()"
@@ -40,7 +46,8 @@ module internal PrettyPrinter =
         for x in o :?> Array do tmp.Add(print (t, x))
         tmp |> String.concat "; " |> sprintf "[|%s|]"
       elif t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<_ list> then
-        string o
+        o :?> IEnumerable
+        |> printCollections (sprintf "[%s]") t
       elif FSharpType.IsUnion t then
         let u, fs = FSharpValue.GetUnionFields(o, t)
         if Array.isEmpty fs then u.Name
@@ -59,10 +66,7 @@ module internal PrettyPrinter =
       else
         match o with
         | :? IEnumerable as o ->
-          let tmp = ResizeArray()
-          let t = t.GetElementType()
-          for x in o do tmp.Add(print (t, x))
-          tmp |> String.concat "; " |> sprintf "seq [%s]"
+          printCollections (sprintf "seq [%s]") t o
         | _ -> string o
 
   let printAll os = os |> List.map print |> String.concat ", "
