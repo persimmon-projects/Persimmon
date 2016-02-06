@@ -47,21 +47,29 @@ module private Impl =
   let persimmonTestMethods (m: MethodInfo) =
     persimmonTests (fun () -> m.Invoke(null, [||])) m.ReturnType m.Name
 
-  let rec testObjects (typ: Type) =
-    seq {
-      yield!
-        typ.GetProperties(BindingFlags.Static ||| BindingFlags.Public)
-        |> Seq.collect persimmonTestProps
-      yield!
-        typ.GetMethods(BindingFlags.Static ||| BindingFlags.Public)
-        |> Seq.filter (fun m -> not m.IsSpecialName) // ignore getter methods
-        |> Seq.filter (fun m -> m.GetParameters() |> Array.isEmpty)
-        |> Seq.collect persimmonTestMethods
-      for nestedType in publicNestedTypes typ do
-        let objs = testObjects nestedType
-        if Seq.isEmpty objs then ()
-        else yield Context(nestedType.Name, objs |> Seq.toList) :> TestObject
-    }
+  let testObjects (typ: Type) =
+    let rec inner depth (typ: Type) =
+      let objs =
+        seq {
+          yield!
+            typ.GetProperties(BindingFlags.Static ||| BindingFlags.Public)
+            |> Seq.collect persimmonTestProps
+          yield!
+            typ.GetMethods(BindingFlags.Static ||| BindingFlags.Public)
+            |> Seq.filter (fun m -> not m.IsSpecialName) // ignore getter methods
+            |> Seq.filter (fun m -> m.GetParameters() |> Array.isEmpty)
+            |> Seq.collect persimmonTestMethods
+          for nestedType in publicNestedTypes typ do
+            let objs = inner (depth + 1) nestedType
+            if Seq.isEmpty objs then ()
+            else yield Context(nestedType.Name, objs |> Seq.toList) :> TestObject
+        }
+      if Seq.isEmpty objs then Seq.empty
+      elif depth > 0 then objs
+      else
+        Context(typ.FullName, objs |> Seq.toList) :> TestObject
+        |> Seq.singleton
+    inner 0 typ
 
 let collectRootTestObjects (asms: Assembly list) =
   asms
