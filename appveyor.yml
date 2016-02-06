@@ -15,4 +15,4 @@ configuration:
   - Release
 
 test_script:
-  - ps: iex "Persimmon.Console\bin\$env:configuration\Persimmon.Console.exe Persimmon.Tests\bin\$env:configuration\Persimmon.Tests.dll Persimmon.Script.Tests\bin\$env:configuration\Persimmon.Script.Tests.dll"
+  - ps: .\Run-Tests-On-CI.ps1
