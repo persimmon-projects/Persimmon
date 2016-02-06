@@ -7,8 +7,8 @@ open System.Runtime.InteropServices
 [<assembly: AssemblyProduct("Persimmon.Runner")>]
 [<assembly: Guid("EB676E7D-9D9D-47C2-A6DC-173B536641B1")>]
 
-[<assembly: AssemblyVersion("1.0.1")>]
-[<assembly: AssemblyFileVersion("1.0.1")>]
-[<assembly: AssemblyInformationalVersion("1.0.1")>]
+[<assembly: AssemblyVersion("1.0.2")>]
+[<assembly: AssemblyFileVersion("1.0.2")>]
+[<assembly: AssemblyInformationalVersion("1.0.2")>]
 
 do ()

@@ -8,9 +8,9 @@ open System.Runtime.CompilerServices
 [<assembly: AssemblyProduct("Persimmon")>]
 [<assembly: Guid("F5EB6EEA-FA93-4F0D-9C23-60A91DB012DB")>]
 
-[<assembly: AssemblyVersion("1.0.1")>]
-[<assembly: AssemblyFileVersion("1.0.1")>]
-[<assembly: AssemblyInformationalVersion("1.0.1")>]
+[<assembly: AssemblyVersion("1.0.2")>]
+[<assembly: AssemblyFileVersion("1.0.2")>]
+[<assembly: AssemblyInformationalVersion("1.0.2")>]
 
 [<assembly: InternalsVisibleTo("Persimmon.Tests")>]
 
