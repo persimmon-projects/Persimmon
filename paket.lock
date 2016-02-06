@@ -1,0 +1,4 @@
+NUGET
+  remote: http://api.nuget.org/v3/index.json
+  specs:
+    Nuget.CommandLine (3.3.0)
