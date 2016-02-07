@@ -121,8 +121,24 @@ Target "RunTests" (fun _ ->
     |> Persimmon (fun p ->
       { p with
           ToolPath = findToolInSubPath "Persimmon.Console.exe" (currentDirectory @@ "src" @@ "Persimmon.Console")
-          Output = OutputDestination.XmlFile "results.xml"
+          Output = OutputDestination.XmlFile "TestResult.xml"
       }
+    )
+)
+
+let isAppVeyor = buildServer = AppVeyor
+
+Target "UploadTestResults" (fun _ ->
+    let url = sprintf "https://ci.appveyor.com/api/testresults/junit/%s" AppVeyor.AppVeyorEnvironment.JobId
+    let files = System.IO.Directory.GetFiles(path = currentDirectory, searchPattern = "*.xml")
+    use wc = new System.Net.WebClient()
+    files
+    |> Seq.iter (fun file ->
+        try
+            wc.UploadFile(url, file) |> ignore
+            printfn "Successfully uploaded test results %s" file
+        with
+        | ex -> printfn "An error occurred while uploading %s:\r\n%O" file ex
     )
 )
 
@@ -295,6 +311,7 @@ Target "All" DoNothing
   ==> "Build"
   ==> "CopyBinaries"
   ==> "RunTests"
+  =?> ("UploadTestResults",isAppVeyor)
   =?> ("GenerateReferenceDocs",isLocalBuild)
   =?> ("GenerateDocs",isLocalBuild)
   ==> "All"

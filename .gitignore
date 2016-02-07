@@ -194,4 +194,3 @@ paket-files
 .paket/paket.exe
 .fake/
 docs/content/release-notes.md
-results.xml
