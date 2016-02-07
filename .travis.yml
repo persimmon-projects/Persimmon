@@ -1,16 +1,11 @@
-language: objective-c
+language: csharp
 
-env:
-  global:
-    - CONFIGURATION="Release"
-  matrix:
-    - MONO_VERSION="3.10.0"
+sudo: false
 
-install:
-  - wget "http://download.mono-project.com/archive/${MONO_VERSION}/macos-10-x86/MonoFramework-MDK-${MONO_VERSION}.macos10.xamarin.x86.pkg"
-  - sudo installer -pkg "MonoFramework-MDK-${MONO_VERSION}.macos10.xamarin.x86.pkg" -target /
+mono:
+  - 3.10.0
+solution: Persimmon.sln
 
 script:
-  - xbuild ./Persimmon.sln /p:Configuration=${CONFIGURATION}
-  - mono --runtime=v4.0 ./src/Persimmon.Console/bin/${CONFIGURATION}/Persimmon.Console.exe ./tests/Persimmon.Tests/bin/${CONFIGURATION}/Persimmon.Tests.dll ./tests/Persimmon.Script.Tests/bin/${CONFIGURATION}/Persimmon.Script.Tests.dll
+  - ./build.sh
 
