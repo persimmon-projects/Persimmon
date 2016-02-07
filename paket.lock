@@ -5,6 +5,12 @@ NUGET
     FAKE.Lib (4.20.0)
     FAKE.Persimmon (1.0.2)
       FAKE.Lib (>= 4.1.0)
+    FSharp.Compiler.Service (2.0.0.4)
+    FSharp.Formatting (2.14.0)
+      FSharp.Compiler.Service (>= 2.0.0.3 < 2.1.0)
+      FSharpVSPowerTools.Core (>= 2.3.0 < 2.4.0)
+    FSharpVSPowerTools.Core (2.3.0)
+      FSharp.Compiler.Service (>= 2.0.0.3)
     Microsoft.Bcl (1.1.10)
       Microsoft.Bcl.Build (>= 1.0.14)
     Microsoft.Bcl.Build (1.0.21) - import_targets: false
