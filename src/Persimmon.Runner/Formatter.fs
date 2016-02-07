@@ -173,8 +173,7 @@ module Formatter =
             sprintf "%s.%s" x.Value ctx.Name
         let nameAttr = XAttribute(xname "name", name)
         acc.Add(nameAttr)
-        let suite = ctx.Children |> Seq.fold inner acc
-        suite
+        ctx.Children |> Seq.fold inner acc
       | TestResult tr ->
         let testCase = XElement(xname "testcase", XAttribute(xname "name", tr.FullName))
         match tr with
@@ -203,8 +202,14 @@ module Formatter =
               XAttribute(xname "time", duration.ToString()))
         acc.Add(testCase)
         acc
-      let suite = XElement(xname "testsuite")
-      inner suite result
+      let suite = inner (XElement(xname "testsuite")) result
+      let summary = result |> Summary.collectSummary Summary.empty
+      suite.Add(
+        XAttribute(xname "tests", summary.Run),
+        XAttribute(xname "failures", summary.Violated),
+        XAttribute(xname "errors", summary.Error),
+        XAttribute(xname "skipped", summary.Skipped))
+      suite
 
     let addSummary (watch: Stopwatch) results (suites: XElement) =
       let summary = results |> Seq.fold Summary.collectSummary { Summary.empty with Duration = watch.Elapsed }
@@ -220,4 +225,4 @@ module Formatter =
         member __.Format(results: ITestResult seq) =
           let xdocument = XDocument(XElement(xname "testsuites", results |> Seq.map toXDocument) |> addSummary watch results)
           Writable.xdocument(xdocument)
-        }
+      }
