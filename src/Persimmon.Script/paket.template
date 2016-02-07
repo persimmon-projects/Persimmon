@@ -1,0 +1,17 @@
+type project
+owners
+    bleis-tift, Gab-km, pocketberserker
+authors
+    bleis-tift, Gab-km, pocketberserker
+projectUrl
+    https://github.com/persimmon-projects/Persimmon
+licenseUrl
+    https://github.com/persimmon-projects/Persimmon/blob/master/LICENSE
+iconUrl
+    https://raw.githubusercontent.com/persimmon-projects/Persimmon/master/docs/files/images/logo.png
+requireLicenseAcceptance
+    false
+tags
+    fsharp testing script
+description
+    script runner for Persimmon

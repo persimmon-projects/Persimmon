@@ -1,0 +1,23 @@
+type file
+id Persimmon.Console
+owners
+    bleis-tift, Gab-km, pocketberserker
+authors
+    bleis-tift, Gab-km, pocketberserker
+projectUrl
+    https://github.com/persimmon-projects/Persimmon
+licenseUrl
+    https://github.com/persimmon-projects/Persimmon/blob/master/LICENSE
+iconUrl
+    https://raw.githubusercontent.com/persimmon-projects/Persimmon/master/docs/files/images/logo.png
+requireLicenseAcceptance
+    false
+tags
+    fsharp testing test
+description
+    The console command-line runner for Persimmon.
+files
+    bin/Release/*.exe ==> tools
+    bin/Release/*.config ==> tools
+    bin/Release/*.dll ==> tools
+    !bin/Release/*.XML
