@@ -1,9 +1,8 @@
 (*** hide ***)
 // This block of code is omitted in the generated HTML documentation. Use
 // it to define helpers that you do not want to show in the documentation.
-#I "../../Persimmon/bin/Release"
-#I "../../Persimmon.Runner/bin/Release"
-#r "Persimmon"
+#I "../../src/Persimmon/bin/Release"
+#I "../../src/Persimmon.Runner/bin/Release"
 
 (**
 <div class="blog-post">

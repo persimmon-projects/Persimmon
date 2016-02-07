@@ -1,4 +1,3 @@
-nuget-packages/
 docs/output/
 
 # Created by https://www.gitignore.io
@@ -189,4 +188,9 @@ UpgradeLog*.htm
 # Microsoft Fakes
 FakesAssemblies/
 
-results.xml
+localpackages/
+paket-files
+*.orig
+.paket/paket.exe
+.fake/
+docs/content/release-notes.md

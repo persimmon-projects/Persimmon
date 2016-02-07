@@ -3,29 +3,27 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon", "Persimmon\Persimmon.fsproj", "{F1D851FD-A776-4204-B287-5C14C3AA198C}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.Tests", "Persimmon.Tests\Persimmon.Tests.fsproj", "{2A2B88F1-BDA8-4D1C-8BF1-43A4CD5F266C}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{B556740B-5636-467C-AFC3-47994B1D5CBC}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{CE82B0A4-59E5-4B8E-8705-1D4960C471A7}"
 	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
+		paket.dependencies = paket.dependencies
 	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.Console", "Persimmon.Console\Persimmon.Console.fsproj", "{FB2AFFD6-76D4-4C18-8750-588ADA5C0E21}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon", "src\Persimmon\Persimmon.fsproj", "{F1D851FD-A776-4204-B287-5C14C3AA198C}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.Tests", "tests\Persimmon.Tests\Persimmon.Tests.fsproj", "{2A2B88F1-BDA8-4D1C-8BF1-43A4CD5F266C}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.Console", "src\Persimmon.Console\Persimmon.Console.fsproj", "{FB2AFFD6-76D4-4C18-8750-588ADA5C0E21}"
 	ProjectSection(ProjectDependencies) = postProject
 		{2A2B88F1-BDA8-4D1C-8BF1-43A4CD5F266C} = {2A2B88F1-BDA8-4D1C-8BF1-43A4CD5F266C}
 	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.Sample", "Persimmon.Sample\Persimmon.Sample.fsproj", "{17ECB810-C2D1-4B01-AC10-42447EF6E591}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.Sample", "examples\Persimmon.Sample\Persimmon.Sample.fsproj", "{17ECB810-C2D1-4B01-AC10-42447EF6E591}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.Runner", "Persimmon.Runner\Persimmon.Runner.fsproj", "{585B95FD-6B0C-4B45-A4CF-F44098A8BA49}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.Runner", "src\Persimmon.Runner\Persimmon.Runner.fsproj", "{585B95FD-6B0C-4B45-A4CF-F44098A8BA49}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.Script", "Persimmon.Script\Persimmon.Script.fsproj", "{5350367C-C03C-4E05-9D46-6ADB64F8BC6A}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.Script", "src\Persimmon.Script\Persimmon.Script.fsproj", "{5350367C-C03C-4E05-9D46-6ADB64F8BC6A}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.Script.Tests", "Persimmon.Script.Tests\Persimmon.Script.Tests.fsproj", "{5CC5FE08-D88A-436E-83A8-57CDACD8E2CE}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.Script.Tests", "tests\Persimmon.Script.Tests\Persimmon.Script.Tests.fsproj", "{5CC5FE08-D88A-436E-83A8-57CDACD8E2CE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

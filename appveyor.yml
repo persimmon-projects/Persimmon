@@ -11,8 +11,7 @@ skip_commits:
 
 clone_depth: 50
 
-configuration:
-  - Release
+test: off
 
-test_script:
-  - ps: .\Run-Tests-On-CI.ps1
+build_script:
+  - cmd: build.cmd
