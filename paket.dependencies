@@ -1,10 +1,11 @@
-source https://api.nuget.org/v3/index.json
-source https://www.nuget.org/api/v2
+group Build
+  source https://api.nuget.org/v3/index.json
+  source https://www.nuget.org/api/v2
 
-nuget FAKE
-nuget FAKE.Persimmon
-nuget NuGet.CommandLine
-nuget SourceLink.Fake
-nuget FSharp.Formatting
+  nuget FAKE
+  nuget FAKE.Persimmon
+  nuget NuGet.CommandLine
+  nuget SourceLink.Fake
+  nuget FSharp.Formatting
 
-github fsharp/FAKE modules/Octokit/Octokit.fsx
+  github fsharp/FAKE modules/Octokit/Octokit.fsx

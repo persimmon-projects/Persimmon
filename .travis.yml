@@ -6,6 +6,9 @@ mono:
   - 3.10.0
 solution: Persimmon.sln
 
+
+before_script:
+  - chmod +x ./build.sh
 script:
   - ./build.sh
 
