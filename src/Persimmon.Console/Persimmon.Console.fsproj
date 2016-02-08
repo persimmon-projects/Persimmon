@@ -54,6 +54,9 @@
     <Compile Include="Args.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
+    <None Include="..\..\Persimmon.snk">
+      <Link>Persimmon.snk</Link>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Persimmon.Runner\Persimmon.Runner.fsproj">
@@ -69,6 +72,10 @@
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\Persimmon.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '11.0'">
