@@ -120,10 +120,12 @@ with
 
 /// This class represents a test that has not been run yet.
 /// In order to run the test represented this class, use the "Run" method.
-type TestCase<'T>(metadata: TestMetadata, body: unit -> TestResult<'T>) =
+type TestCase<'T>(metadata: TestMetadata, body: Lazy<TestResult<'T>>) =
   inherit TestObject ()
 
-  new (name, parameters, body) = TestCase<_>({ Name = name; Parameters = parameters }, body)
+  new (metadata, body) = TestCase<_>(metadata, lazy body ())
+  new (name, parameters, body: Lazy<_>) = TestCase<_>({ Name = name; Parameters = parameters }, body)
+  new (name, parameters, body) = TestCase<_>({ Name = name; Parameters = parameters }, lazy body ())
 
   override __.SetNameIfNeed(newName: string) =
     TestCase<'T>({ metadata with Name = match metadata.Name with None -> Some newName | _ -> metadata.Name }, body) :> TestObject
@@ -140,7 +142,7 @@ type TestCase<'T>(metadata: TestMetadata, body: unit -> TestResult<'T>) =
   /// Execute the test.
   member __.Run() =
     let watch = Stopwatch.StartNew()
-    let result = body ()
+    let result = body.Value
     watch.Stop()
     match result with
     | Error (_, errs, res, _) -> Error (metadata, errs, res, watch.Elapsed)
