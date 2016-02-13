@@ -1,5 +1,5 @@
-#r @"..\Persimmon\bin\Debug\Persimmon.dll"
-#r @"..\Persimmon.Script\bin\Debug\Persimmon.Script.dll"
+#r @"..\..\src\Persimmon\bin\Debug\Persimmon.dll"
+#r @"..\..\src\Persimmon.Script\bin\Debug\Persimmon.Script.dll"
 
 open Persimmon
 open UseTestNameByReflection
