@@ -79,9 +79,8 @@ type TestCollector() =
     target |> TestCollectorImpl.publicTypes
       |> Seq.collect TestCollectorImpl.testObjects
       |> Seq.map (fun (t, testObject) -> testObject)
-      |> Seq.toArray
 
-  member __.RunAndMarshal(target: Assembly) =
+  member __.RunAndMarshal(target: Assembly, f: Action<obj>) =
 #if DEBUG
     let currentAppDomain = AppDomain.CurrentDomain
     let assembly = Assembly.GetExecutingAssembly()
@@ -91,4 +90,4 @@ type TestCollector() =
     target |> TestCollectorImpl.publicTypes
       |> Seq.collect TestCollectorImpl.testObjects
       |> Seq.map (TestCase.ofTestObject target.FullName)
-      |> Seq.toArray
+      |> Seq.iter (fun testCase -> f.Invoke(testCase))
