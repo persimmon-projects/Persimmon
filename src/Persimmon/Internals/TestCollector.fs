@@ -61,10 +61,12 @@ module private TestCollectorImpl =
         |> Seq.filter (fun m -> m.GetParameters() |> Array.isEmpty)
         |> Seq.collect persimmonTestMethods
         |> Seq.map (fun x -> (typ, x))
+        (* TODO:
       for nestedType in publicNestedTypes typ do
         let objs = testObjects nestedType |> Seq.map snd
         if Seq.isEmpty objs then ()
         else yield (nestedType, Context(nestedType.Name, objs |> Seq.toList) :> TestObject)
+        *)
     }
 
 [<Sealed>]
@@ -80,14 +82,15 @@ type TestCollector() =
       |> Seq.collect TestCollectorImpl.testObjects
       |> Seq.map (fun (t, testObject) -> testObject)
 
-  member __.RunAndMarshal(target: Assembly, f: Action<obj>) =
+  /// RunAndMarshal is safe-serializable-types runner method.
+  member __.RunAndMarshal(target: Assembly, f: Action<obj[]>) =
 #if DEBUG
     let currentAppDomain = AppDomain.CurrentDomain
     let assembly = Assembly.GetExecutingAssembly()
     let currentFSharpFuncType = typedefof<FSharpFunc<obj, obj>>
     let currentFSharpCore = currentFSharpFuncType.Assembly
 #endif
+    // AssemblyName is safe serializing type.
     target |> TestCollectorImpl.publicTypes
       |> Seq.collect TestCollectorImpl.testObjects
-      |> Seq.map (TestCase.ofTestObject target.FullName)
-      |> Seq.iter (fun testCase -> f.Invoke(testCase))
+      |> Seq.iter (fun (t, testObject) -> f.Invoke([|testObject.FullName :> obj; t.FullName :> obj; target.GetName() :> obj|]))

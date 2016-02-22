@@ -69,6 +69,8 @@ with
 /// if you want to process derived objects through this class.
 [<AbstractClass>]
 type TestObject internal () =
+  abstract member Name : string option
+  abstract member FullName : string
   abstract member SetNameIfNeed: string -> TestObject
 
 /// This marker interface represents a test result.
@@ -85,7 +87,9 @@ type Context(name: string, children: TestObject list) =
     Context((if name = "" then newName else name), children) :> TestObject
 
   /// The context name.
-  member __.Name = name
+  override __.Name = Some name
+  /// TODO: Context is pseudo test object, not defined.
+  override __.FullName = name
   /// This is a list that has the elements represented the subcontext or the test case.
   member __.Children = children
 
@@ -131,12 +135,13 @@ type TestCase<'T>(metadata: TestMetadata, body: unit -> TestResult<'T>) =
   member internal __.Metadata = metadata
 
   /// The test name. It doesn't contain the parameters.
-  member __.Name = metadata.Name
+  override __.Name = metadata.Name
   /// The test name(if the test has parameters then the value contains them).
-  member __.FullName = metadata.FullName
+  override __.FullName = metadata.FullName
   /// The test parameters.
   /// If the test has no parameters then the value is empty list.
   member __.Parameters = metadata.Parameters
+
   /// Execute the test.
   member __.Run() =
     let watch = Stopwatch.StartNew()
