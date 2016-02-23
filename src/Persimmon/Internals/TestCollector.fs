@@ -4,9 +4,9 @@ open System
 open System.Reflection
 open Microsoft.FSharp.Collections
 
-module private TestCollectorImpl =
+open Persimmon
 
-  open Persimmon
+module private TestCollectorImpl =
 
   let publicTypes (asm: Assembly) =
     asm.GetTypes()
@@ -61,36 +61,37 @@ module private TestCollectorImpl =
         |> Seq.filter (fun m -> m.GetParameters() |> Array.isEmpty)
         |> Seq.collect persimmonTestMethods
         |> Seq.map (fun x -> (typ, x))
-        (* TODO:
       for nestedType in publicNestedTypes typ do
         let objs = testObjects nestedType |> Seq.map snd
         if Seq.isEmpty objs then ()
         else yield (nestedType, Context(nestedType.Name, objs |> Seq.toList) :> TestObject)
-        *)
     }
 
 [<Sealed>]
 type TestCollector() =
+  
+  let rec flattenItem (t:Type, testObject:TestObject) : (Type * TestObject) seq =
+    seq {
+      match testObject with
+      | :? Context as context ->
+        for child in context.Children do
+          yield! flattenItem (t, child)
+      | testObject -> yield (t, testObject)
+    }
+  and flatten (entries:(Type * TestObject) seq) : (Type * TestObject) seq =
+    seq {
+      for entry in entries do yield! flattenItem entry
+    }
+
   member __.Run(target: Assembly) =
-#if DEBUG
-    let currentAppDomain = AppDomain.CurrentDomain
-    let assembly = Assembly.GetExecutingAssembly()
-    let currentFSharpFuncType = typedefof<FSharpFunc<obj, obj>>
-    let currentFSharpCore = currentFSharpFuncType.Assembly
-#endif
     target |> TestCollectorImpl.publicTypes
       |> Seq.collect TestCollectorImpl.testObjects
       |> Seq.map (fun (t, testObject) -> testObject)
 
   /// RunAndMarshal is safe-serializable-types runner method.
   member __.RunAndMarshal(target: Assembly, f: Action<obj[]>) =
-#if DEBUG
-    let currentAppDomain = AppDomain.CurrentDomain
-    let assembly = Assembly.GetExecutingAssembly()
-    let currentFSharpFuncType = typedefof<FSharpFunc<obj, obj>>
-    let currentFSharpCore = currentFSharpFuncType.Assembly
-#endif
     // AssemblyName is safe serializing type.
     target |> TestCollectorImpl.publicTypes
       |> Seq.collect TestCollectorImpl.testObjects
-      |> Seq.iter (fun (t, testObject) -> f.Invoke([|testObject.FullName :> obj; t.FullName :> obj; target.GetName() :> obj|]))
+      |> flatten
+      |> Seq.iter (fun (t, testObject) -> f.Invoke([|testObject.FullName :> obj; t.FullName :> obj|]))
