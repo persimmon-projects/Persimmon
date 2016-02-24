@@ -3,9 +3,7 @@
 open System.IO
 open System.Xml.Linq
 
-/// This interface represents something that can write to TextWriter.
-type IWritable =
-  abstract WriteTo: writer:TextWriter -> unit
+open Persimmon.Internals
 
 /// Some implementations of the IWritable.
 module Writable =

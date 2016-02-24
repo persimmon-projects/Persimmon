@@ -1,8 +1,5 @@
 ﻿namespace Persimmon.Output
 
-type IFormatter<'T> =
-  abstract Format: 'T -> IWritable
-
 module Formatter =
   open System
   open System.Diagnostics

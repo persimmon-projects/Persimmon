@@ -6,6 +6,7 @@ open System.Diagnostics
 open Persimmon
 open Persimmon.Runner
 open Persimmon.Output
+open Persimmon.Internals
 
 module Helper =
 

@@ -67,8 +67,11 @@
     <Compile Include="Assertions.fs" />
     <Compile Include="ComputationExpressions.fs" />
     <Compile Include="Syntax.fs" />
+    <Compile Include="Output\Printer.fs" />
+    <Compile Include="Output\Reporter.fs" />
     <Compile Include="Internals\RuntimeUtil.fs" />
     <Compile Include="Internals\TestCollector.fs" />
+    <Compile Include="Internals\TestRunner.fs" />
     <None Include="..\..\Persimmon.snk">
       <Link>Persimmon.snk</Link>
     </None>
