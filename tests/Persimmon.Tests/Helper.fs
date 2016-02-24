@@ -2,6 +2,7 @@
 
 open System.IO
 open System.Diagnostics
+
 open Persimmon
 open Persimmon.Runner
 open Persimmon.Output
@@ -17,7 +18,7 @@ module Helper =
       | Passed _ -> Passed ()
       | NotPassed x -> NotPassed x), d)
     | Error (m, es, results, d) -> Error (m, es, results, d)
-    TestCase({ Name = x.Name; Parameters = x.Parameters }, fun () -> inner (run x))
+    TestCase(TestMetadata(x.Name, x.Parameters), fun () -> inner (run x))
 
   let shouldNotPassed<'T> (expectedMessages: NonEmptyList<string>) (x: TestCase<'T>) =
     let inner = function
@@ -28,7 +29,7 @@ module Helper =
         |> NonEmptyList.map (function NotPassed (Skipped x | Violated x) -> x | Persimmon.Passed x -> sprintf "Expected is NotPased but Passed(%A)" x)
         |> fun actual -> Done (m, (assertEquals expectedMessages actual, []), d)
     | Error (m, es, results, d) -> Error (m, es, results, d)
-    TestCase({ Name = x.Name; Parameters = x.Parameters }, fun () -> inner (run x))
+    TestCase(TestMetadata(x.Name, x.Parameters), fun () -> inner (run x))
 
   let shouldEqualErrorCount expected xs =
     use reporter =
@@ -36,7 +37,7 @@ module Helper =
         new Printer<_>(new StringWriter(), Formatter.ProgressFormatter.dot),
         new Printer<_>(new StringWriter(), Formatter.SummaryFormatter.normal (Stopwatch())),
         new Printer<_>(new StringWriter(), Formatter.ErrorFormatter.normal))
-    (xs |> Seq.toList |> TestRunner.runAllTests reporter).Errors
+    (xs |> TestRunner.runAllTests reporter).Errors
     |> assertEquals expected
 
   let shouldFirstRaise<'T, 'U when 'T :> exn> (x: TestCase<'U>) =
@@ -49,5 +50,4 @@ module Helper =
     | Error (m, [], results, d) ->
       Done (m, (fail (sprintf "Expect: raise %s\nActual: not raise exception" (typeof<'T>.Name)), []), d)
     | Error (m, x::_, results, d) -> Done (m, (assertEquals typeof<'T> (x.GetType()), []), d)
-    TestCase({ Name = x.Name; Parameters = x.Parameters }, fun () -> inner (run x))
-
+    TestCase(TestMetadata(x.Name, x.Parameters), fun () -> inner (run x))

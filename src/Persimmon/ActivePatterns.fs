@@ -1,6 +1,6 @@
 ﻿module Persimmon.ActivePatterns
 
-let (|Context|TestCase|) (test: TestObject) =
+let (|Context|TestCase|) (test: ITestObject) =
   match test with
   | :? Context as ctx -> Context ctx
   | tc -> TestCase (tc.GetType().GetMethod("BoxTypeParam").Invoke(tc, [||]) :?> TestCase<obj>)

@@ -32,15 +32,15 @@ module private TestCollectorImpl =
     let testObjType = typeof<TestObject>
     match typ with
     | SubTypeOf testObjType _ ->
-        yield (f () :?> TestObject).SetNameIfNeed(name)
+        yield (f () :?> ITestCase).SetNameIfNeed(name)
     | ArrayType elemType when typedefis<TestCase<_>>(elemType) || elemType = typeof<TestObject> ->
-        yield! (f (), elemType) |> RuntimeArray.map (fun x -> (x :?> TestObject).SetNameIfNeed(name) |> box)
+        yield! (f (), elemType) |> RuntimeArray.map (fun x -> (x :?> ITestCase).SetNameIfNeed(name) |> box)
     | GenericType (genTypeDef, _) when genTypeDef = typedefof<TestCase<_>> ->
-        yield (f () :?> TestObject).SetNameIfNeed(name)
+        yield (f () :?> ITestCase).SetNameIfNeed(name)
     | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ seq> && (typedefis<TestCase<_>>(elemType) || elemType = typeof<TestObject>) ->
-        yield! (f (), elemType) |> RuntimeSeq.map (fun x -> (x :?> TestObject).SetNameIfNeed(name) |> box)
+        yield! (f (), elemType) |> RuntimeSeq.map (fun x -> (x :?> ITestCase).SetNameIfNeed(name) |> box)
     | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ list> && (typedefis<TestCase<_>>(elemType) || elemType = typeof<TestObject>) ->
-        yield! (f (), elemType) |> RuntimeList.map (fun x -> (x :?> TestObject).SetNameIfNeed(name) |> box)
+        yield! (f (), elemType) |> RuntimeList.map (fun x -> (x :?> ITestCase).SetNameIfNeed(name) |> box)
     | _ -> ()
   }
 
@@ -64,13 +64,13 @@ module private TestCollectorImpl =
       for nestedType in publicNestedTypes typ do
         let objs = testObjects nestedType |> Seq.map snd
         if Seq.isEmpty objs then ()
-        else yield (nestedType, Context(nestedType.Name, objs |> Seq.toList) :> TestObject)
+        else yield (nestedType, Context(nestedType.Name, objs |> Seq.toList) :> ITestObject)
     }
 
 [<Sealed>]
 type TestCollector() =
   
-  let rec flattenItem (t:Type, testObject:TestObject) : (Type * TestObject) seq =
+  let rec flattenItem (t:Type, testObject:ITestObject) : (Type * ITestObject) seq =
     seq {
       match testObject with
       | :? Context as context ->
@@ -78,7 +78,7 @@ type TestCollector() =
           yield! flattenItem (t, child)
       | testObject -> yield (t, testObject)
     }
-  and flatten (entries:(Type * TestObject) seq) : (Type * TestObject) seq =
+  and flatten (entries:(Type * ITestObject) seq) : (Type * ITestObject) seq =
     seq {
       for entry in entries do yield! flattenItem entry
     }
@@ -94,4 +94,4 @@ type TestCollector() =
     target |> TestCollectorImpl.publicTypes
       |> Seq.collect TestCollectorImpl.testObjects
       |> flatten
-      |> Seq.iter (fun (t, testObject) -> f.Invoke([|testObject.FullName :> obj; t.FullName :> obj|]))
+      |> Seq.iter (fun (t, testObject) -> f.Invoke([|testObject.Name :> obj; t.FullName :> obj|]))

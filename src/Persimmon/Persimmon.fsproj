@@ -59,7 +59,10 @@
     <Compile Include="NonEmptyList.fsi" />
     <Compile Include="NonEmptyList.fs" />
     <Compile Include="PrettyPrinter.fs" />
+    <Compile Include="Interfaces.fs" />
     <Compile Include="Types.fs" />
+    <Compile Include="TestResult.fs" />
+    <Compile Include="TestCase.fs" />
     <Compile Include="ActivePatterns.fs" />
     <Compile Include="Assertions.fs" />
     <Compile Include="ComputationExpressions.fs" />
