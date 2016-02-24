@@ -32,7 +32,7 @@ module private TestCollectorImpl =
     let testObjType = typeof<TestObject>
     match typ with
     | SubTypeOf testObjType _ ->
-        yield (f () :?> ITestCase).SetNameIfNeed(name)
+        yield (f () :?> ITestObject).SetNameIfNeed(name)
     | ArrayType elemType when typedefis<TestCase<_>>(elemType) || elemType = typeof<TestObject> ->
         yield! (f (), elemType) |> RuntimeArray.map (fun x -> (x :?> ITestCase).SetNameIfNeed(name) |> box)
     | GenericType (genTypeDef, _) when genTypeDef = typedefof<TestCase<_>> ->
@@ -70,28 +70,28 @@ module private TestCollectorImpl =
 [<Sealed>]
 type TestCollector() =
   
-  let rec flattenItem (t:Type, testObject:ITestObject) : (Type * ITestObject) seq =
+  let rec flattenTestCase (t:Type, testObject:ITestObject) : (Type * ITestCase) seq =
     seq {
       match testObject with
       | :? Context as context ->
         for child in context.Children do
-          yield! flattenItem (t, child)
-      | testObject -> yield (t, testObject)
+          yield! flattenTestCase (t, child)
+      | testObject -> yield (t, testObject :?> ITestCase)
     }
-  and flatten (entries:(Type * ITestObject) seq) : (Type * ITestObject) seq =
+  and flattenTestCases (entries:(Type * ITestObject) seq) : (Type * ITestCase) seq =
     seq {
-      for entry in entries do yield! flattenItem entry
+      for entry in entries do yield! flattenTestCase entry
     }
 
-  member __.Run(target: Assembly) =
+  member __.Collect(target: Assembly) =
     target |> TestCollectorImpl.publicTypes
       |> Seq.collect TestCollectorImpl.testObjects
       |> Seq.map (fun (t, testObject) -> testObject)
 
-  /// RunAndMarshal is safe-serializable-types runner method.
-  member __.RunAndMarshal(target: Assembly, f: Action<obj[]>) =
+  /// CollectAndMarshal is safe-serializable-types runner method.
+  member __.CollectAndMarshal(target: Assembly, f: Action<obj[]>) =
     // AssemblyName is safe serializing type.
     target |> TestCollectorImpl.publicTypes
       |> Seq.collect TestCollectorImpl.testObjects
-      |> flatten
-      |> Seq.iter (fun (t, testObject) -> f.Invoke([|testObject.Name :> obj; t.FullName :> obj|]))
+      |> flattenTestCases
+      |> Seq.iter (fun (t, testCase) -> f.Invoke([|testCase.FullName :> obj; t.FullName :> obj|]))
