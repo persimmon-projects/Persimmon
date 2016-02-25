@@ -16,11 +16,11 @@ type TestCaseType<'T> =
 
 module TestCase =
   let make name parameters x =
-    let meta = TestMetadata(name, parameters)
+    let meta = { Name = name; Parameters = parameters }
     TestCase(meta, fun () -> Done (meta, NonEmptyList.singleton x, TimeSpan.Zero))
 
   let makeError name parameters exn =
-    let meta = TestMetadata(name, parameters)
+    let meta = { Name = name; Parameters = parameters }
     TestCase(meta, fun () -> Error (meta, [exn], [], TimeSpan.Zero))
 
   let addNotPassed notPassedCause (x: TestCase<_>) =

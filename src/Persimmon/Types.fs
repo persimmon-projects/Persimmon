@@ -44,15 +44,16 @@ module AssertionResult =
 
 /// The metadata that is common to each test case and test result.
 [<StructuredFormatDisplay("{FullName}")>]
-type TestMetadata(name: string option, parameters: (Type * obj) list) =
-
+type TestMetadata = {
   /// The test name. It doesn't contain the parameters.
-  member __.Name = name
-  /// The test name(if the test has parameters then the value contains them).
-  member this.FullName = this.ToString()
+  Name: string option
   /// The test parameters.
   /// If the test has no parameters then the value is empty list.
-  member __.Parameters = parameters
+  Parameters: (Type * obj) list
+}
+with
+  /// The test name(if the test has parameters then the value contains them).
+  member this.FullName = this.ToString()
 
   override this.ToString() =
     match this.Name with
@@ -84,10 +85,13 @@ type TestObject internal () =
     
 /// This class represents a nested test result.
 /// After running tests, the Context objects become the ContextReults objects.
-type ContextResult(name: string, children: ITestResult list) =
-  member __.Name = name
-  member __.Children = children
+type ContextResult = {
+  Name: string
+  Children: ITestResult list
+}
+with
   override this.ToString() = sprintf "%A" this
+
   interface ITestResult with
     member this.Name = Some this.Name
 
@@ -107,7 +111,7 @@ type Context(name: string, children: ITestObject seq) =
 
   /// Execute tests recursively.
   member __.Run(reporter: ITestResult -> unit) =
-    ContextResult(name, children
+    { Name = name; Children = children
       |> Seq.map (function
         | :? Context as c ->
             let res = c.Run(reporter) :> ITestResult
@@ -118,7 +122,8 @@ type Context(name: string, children: ITestObject seq) =
             let res = run.Invoke(x, [||]) :?> ITestResult
             reporter res
             res)
-      |> Seq.toList)    // "Run" is meaing run tests and fixed results at this point.
+      |> Seq.toList  // "Run" is meaing run tests and fixed results at this point.
+    }
 
   override __.ToString() =
     sprintf "Context(%A, %A)" name children
@@ -153,17 +158,20 @@ type TestResult<'T> =
 
 /// This class represents a test that has not been run yet.
 /// In order to run the test represented this class, use the "Run" method.
-type TestCase<'T>(metadata: TestMetadata, body: unit -> TestResult<'T>) =
+type TestCase<'T>(metadata: TestMetadata, body: Lazy<TestResult<'T>>) =
   inherit TestObject ()
 
-  new (name, parameters, body) = TestCase<_>(TestMetadata(name, parameters), body)
+  new (metadata, body) = TestCase<_>(metadata, lazy body ())
+  new (name, parameters, body: Lazy<_>) = TestCase<_>({ Name = name; Parameters = parameters }, body)
+  new (name, parameters, body) = TestCase<_>({ Name = name; Parameters = parameters }, lazy body ())
 
   override __.SetNameIfNeed(newName: string) =
-    TestCase<'T>(
-      TestMetadata(
-        (match metadata.Name with None -> Some newName | _ -> metadata.Name),
-        metadata.Parameters),
-      body) :> TestObject
+    TestCase<'T>({ Name = match metadata.Name with
+                          | None -> Some newName
+                          | _ -> metadata.Name;
+                   Parameters = metadata.Parameters
+                 },
+                 body) :> TestObject
 
   member internal __.Metadata = metadata
 
@@ -178,7 +186,7 @@ type TestCase<'T>(metadata: TestMetadata, body: unit -> TestResult<'T>) =
   /// Execute the test.
   member __.Run() =
     let watch = Stopwatch.StartNew()
-    let result = body ()
+    let result = body.Value
     watch.Stop()
     match result with
     | Error (_, errs, res, _) -> Error (metadata, errs, res, watch.Elapsed)
