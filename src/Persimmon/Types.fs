@@ -47,6 +47,8 @@ module AssertionResult =
 type TestMetadata = {
   /// The test name. It doesn't contain the parameters.
   Name: string option
+  /// The test defined type. Storing by TestCollector.
+  DeclaredType: Type option
   /// The test parameters.
   /// If the test has no parameters then the value is empty list.
   Parameters: (Type * obj) list
@@ -64,8 +66,15 @@ with
 
   interface ITestCaseNode with
     member this.Name = this.Name
+    member this.DeclaredType = this.DeclaredType
     member this.FullName = this.FullName
     member this.Parameters = this.Parameters
+
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+module TestMetadata =
+  // Construct TestMetadata
+  let init name parameters =
+    { Name = name; DeclaredType = None; Parameters = parameters }
 
 /// The type that is treated as tests by Persimmon.
 /// Derived class of this class are only two classes,
@@ -76,42 +85,54 @@ with
 [<AbstractClass>]
 type TestObject internal () =
 
+  /// The test name. It doesn't contain the parameters.
   abstract member Name: string option
-  abstract member SetNameIfNeed: string -> TestObject
+  /// The test defined type. Storing by TestCollector.
+  abstract member DeclaredType: Type option
+  /// (For internal use only)
+  abstract member CreateAdditionalMetadataIfNeed: string * Type -> TestObject
 
   interface ITestObject with
     member this.Name = this.Name
-    member this.SetNameIfNeed(newName: string) = this.SetNameIfNeed(newName) :> ITestObject
+    member this.DeclaredType = this.DeclaredType
+    member this.CreateAdditionalMetadataIfNeed(newName, newType) =
+      this.CreateAdditionalMetadataIfNeed(newName, newType) :> ITestObject
     
 /// This class represents a nested test result.
 /// After running tests, the Context objects become the ContextReults objects.
-type ContextResult = {
-  Name: string
-  Children: ITestResult list
-}
-with
+type ContextResult internal (name: string, declaredType: Type, children: ITestResult list) =
+
+  member __.Name = name
+  member __.DeclaredType = declaredType
+  member __.Children = children
+
   override this.ToString() = sprintf "%A" this
 
   interface ITestResult with
-    member this.Name = Some this.Name
+    member __.Name = name
+    member __.DeclaredType = declaredType
 
 /// This class represents a nested test.
 /// We can use this class for grouping of the tests.
-type Context(name: string, children: ITestObject seq) =
+type Context private (name: string, declaredType: Type option, children: ITestObject list) =
   inherit TestObject ()
+
+  new(name: string, children: ITestObject seq) = Context(name, None, children |> Seq.toList)
 
   /// The context name.
   override __.Name = Some name
-
-  override __.SetNameIfNeed(newName: string) =
-    Context((if name = "" then newName else name), children) :> TestObject
+  /// The context defined type. Storing by TestCollector.
+  override __.DeclaredType = declaredType
+  /// (For internal use only)
+  override __.CreateAdditionalMetadataIfNeed(newName: string, newType: Type) =
+    Context((if name = "" then newName else name), Some newType, children) :> TestObject
 
   /// This is a list that has the elements represented the subcontext or the test case.
   member __.Children = children
 
   /// Execute tests recursively.
   member __.Run(reporter: ITestResult -> unit) =
-    { Name = name; Children = children
+    ContextResult(name, declaredType.Value, children
       |> Seq.map (function
         | :? Context as c ->
             let res = c.Run(reporter) :> ITestResult
@@ -122,8 +143,8 @@ type Context(name: string, children: ITestObject seq) =
             let res = run.Invoke(x, [||]) :?> ITestResult
             reporter res
             res)
-      |> Seq.toList  // "Run" is meaing run tests and fixed results at this point.
-    }
+      |> Seq.toList  // "Run" is meaing JUST RUN tests and fixed results.
+    )
 
   override __.ToString() =
     sprintf "Context(%A, %A)" name children
@@ -138,8 +159,11 @@ type TestResult<'T> =
   with
     member private this.Metadata =
       match this with Error (x, _, _, _) | Done (x, _, _) -> x
+
     /// The test name. It doesn't contain the parameters.
-    member this.Name = this.Metadata.Name
+    member this.Name = this.Metadata.Name.Value
+    /// The context defined type. Storing by TestCollector.
+    member this.DeclaredType = this.Metadata.DeclaredType.Value
     /// The test name(if the test has parameters then the value contains them).
     member this.FullName = this.Metadata.FullName
     /// The test parameters.
@@ -155,6 +179,7 @@ type TestResult<'T> =
 
     interface ITestResult with
       member this.Name = this.Name
+      member this.DeclaredType = this.DeclaredType
 
 /// This class represents a test that has not been run yet.
 /// In order to run the test represented this class, use the "Run" method.
@@ -162,13 +187,18 @@ type TestCase<'T>(metadata: TestMetadata, body: Lazy<TestResult<'T>>) =
   inherit TestObject ()
 
   new (metadata, body) = TestCase<_>(metadata, lazy body ())
-  new (name, parameters, body: Lazy<_>) = TestCase<_>({ Name = name; Parameters = parameters }, body)
-  new (name, parameters, body) = TestCase<_>({ Name = name; Parameters = parameters }, lazy body ())
+  new (name, parameters, body: Lazy<_>) = TestCase<_>(TestMetadata.init name parameters, body)
+  new (name, parameters, body) = TestCase<_>(TestMetadata.init name parameters, lazy body ())
 
-  override __.SetNameIfNeed(newName: string) =
-    TestCase<'T>({ Name = match metadata.Name with
-                          | None -> Some newName
-                          | _ -> metadata.Name;
+  override __.CreateAdditionalMetadataIfNeed(newName: string, newDeclaredType: Type) =
+    TestCase<'T>({ Name =
+                     match metadata.Name with
+                     | None -> Some newName
+                     | _ -> metadata.Name;
+                   DeclaredType =
+                     match metadata.DeclaredType with
+                     | None -> Some newDeclaredType
+                     | _ -> metadata.DeclaredType;
                    Parameters = metadata.Parameters
                  },
                  body) :> TestObject
@@ -177,6 +207,8 @@ type TestCase<'T>(metadata: TestMetadata, body: Lazy<TestResult<'T>>) =
 
   /// The test name. It doesn't contain the parameters.
   override __.Name = metadata.Name
+  /// The context defined type. Storing by TestCollector.
+  override __.DeclaredType = metadata.DeclaredType
   /// The test name(if the test has parameters then the value contains them).
   member __.FullName = metadata.FullName
   /// The test parameters.

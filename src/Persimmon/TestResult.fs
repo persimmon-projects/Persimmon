@@ -6,13 +6,12 @@ open System.Diagnostics
 // Utility functions of TestResult<'T>
 module TestResult =
 
-  type private EndMarker () =
-    interface ITestResult with
-      member __.Name = None
-
   /// The marker represents the end of tests.
   /// The progress reporter needs the end marker in order to print new line at the end.
-  let endMarker = EndMarker() :> ITestResult
+  let endMarker = { new ITestResult with
+    member __.Name = "endMarker"
+    member __.DeclaredType = null
+  }
 
   let addAssertionResult x = function
   | Done (metadata, (Passed _, []), d) -> Done (metadata, NonEmptyList.singleton x, d)

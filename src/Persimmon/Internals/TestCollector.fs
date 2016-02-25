@@ -28,26 +28,26 @@ module private TestCollectorImpl =
     else
       None
 
-  let persimmonTests (f: unit -> obj) (typ: Type) name = seq {
+  let persimmonTests (f: unit -> obj) (typ: Type) (declaredType: Type) name = seq {
     let testObjType = typeof<TestObject>
     match typ with
     | SubTypeOf testObjType _ ->
-        yield (f () :?> ITestObject).SetNameIfNeed(name)
+        yield (f () :?> ITestObject).CreateAdditionalMetadataIfNeed(name, declaredType)
     | ArrayType elemType when typedefis<TestCase<_>>(elemType) || elemType = typeof<TestObject> ->
-        yield! (f (), elemType) |> RuntimeArray.map (fun x -> (x :?> ITestCase).SetNameIfNeed(name) |> box)
+        yield! (f (), elemType) |> RuntimeArray.map (fun x -> (x :?> ITestCase).CreateAdditionalMetadataIfNeed(name, declaredType) |> box)
     | GenericType (genTypeDef, _) when genTypeDef = typedefof<TestCase<_>> ->
-        yield (f () :?> ITestCase).SetNameIfNeed(name)
+        yield (f () :?> ITestCase).CreateAdditionalMetadataIfNeed(name, declaredType)
     | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ seq> && (typedefis<TestCase<_>>(elemType) || elemType = typeof<TestObject>) ->
-        yield! (f (), elemType) |> RuntimeSeq.map (fun x -> (x :?> ITestCase).SetNameIfNeed(name) |> box)
+        yield! (f (), elemType) |> RuntimeSeq.map (fun x -> (x :?> ITestCase).CreateAdditionalMetadataIfNeed(name, declaredType) |> box)
     | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ list> && (typedefis<TestCase<_>>(elemType) || elemType = typeof<TestObject>) ->
-        yield! (f (), elemType) |> RuntimeList.map (fun x -> (x :?> ITestCase).SetNameIfNeed(name) |> box)
+        yield! (f (), elemType) |> RuntimeList.map (fun x -> (x :?> ITestCase).CreateAdditionalMetadataIfNeed(name, declaredType) |> box)
     | _ -> ()
   }
 
   let persimmonTestProps (p: PropertyInfo) =
-    persimmonTests (fun () -> p.GetValue(null, null)) p.PropertyType p.Name
+    persimmonTests (fun () -> p.GetValue(null, null)) p.PropertyType p.DeclaringType p.Name
   let persimmonTestMethods (m: MethodInfo) =
-    persimmonTests (fun () -> m.Invoke(null, [||])) m.ReturnType m.Name
+    persimmonTests (fun () -> m.Invoke(null, [||])) m.ReturnType m.DeclaringType m.Name
 
   let rec testObjects (typ: Type) =
     seq {

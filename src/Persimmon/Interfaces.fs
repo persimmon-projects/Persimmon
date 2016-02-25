@@ -6,6 +6,8 @@ open System
 type ITestNode =
   /// The test name. It doesn't contain the parameters.
   abstract Name: string option
+  /// The test defined type. Storing by TestCollector.
+  abstract DeclaredType: Type option
 
 /// This interface represents a test case metadata. (non-generic view)
 type ITestCaseNode =
@@ -19,13 +21,17 @@ type ITestCaseNode =
 /// The interface that is treated as tests by Persimmon. (non-generic view)
 type ITestObject =
   inherit ITestNode
-  abstract SetNameIfNeed: string -> ITestObject
+  /// (For internal use only)
+  abstract CreateAdditionalMetadataIfNeed: string * Type -> ITestObject
 
 /// This interface represents a test result. (non-generic view)
 /// You should use the ActivePatterns
 /// if you want to process derived objects through this interface.
 type ITestResult =
-  inherit ITestNode
+  /// The test name. It doesn't contain the parameters.
+  abstract Name: string
+  /// The test defined type. Storing by TestCollector.
+  abstract DeclaredType: Type
 
 /// This interface represents a test case. (non-generic view)
 /// In order to run the test represented this class, use the "Run" method.
