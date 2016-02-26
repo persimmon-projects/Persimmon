@@ -16,7 +16,7 @@ let entryPoint (args: Args) =
       fun reporter tests ->
         async {
           watch.Start()
-          let! res = TestRunner.asyncRunAllTests reporter tests
+          let! res = TestRunner.asyncRunAllTests reporter.ReportProgress tests
           watch.Stop()
           // report
           reporter.ReportProgress(TestResult.endMarker)
@@ -27,7 +27,7 @@ let entryPoint (args: Args) =
     else
       fun reporter tests ->
         watch.Start()
-        let res = TestRunner.runAllTests reporter tests
+        let res = TestRunner.runAllTests reporter.ReportProgress tests
         watch.Stop()
         // report
         reporter.ReportProgress(TestResult.endMarker)

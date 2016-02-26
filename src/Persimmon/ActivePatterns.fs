@@ -5,7 +5,7 @@ let (|Context|TestCase|) (test: ITestObject) =
   | :? Context as ctx -> Context ctx
   | tc -> TestCase (tc.GetType().GetMethod("BoxTypeParam").Invoke(tc, [||]) :?> TestCase<obj>)
 
-let (|ContextResult|TestResult|EndMarker|) (res: ITestResult) =
+let (|ContextResult|TestResult|EndMarker|) (res: ITestResultNode) =
   match res with
   | :? ContextResult as cr -> ContextResult cr
   | marker when marker = TestResult.endMarker -> EndMarker

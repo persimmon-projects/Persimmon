@@ -3,10 +3,10 @@
 open Persimmon
 open Persimmon.Internals
 
-let runAllTests reporter (tests: #ITestObject seq) =
+let runAllTests progress (tests: #ITestObject seq) =
   let runner = new TestRunner()
-  runner.RunAllTests reporter tests
+  runner.RunAllTests progress tests
 
-let asyncRunAllTests reporter (tests: #ITestObject seq) =
+let asyncRunAllTests progress (tests: #ITestObject seq) =
   let runner = new TestRunner()
-  runner.AsyncRunAllTests reporter tests
+  runner.AsyncRunAllTests progress tests

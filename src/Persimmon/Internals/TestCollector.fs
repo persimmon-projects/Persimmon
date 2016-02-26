@@ -76,7 +76,7 @@ type TestCollector() =
       | :? Context as context ->
         for child in context.Children do
           yield! flattenTestCase (t, child)
-      | testObject -> yield (t, testObject :?> ITestCase)
+      | _ -> yield (t, testObject :?> ITestCase)
     }
   and flattenTestCases (entries:(Type * ITestObject) seq) : (Type * ITestCase) seq =
     seq {
@@ -88,8 +88,8 @@ type TestCollector() =
       |> Seq.collect TestCollectorImpl.testObjects
       |> Seq.map (fun (t, testObject) -> testObject)
 
-  /// CollectAndMarshal is safe-serializable-types runner method.
-  member __.CollectAndMarshal(target: Assembly, f: Action<obj[]>) =
+  /// CollectAndCallback is safe-serializable-types runner method.
+  member __.CollectAndCallback(target: Assembly, f: Action<obj[]>) =
     // AssemblyName is safe serializing type.
     target |> TestCollectorImpl.publicTypes
       |> Seq.collect TestCollectorImpl.testObjects

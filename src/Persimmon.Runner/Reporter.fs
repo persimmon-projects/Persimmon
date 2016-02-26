@@ -5,15 +5,15 @@ open Persimmon
 
 type Reporter
   (
-    progressPrinter: Printer<ITestResult>,
-    summaryPrinter: Printer<ITestResult seq>,
+    progressPrinter: Printer<ITestResultNode>,
+    summaryPrinter: Printer<ITestResultNode seq>,
     errorPrinter: Printer<string>
   ) =
 
-  member __.ReportProgress(test: ITestResult) =
+  member __.ReportProgress(test: ITestResultNode) =
     progressPrinter.Print(test)
 
-  member __.ReportSummary(rootTests: ITestResult seq) =
+  member __.ReportSummary(rootTests: ITestResultNode seq) =
     summaryPrinter.Print(rootTests)
 
   member __.ReportError(message: string) =
@@ -24,3 +24,7 @@ type Reporter
       [ progressPrinter.Dispose; summaryPrinter.Dispose; errorPrinter.Dispose ]
       |> List.iter (fun d -> try d () with _ -> ())
     
+  interface IReporter with
+    member this.ReportProgress test = this.ReportProgress test
+    member this.ReportSummary tests = this.ReportSummary tests
+    member this.ReportError message = this.ReportError message

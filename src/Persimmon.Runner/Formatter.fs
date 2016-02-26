@@ -1,5 +1,8 @@
 ﻿namespace Persimmon.Output
 
+type IFormatter<'T> =
+  abstract Format: 'T -> IWritable
+
 module Formatter =
   open System
   open System.Diagnostics
@@ -8,8 +11,8 @@ module Formatter =
 
   module ProgressFormatter =
     let dot =
-      { new IFormatter<ITestResult> with
-          member x.Format(test: ITestResult): IWritable = 
+      { new IFormatter<ITestResultNode> with
+          member x.Format(test: ITestResultNode): IWritable = 
             match test with
             | ContextResult _ctx -> Writable.doNothing
             | EndMarker -> Writable.newline
@@ -131,8 +134,8 @@ module Formatter =
           | NotPassed (Violated _) -> { summary with Run = summary.Run + 1; Violated = summary.Violated + 1 }
 
     let normal (watch: Stopwatch) =
-      { new IFormatter<ITestResult seq> with
-          member x.Format(results: ITestResult seq): IWritable = 
+      { new IFormatter<ITestResultNode seq> with
+          member x.Format(results: ITestResultNode seq): IWritable = 
             Writable.stringSeq begin
               seq {
                 yield! results |> Seq.collect (toStrs 0)
@@ -218,8 +221,8 @@ module Formatter =
       suites
 
     let junitStyle watch =
-      { new IFormatter<ITestResult seq> with
-        member __.Format(results: ITestResult seq) =
+      { new IFormatter<ITestResultNode seq> with
+        member __.Format(results: ITestResultNode seq) =
           let xdocument = XDocument(XElement(xname "testsuites", results |> Seq.map toXDocument) |> addSummary watch results)
           Writable.xdocument(xdocument)
       }

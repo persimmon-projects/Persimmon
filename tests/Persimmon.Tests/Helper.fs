@@ -33,12 +33,8 @@ module Helper =
     TestCase(TestMetadata.init x.Name x.Parameters, fun () -> inner (run x))
 
   let shouldEqualErrorCount expected xs =
-    use reporter =
-      new Reporter(
-        new Printer<_>(new StringWriter(), Formatter.ProgressFormatter.dot),
-        new Printer<_>(new StringWriter(), Formatter.SummaryFormatter.normal (Stopwatch())),
-        new Printer<_>(new StringWriter(), Formatter.ErrorFormatter.normal))
-    (xs |> TestRunner.runAllTests reporter).Errors
+    use printer = new Printer<_>(new StringWriter(), Formatter.ProgressFormatter.dot)
+    (xs |> TestRunner.runAllTests printer.Print).Errors
     |> assertEquals expected
 
   let shouldFirstRaise<'T, 'U when 'T :> exn> (x: TestCase<'U>) =

@@ -3,13 +3,6 @@
 open System
 open System.IO
 
-/// This interface represents something that can write to TextWriter.
-type IWritable =
-  abstract WriteTo: writer:TextWriter -> unit
-
-type IFormatter<'T> =
-  abstract Format: 'T -> IWritable
-
 type PrinterInfo<'T> = { Writer: TextWriter; Formatter: IFormatter<'T> }
 
 type Printer<'T> (infos: PrinterInfo<'T> list) =

@@ -5,6 +5,10 @@ open System.Xml.Linq
 
 open Persimmon.Internals
 
+/// This interface represents something that can write to TextWriter.
+type IWritable =
+  abstract WriteTo: writer:TextWriter -> unit
+
 /// Some implementations of the IWritable.
 module Writable =
   /// This does not write anything to TextWriter.

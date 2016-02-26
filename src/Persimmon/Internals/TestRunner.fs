@@ -1,5 +1,9 @@
 ﻿namespace Persimmon.Internals
 
+open System
+open System.Collections.Generic
+open System.Reflection
+
 open Microsoft.FSharp.Collections
 
 open Persimmon
@@ -8,13 +12,13 @@ open Persimmon.Output
 
 module private TestRunnerImpl =
 
-  let runTests (reporter: Reporter) (test: ITestObject) =
+  let runTest progress test =
     match test with
-    | Context ctx -> ctx.Run(reporter.ReportProgress) :> ITestResult
+    | Context ctx -> ctx.Run(progress) :> ITestResultNode
     | TestCase tc ->
       let result = tc.Run()
-      reporter.ReportProgress(result)
-      result :> ITestResult
+      progress result
+      result :> ITestResultNode
 
   let rec countErrors = function
   | ContextResult cr ->
@@ -32,27 +36,44 @@ module private TestRunnerImpl =
 
 type RunResult = {
   Errors: int
-  ExecutedRootTestResults: ITestResult seq
+  ExecutedRootTestResults: ITestResultNode seq
 }
 
 [<Sealed>]
 type TestRunner() =
   
-  member __.RunAllTests reporter (tests: #ITestObject seq) =
-    let rootResults = tests |> Seq.map (TestRunnerImpl.runTests reporter)
+  member __.RunAllTests progress (tests: #ITestObject seq) =
+    let rootResults = tests |> Seq.map (TestRunnerImpl.runTest progress)
     let errors = rootResults |> Seq.sumBy TestRunnerImpl.countErrors
     { Errors = errors; ExecutedRootTestResults = rootResults }
     
-  member __.AsyncRunAllTests reporter (tests: #ITestObject seq) =
+  member __.AsyncRunAllTests progress (tests: #ITestObject seq) =
     let asyncRun test = async {
-        return TestRunnerImpl.runTests reporter test
+        return TestRunnerImpl.runTest progress test
     }
     async {
         let! rootResults = tests |> Seq.map asyncRun |> Async.Parallel
         let errors = Seq.ofArray rootResults |> Seq.sumBy TestRunnerImpl.countErrors
         return { Errors = errors; ExecutedRootTestResults = rootResults }
     }
+      
+  /// RunTestsAndCallback is safe-serializable-types runner method.
+  member __.RunTestsAndCallback (target: Assembly, fullyQualifiedTestNames: string[], f: Action<obj[]>) =
+    let progress (testResult: ITestResultNode) =
+      match testResult with
+      // Call f if testResult is ITestResult (ignoring ContextResult)
+      | :? ITestResult as tr -> f.Invoke([|tr.FullName :> obj; tr.DeclaredType.FullName :> obj; tr.Outcome :> obj|])
+      | _ -> ()
 
-#if NET4
-  // TODO: CLR4's Task<'T>
-#endif
+    let targetNames = Dictionary<string, string>()
+    for name in fullyQualifiedTestNames do targetNames.Add(name, name)
+
+    let collector = TestCollector()
+    let testObjects = collector.Collect(target)
+    do testObjects
+      // TODO: filtering must into TestRunnerImpl.runTest
+      |> Seq.filter (fun testObject ->
+        match testObject with
+        | :? ITestCase as testCase -> targetNames.ContainsKey(testCase.FullName)
+        | _ -> true)    // true if Context (must traverse any children) 
+      |> Seq.iter (fun testObject -> TestRunnerImpl.runTest progress testObject |> ignore)

@@ -8,7 +8,7 @@ module TestResult =
 
   /// The marker represents the end of tests.
   /// The progress reporter needs the end marker in order to print new line at the end.
-  let endMarker = { new ITestResult with
+  let endMarker = { new ITestResultNode with
     member __.Name = "endMarker"
     member __.DeclaredType = null
   }
