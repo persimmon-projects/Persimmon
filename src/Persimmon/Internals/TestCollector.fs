@@ -89,9 +89,9 @@ type TestCollector() =
       |> Seq.map (fun (t, testObject) -> testObject)
 
   /// CollectAndCallback is safe-serializable-types runner method.
-  member __.CollectAndCallback(target: Assembly, f: Action<obj[]>) =
+  member __.CollectAndCallback(target: Assembly, callback: Action<obj>) =
     // AssemblyName is safe serializing type.
     target |> TestCollectorImpl.publicTypes
       |> Seq.collect TestCollectorImpl.testObjects
       |> flattenTestCases
-      |> Seq.iter (fun (t, testCase) -> f.Invoke([|testCase.FullName :> obj; t.FullName :> obj|]))
+      |> Seq.iter (fun (t, testCase) -> callback.Invoke(testCase))

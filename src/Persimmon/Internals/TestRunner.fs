@@ -58,11 +58,11 @@ type TestRunner() =
     }
       
   /// RunTestsAndCallback is safe-serializable-types runner method.
-  member __.RunTestsAndCallback (target: Assembly, fullyQualifiedTestNames: string[], f: Action<obj[]>) =
+  member __.RunTestsAndCallback (target: Assembly, fullyQualifiedTestNames: string[], callback: Action<obj>) =
     let progress (testResult: ITestResultNode) =
       match testResult with
       // Call f if testResult is ITestResult (ignoring ContextResult)
-      | :? ITestResult as tr -> f.Invoke([|tr.FullName :> obj; tr.DeclaredType.FullName :> obj; tr.Outcome :> obj|])
+      | :? ITestResult as tr -> callback.Invoke(tr)
       | _ -> ()
 
     let targetNames = Dictionary<string, string>()
