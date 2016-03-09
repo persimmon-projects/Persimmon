@@ -89,14 +89,10 @@ type TestObject internal () =
   abstract member Name: string option
   /// The test defined type. Storing by TestCollector.
   abstract member DeclaredType: Type option
-  /// (For internal use only)
-  abstract member CreateAdditionalMetadataIfNeed: string * Type -> TestObject
 
   interface ITestObject with
     member this.Name = this.Name
     member this.DeclaredType = this.DeclaredType
-    member this.CreateAdditionalMetadataIfNeed(newName, newType) =
-      this.CreateAdditionalMetadataIfNeed(newName, newType) :> ITestObject
     
 /// This class represents a nested test result.
 /// After running tests, the Context objects become the ContextReults objects.
@@ -140,6 +136,11 @@ type TestResult<'T> =
       | Done (meta, res, d) ->
           Done (meta, res |> NonEmptyList.map (function Passed x -> Passed (box x) | NotPassed x -> NotPassed x), d)
 
+    member this.Outcome = // TODO: lack of informations (ex: exn in failed)
+      match this with
+      | Error (_, _, _, _) -> "Failed"
+      | Done (_, _, _) -> "Passed"
+
     interface ITestResult with
       member this.Name = this.Name
       member this.DeclaredType = this.DeclaredType
@@ -156,14 +157,22 @@ type Context private (name: string, declaredType: Type option, children: ITestOb
   inherit TestObject ()
 
   new(name: string, children: ITestObject seq) = Context(name, None, children |> Seq.toList)
+  new(name: string, declaredType: Type, children: ITestObject seq) = Context(name, Some declaredType, children |> Seq.toList)
 
   /// The context name.
   override __.Name = Some name
   /// The context defined type. Storing by TestCollector.
   override __.DeclaredType = declaredType
   /// (For internal use only)
-  override __.CreateAdditionalMetadataIfNeed(newName: string, newType: Type) =
-    Context((if name = "" then newName else name), Some newType, children) :> TestObject
+  member __.CreateAdditionalMetadataIfNeed(newName: string, newDeclaredType: Type, mapper: (ITestObject -> ITestObject) option) =
+    Context(
+      (if name = "" then newName else name),
+      (match declaredType with
+       | Some _ -> declaredType
+       | None -> Some newDeclaredType),
+      (match mapper with
+       | Some m -> children |> Seq.map m |> Seq.toList
+       | None -> children)) :> TestObject
 
   /// This is a list that has the elements represented the subcontext or the test case.
   member __.Children = children
@@ -196,7 +205,7 @@ type TestCase<'T>(metadata: TestMetadata, body: Lazy<TestResult<'T>>) =
   new (name, parameters, body: Lazy<_>) = TestCase<_>(TestMetadata.init name parameters, body)
   new (name, parameters, body) = TestCase<_>(TestMetadata.init name parameters, lazy body ())
 
-  override __.CreateAdditionalMetadataIfNeed(newName: string, newDeclaredType: Type) =
+  member __.CreateAdditionalMetadataIfNeed(newName: string, newDeclaredType: Type) =
     TestCase<'T>({ Name =
                      match metadata.Name with
                      | None -> Some newName
@@ -207,7 +216,7 @@ type TestCase<'T>(metadata: TestMetadata, body: Lazy<TestResult<'T>>) =
                      | _ -> metadata.DeclaredType;
                    Parameters = metadata.Parameters
                  },
-                 body) :> TestObject
+                 body)
 
   member internal __.Metadata = metadata
 
@@ -236,6 +245,8 @@ type TestCase<'T>(metadata: TestMetadata, body: Lazy<TestResult<'T>>) =
   interface ITestCase with
     member this.FullName = this.FullName
     member this.Parameters = this.Parameters
+    member this.CreateAdditionalMetadataIfNeed(newName: string, newDeclaredType: Type) =
+      this.CreateAdditionalMetadataIfNeed(newName, newDeclaredType) :> ITestCase
     member this.Run() = this.Run() :> ITestResult
 
 // extension

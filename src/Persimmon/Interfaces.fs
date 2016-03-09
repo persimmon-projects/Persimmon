@@ -21,8 +21,6 @@ type ITestMetadata =
 /// The interface that is treated as tests by Persimmon. (non-generic view)
 type ITestObject =
   inherit ITestNode
-  /// (For internal use only)
-  abstract CreateAdditionalMetadataIfNeed: string * Type -> ITestObject
 
 /// This interface represents a test result. (non-generic view)
 /// You should use the ActivePatterns
@@ -48,6 +46,8 @@ type ITestResult =
 type ITestCase =
   inherit ITestObject
   inherit ITestMetadata
+  /// (For internal use only)
+  abstract CreateAdditionalMetadataIfNeed: string * Type -> ITestCase
   abstract Run: unit -> ITestResult
 
 namespace Persimmon.Output

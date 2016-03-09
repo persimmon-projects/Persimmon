@@ -29,10 +29,10 @@ module private TestCollectorImpl =
       None
 
   let persimmonTests (f: unit -> obj) (typ: Type) (declaredType: Type) name = seq {
-    let testObjType = typeof<TestObject>
+    let testObjType = typeof<ITestCase>
     match typ with
     | SubTypeOf testObjType _ ->
-        yield (f () :?> ITestObject).CreateAdditionalMetadataIfNeed(name, declaredType)
+        yield (f () :?> ITestCase).CreateAdditionalMetadataIfNeed(name, declaredType)
     | ArrayType elemType when typedefis<TestCase<_>>(elemType) || elemType = typeof<TestObject> ->
         yield! (f (), elemType) |> RuntimeArray.map (fun x -> (x :?> ITestCase).CreateAdditionalMetadataIfNeed(name, declaredType) |> box)
     | GenericType (genTypeDef, _) when genTypeDef = typedefof<TestCase<_>> ->
@@ -54,44 +54,48 @@ module private TestCollectorImpl =
       yield!
         typ.GetProperties(BindingFlags.Static ||| BindingFlags.Public)
         |> Seq.collect persimmonTestProps
-        |> Seq.map (fun x -> (typ, x))
+        |> Seq.map (fun testCase -> testCase :> ITestObject)
       yield!
         typ.GetMethods(BindingFlags.Static ||| BindingFlags.Public)
         |> Seq.filter (fun m -> not m.IsSpecialName) // ignore getter methods
         |> Seq.filter (fun m -> m.GetParameters() |> Array.isEmpty)
         |> Seq.collect persimmonTestMethods
-        |> Seq.map (fun x -> (typ, x))
+        |> Seq.map (fun testCase -> testCase :> ITestObject)
       for nestedType in publicNestedTypes typ do
-        let objs = testObjects nestedType |> Seq.map snd
+        let objs = testObjects nestedType
         if Seq.isEmpty objs then ()
-        else yield (nestedType, Context(nestedType.Name, objs |> Seq.toList) :> ITestObject)
+        else yield Context(nestedType.Name, nestedType, objs |> Seq.toList) :> ITestObject
     }
 
 [<Sealed>]
 type TestCollector() =
   
-  let rec flattenTestCase (t:Type, testObject:ITestObject) : (Type * ITestCase) seq =
+  let rec fixupDeclaredType (testObject:ITestObject) =
+    match testObject with
+    | :? Context as context ->
+        context.CreateAdditionalMetadataIfNeed(
+          context.Name.Value,
+          testObject.DeclaredType.Value,
+          Some fixupDeclaredType) :> ITestObject
+    | _ -> testObject
+
+  let rec flattenTestCase (testObject:ITestObject) =
     seq {
       match testObject with
       | :? Context as context ->
         for child in context.Children do
-          yield! flattenTestCase (t, child)
-      | _ -> yield (t, testObject :?> ITestCase)
-    }
-  and flattenTestCases (entries:(Type * ITestObject) seq) : (Type * ITestCase) seq =
-    seq {
-      for entry in entries do yield! flattenTestCase entry
+          yield! flattenTestCase child
+      | :? ITestCase as testCase -> yield testCase
+      | _ -> ()
     }
 
   member __.Collect(target: Assembly) =
     target |> TestCollectorImpl.publicTypes
       |> Seq.collect TestCollectorImpl.testObjects
-      |> Seq.map (fun (t, testObject) -> testObject)
+      |> Seq.map fixupDeclaredType
 
   /// CollectAndCallback is safe-serializable-types runner method.
-  member __.CollectAndCallback(target: Assembly, callback: Action<obj>) =
-    // AssemblyName is safe serializing type.
-    target |> TestCollectorImpl.publicTypes
-      |> Seq.collect TestCollectorImpl.testObjects
-      |> flattenTestCases
-      |> Seq.iter (fun (t, testCase) -> callback.Invoke(testCase))
+  member this.CollectAndCallback(target: Assembly, callback: Action<obj>) =
+    target |> this.Collect
+      |> Seq.collect flattenTestCase
+      |> Seq.iter (fun testCase -> callback.Invoke(testCase))

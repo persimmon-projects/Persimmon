@@ -74,6 +74,6 @@ type TestRunner() =
       // TODO: filtering must into TestRunnerImpl.runTest
       |> Seq.filter (fun testObject ->
         match testObject with
-        | :? ITestCase as testCase -> targetNames.ContainsKey(testCase.FullName)
-        | _ -> true)    // true if Context (must traverse any children) 
+        | :? ITestCase as testCase when (targetNames.Count >= 1) -> targetNames.ContainsKey(testCase.FullName)
+        | _ -> true)
       |> Seq.iter (fun testObject -> TestRunnerImpl.runTest progress testObject |> ignore)
