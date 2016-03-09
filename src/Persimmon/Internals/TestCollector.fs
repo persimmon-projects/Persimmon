@@ -94,8 +94,13 @@ type TestCollector() =
       |> Seq.collect TestCollectorImpl.testObjects
       |> Seq.map fixupDeclaredType
 
+  member __.CollectOnlyTestCases(target: Assembly) =
+    target |> TestCollectorImpl.publicTypes
+      |> Seq.collect TestCollectorImpl.testObjects
+      |> Seq.map fixupDeclaredType
+      |> Seq.collect flattenTestCase
+
   /// CollectAndCallback is safe-serializable-types runner method.
   member this.CollectAndCallback(target: Assembly, callback: Action<obj>) =
-    target |> this.Collect
-      |> Seq.collect flattenTestCase
+    target |> this.CollectOnlyTestCases
       |> Seq.iter (fun testCase -> callback.Invoke(testCase))

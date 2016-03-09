@@ -65,15 +65,21 @@ type TestRunner() =
       | :? ITestResult as tr -> callback.Invoke(tr)
       | _ -> ()
 
+    // Make fqtn dicts.
     let targetNames = Dictionary<string, string>()
     for name in fullyQualifiedTestNames do targetNames.Add(name, name)
 
+    // If fqtn is empty, try all tests.
+    let containsKey key =
+      match targetNames.Count with
+      | 0 -> true
+      | _ -> targetNames.ContainsKey key
+
+    // Collect test cases.
     let collector = TestCollector()
-    let testObjects = collector.Collect(target)
-    do testObjects
-      // TODO: filtering must into TestRunnerImpl.runTest
-      |> Seq.filter (fun testObject ->
-        match testObject with
-        | :? ITestCase as testCase when (targetNames.Count >= 1) -> targetNames.ContainsKey(testCase.FullName)
-        | _ -> true)
-      |> Seq.iter (fun testObject -> TestRunnerImpl.runTest progress testObject |> ignore)
+    let testCases = collector.CollectOnlyTestCases(target)
+
+    // Run tests.
+    do testCases
+      |> Seq.filter (fun testCase -> containsKey testCase.FullName)
+      |> Seq.iter (fun testCase -> TestRunnerImpl.runTest progress testCase |> ignore)
