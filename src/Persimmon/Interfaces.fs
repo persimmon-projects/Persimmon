@@ -1,13 +1,14 @@
 ﻿namespace Persimmon
 
 open System
+open System.Reflection
 
 /// This interface total abstraction represents a test metadata. (non-generic view)
 type ITestNode =
   /// The test name. It doesn't contain the parameters.
   abstract Name: string option
-  /// The test defined type. Storing by TestCollector.
-  abstract DeclaredType: Type option
+  /// The test defined member. Storing by TestCollector.
+  abstract DeclaredMember: MemberInfo option
 
 /// This interface represents a test case metadata. (non-generic view)
 type ITestMetadata =
@@ -28,8 +29,8 @@ type ITestObject =
 type ITestResultNode =
   /// The test name. It doesn't contain the parameters.
   abstract Name: string
-  /// The test defined type. Storing by TestCollector.
-  abstract DeclaredType: Type
+  /// The test defined member. Storing by TestCollector.
+  abstract DeclaredMember: MemberInfo
 
 type ITestResult =
   inherit ITestResultNode
@@ -47,7 +48,7 @@ type ITestCase =
   inherit ITestObject
   inherit ITestMetadata
   /// (For internal use only)
-  abstract CreateAdditionalMetadataIfNeed: string * Type -> ITestCase
+  abstract CreateAdditionalMetadataIfNeed: string * MemberInfo -> ITestCase
   abstract Run: unit -> ITestResult
 
 namespace Persimmon.Output

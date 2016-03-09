@@ -8,7 +8,6 @@ open Microsoft.FSharp.Collections
 
 open Persimmon
 open Persimmon.ActivePatterns
-open Persimmon.Output
 
 module private TestRunnerImpl =
 
@@ -41,12 +40,14 @@ type RunResult = {
 
 [<Sealed>]
 type TestRunner() =
-  
+
+  /// Collect test objects and run tests.
   member __.RunAllTests progress (tests: #ITestObject seq) =
     let rootResults = tests |> Seq.map (TestRunnerImpl.runTest progress)
     let errors = rootResults |> Seq.sumBy TestRunnerImpl.countErrors
     { Errors = errors; ExecutedRootTestResults = rootResults }
     
+  /// Collect test objects and run tests on async context.
   member __.AsyncRunAllTests progress (tests: #ITestObject seq) =
     let asyncRun test = async {
         return TestRunnerImpl.runTest progress test
@@ -57,7 +58,8 @@ type TestRunner() =
         return { Errors = errors; ExecutedRootTestResults = rootResults }
     }
       
-  /// RunTestsAndCallback is safe-serializable-types runner method.
+  /// RunTestsAndCallback run test cases and callback. (Internal use only)
+  /// If fullyQualifiedTestNames is empty, try all tests.
   member __.RunTestsAndCallback (target: Assembly, fullyQualifiedTestNames: string[], callback: Action<obj>) =
     let progress (testResult: ITestResultNode) =
       match testResult with
