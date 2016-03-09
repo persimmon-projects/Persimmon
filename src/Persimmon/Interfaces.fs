@@ -40,7 +40,8 @@ type ITestResult =
   /// If the test has no parameters then the value is empty list.
   abstract Parameters: (Type * obj) list
   /// The test result
-  abstract Outcome : string // TODO: lack of informations (ex: exn in failed)
+  abstract Exceptions : exn []
+  abstract Duration : TimeSpan
 
 /// This interface represents a test case. (non-generic view)
 /// In order to run the test represented this class, use the "Run" method.

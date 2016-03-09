@@ -138,20 +138,23 @@ type TestResult<'T> =
       | Done (meta, res, d) ->
           Done (meta, res |> NonEmptyList.map (function Passed x -> Passed (box x) | NotPassed x -> NotPassed x), d)
 
-    member this.Outcome = // TODO: lack of informations (ex: exn in failed)
+    member this.Exceptions =
       match this with
-      | Error (_, _, _, _) -> "Failed"
-      | Done (_, _, _) -> "Passed"
+      | Error (_, exns, _, _) -> exns |> Seq.toArray
+      | Done (_, _, _) -> [||]
+
+    member this.Duration =
+      match this with
+      | Error (_, _, _, duration) -> duration
+      | Done (_, _, duration) -> duration
 
     interface ITestResult with
       member this.Name = this.Name
       member this.DeclaredMember = this.DeclaredMember
       member this.FullName = this.FullName
       member this.Parameters = this.Parameters
-      member this.Outcome = // TODO: lack of informations (ex: exn in failed)
-        match this with
-        | Error (_, _, _, _) -> "Failed"
-        | Done (_, _, _) -> "Passed"
+      member this.Exceptions = this.Exceptions
+      member this.Duration = this.Duration
 
 /// This class represents a nested test.
 /// We can use this class for grouping of the tests.
