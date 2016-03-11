@@ -72,8 +72,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.config" />
-    <None Include="..\Persimmon.VisualStudio.TestExplorer.snk">
-      <Link>Properties\Persimmon.VisualStudio.TestExplorer.snk</Link>
+    <None Include="..\..\Persimmon.snk">
+      <Link>Properties\Persimmon.snk</Link>
     </None>
     <Content Include="Persimmon.VisualStudio.TestExplorer.dll.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
