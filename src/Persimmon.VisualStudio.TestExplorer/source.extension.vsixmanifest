@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+  <Metadata>
+    <Identity Id="Persimmon.VisualStudio.TestExplorer.persimmon-projects.c35f7015-465a-456a-801e-210ab907210d" Version="1.0.0" Language="en-US" Publisher="persimmon-projects" />
+    <DisplayName>Persimmon Test Explorer</DisplayName>
+    <Description xml:space="preserve">Visual Studio runner for Persimmon.</Description>
+    <MoreInfo>https://github.com/persimmon-projects/Persimmon.VisualStudio.TestExplorer</MoreInfo>
+    <License>LICENSE.txt</License>
+    <Icon>persimmon.ico</Icon>
+    <Tags>Unit Testing, Testing, test explorer, Test Adapter</Tags>
+  </Metadata>
+  <Installation AllUsers="true">
+    <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="[12.0,13.0)" />
+    <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="[13.0,15.0)" />
+  </Installation>
+  <Dependencies>
+    <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="4.5" />
+  </Dependencies>
+  <Assets>
+    <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%|" />
+    <Asset Type="UnitTestExtension" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%|" />
+    <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+    <Asset Type="Microsoft.VisualStudio.Assembly" d:Source="Project" d:ProjectName="Persimmon.VisualStudio.TestRunner" Path="|Persimmon.VisualStudio.TestRunner|" AssemblyName="|Persimmon.VisualStudio.TestRunner;AssemblyName|" />
+    <Asset Type="Application Settings Configuration file" d:Source="File" Path="Persimmon.VisualStudio.TestExplorer.dll.config" />
+  </Assets>
+</PackageManifest>
