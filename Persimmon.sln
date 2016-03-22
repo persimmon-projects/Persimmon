@@ -34,16 +34,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		build.cmd = build.cmd
 		build.fsx = build.fsx
 		build.sh = build.sh
-		src\CommonAssemblyInfo.cs = src\CommonAssemblyInfo.cs
 		LICENSE = LICENSE
 		Persimmon.snk = Persimmon.snk
 		README.md = README.md
 		RELEASE_NOTES.md = RELEASE_NOTES.md
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Persimmon.VisualStudio.TestRunner", "src\Persimmon.VisualStudio.TestRunner\Persimmon.VisualStudio.TestRunner.csproj", "{E7226D5A-7306-41D2-8A30-435728FD604B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Persimmon.VisualStudio.TestExplorer", "src\Persimmon.VisualStudio.TestExplorer\Persimmon.VisualStudio.TestExplorer.csproj", "{4F2D32B2-0CC1-48E2-A186-81188BEB2A64}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{D4EA4A20-DB16-4D02-B6C7-AD212E95BF20}"
 	ProjectSection(SolutionItems) = preProject
@@ -86,14 +81,6 @@ Global
 		{5CC5FE08-D88A-436E-83A8-57CDACD8E2CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5CC5FE08-D88A-436E-83A8-57CDACD8E2CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5CC5FE08-D88A-436E-83A8-57CDACD8E2CE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E7226D5A-7306-41D2-8A30-435728FD604B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E7226D5A-7306-41D2-8A30-435728FD604B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E7226D5A-7306-41D2-8A30-435728FD604B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E7226D5A-7306-41D2-8A30-435728FD604B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4F2D32B2-0CC1-48E2-A186-81188BEB2A64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4F2D32B2-0CC1-48E2-A186-81188BEB2A64}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4F2D32B2-0CC1-48E2-A186-81188BEB2A64}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4F2D32B2-0CC1-48E2-A186-81188BEB2A64}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
