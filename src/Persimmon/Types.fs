@@ -177,7 +177,7 @@ type Context private (name: string, declaredMember: MemberInfo option, children:
        | None -> Some newDeclaredMember),
       (match mapper with
        | Some m -> children |> Seq.map m |> Seq.toList
-       | None -> children)) :> TestObject
+       | None -> children))
 
   /// This is a list that has the elements represented the subcontext or the test case.
   member __.Children = children

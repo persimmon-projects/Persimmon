@@ -29,6 +29,7 @@ let test4 = test "error test" {
   do! assertEquals (err ()) 1
 }
 
+// tests.[0].success test(list)
 let tests = [
   test "success test(list)" {
     do! assertEquals 1 1
@@ -87,17 +88,19 @@ let tests6 =
     run innerTest
   }
 
+// context1.[0].Hoge.success(context)
 let context1 =
-  context "Hoge" [
-    context "Piyo" [
-      test "success(context)" {
-        do! assertEquals 1 1
-      }
-      test "failure(context)" {
-        do! assertEquals 1 2
-      }
+    context "Hoge" [
+        context "Piyo" [
+            test "success(context)" {
+                do! assertEquals 1 1
+            }
+            test "failure(context)" {
+                do! assertEquals 1 2
+            }
+        ]
     ]
-  ]
+
 
 type MyClass() =
   member __.test() = test "not execute because this is instance method" {

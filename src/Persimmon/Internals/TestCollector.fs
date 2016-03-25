@@ -16,51 +16,51 @@ module private TestCollectorImpl =
     typ.GetNestedTypes()
     |> Seq.filter (fun typ -> typ.IsNestedPublic)
 
-  let typedefis<'T>(typ: Type) =
-    typ.IsGenericType && typ.GetGenericTypeDefinition() = typedefof<'T>
+  /// Traverse test object instances recursive.
+  let rec persimmonTests (testObject: obj, name: string, declared: MemberInfo) =
+    seq {
+      match testObject with
+      // For test case:
+      | :? ITestCase as testCase ->
+        yield
+          testCase.CreateAdditionalMetadataIfNeed(declared.Name, declared) :> ITestObject
+      // For test objects (sequence, ex: array):
+      | :? (ITestObject seq) as testObjects ->
+        yield!
+          testObjects
+          |> Seq.collect (fun testObject -> persimmonTests(testObject, name, declared))
+      // For context:
+      | :? Context as context ->
+        // TODO: NOT collect children, save context structures.
+        let children = context.CreateAdditionalMetadataIfNeed(declared.Name, declared, None).Children
+        yield!
+          persimmonTests(children, name, declared)
+      // Unknown type, ignored.
+      | _ -> ()
+    }
 
-  let (|SubTypeOf|_|) (matching: Type) (typ: Type) =
-    if matching.IsAssignableFrom(typ) then Some typ else None
-  let (|ArrayType|_|) (typ: Type) = if typ.IsArray then Some (typ.GetElementType()) else None
-  let (|GenericType|_|) (typ: Type) =
-    if typ.IsGenericType then
-      Some (typ.GetGenericTypeDefinition(), typ.GetGenericArguments())
-    else
-      None
-
-  let persimmonTests (f: unit -> obj) (typ: Type) (declaredMember: MemberInfo) name = seq {
-    let testObjType = typeof<ITestCase>
-    match typ with
-    | SubTypeOf testObjType _ ->
-        yield (f () :?> ITestCase).CreateAdditionalMetadataIfNeed(name, declaredMember)
-    | ArrayType elemType when typedefis<TestCase<_>>(elemType) || elemType = typeof<TestObject> ->
-        yield! (f (), elemType) |> RuntimeArray.map (fun x -> (x :?> ITestCase).CreateAdditionalMetadataIfNeed(name, declaredMember) |> box)
-    | GenericType (genTypeDef, _) when genTypeDef = typedefof<TestCase<_>> ->
-        yield (f () :?> ITestCase).CreateAdditionalMetadataIfNeed(name, declaredMember)
-    | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ seq> && (typedefis<TestCase<_>>(elemType) || elemType = typeof<TestObject>) ->
-        yield! (f (), elemType) |> RuntimeSeq.map (fun x -> (x :?> ITestCase).CreateAdditionalMetadataIfNeed(name, declaredMember) |> box)
-    | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ list> && (typedefis<TestCase<_>>(elemType) || elemType = typeof<TestObject>) ->
-        yield! (f (), elemType) |> RuntimeList.map (fun x -> (x :?> ITestCase).CreateAdditionalMetadataIfNeed(name, declaredMember) |> box)
-    | _ -> ()
-  }
-
+  /// Retreive test object via target property, and traverse.
   let persimmonTestProps (p: PropertyInfo) =
-    persimmonTests (fun () -> p.GetValue(null, null)) p.PropertyType (p.GetGetMethod()) p.Name
+    persimmonTests (p.GetValue(null, null), p.Name, p)
+  
+  /// Retreive test object via target method, and traverse.
   let persimmonTestMethods (m: MethodInfo) =
-    persimmonTests (fun () -> m.Invoke(null, [||])) m.ReturnType m m.Name
-
+    persimmonTests (m.Invoke(null, [||]), m.Name, m)
+  
+  /// Retreive test object via target type, and traverse.
   let rec testObjects (typ: Type) =
     seq {
+      // For properties (value binding):
       yield!
         typ.GetProperties(BindingFlags.Static ||| BindingFlags.Public)
         |> Seq.collect persimmonTestProps
-        |> Seq.map (fun testCase -> testCase :> ITestObject)
+      // For methods (function binding):
       yield!
         typ.GetMethods(BindingFlags.Static ||| BindingFlags.Public)
         |> Seq.filter (fun m -> not m.IsSpecialName) // ignore getter methods
         |> Seq.filter (fun m -> m.GetParameters() |> Array.isEmpty)
         |> Seq.collect persimmonTestMethods
-        |> Seq.map (fun testCase -> testCase :> ITestObject)
+      // For nested modules:
       for nestedType in publicNestedTypes typ do
         let objs = testObjects nestedType
         if Seq.isEmpty objs then ()
