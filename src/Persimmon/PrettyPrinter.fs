@@ -69,4 +69,4 @@ module internal PrettyPrinter =
           printCollections (sprintf "seq [%s]") t o
         | _ -> string o
 
-  let printAll os = os |> List.map print |> String.concat ", "
+  let printAll os = os |> Seq.map print |> String.concat ", "

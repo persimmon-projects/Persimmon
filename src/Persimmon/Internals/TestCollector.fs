@@ -17,77 +17,61 @@ module private TestCollectorImpl =
     |> Seq.filter (fun typ -> typ.IsNestedPublic)
 
   /// Traverse test object instances recursive.
-  let rec persimmonTests (testObject: obj, name: string, declared: MemberInfo) =
+  let rec persimmonTests (testObject: obj, name: string, declared: MemberInfo, parentContext : ITestMetadata option) =
     seq {
       match testObject with
       // For test case:
-      | :? ITestCase as testCase ->
-        yield
-          testCase.CreateAdditionalMetadataIfNeed(declared.Name, declared) :> ITestObject
-      // For test objects (sequence, ex: array):
-      | :? (ITestObject seq) as testObjects ->
-        yield!
-          testObjects
-          |> Seq.collect (fun testObject -> persimmonTests(testObject, name, declared))
+      | :? TestCase as testCase ->
+        testCase.Fixup(declared.Name, parentContext)
+        yield testCase :> ITestMetadata
       // For context:
       | :? Context as context ->
-        // TODO: NOT collect children, save context structures.
-        let children = context.CreateAdditionalMetadataIfNeed(declared.Name, declared, None).Children
-        yield!
-          persimmonTests(children, name, declared)
+        context.Fixup(declared.Name, parentContext)
+        yield! persimmonTests(context.Children, name, declared, Some (context :> ITestMetadata))
+      // For test objects (sequence, ex: array):
+      | :? (ITestMetadata seq) as tests ->
+        yield! tests |> Seq.collect (fun child -> persimmonTests(child, name, declared, parentContext))
       // Unknown type, ignored.
       | _ -> ()
     }
 
   /// Retreive test object via target property, and traverse.
-  let persimmonTestProps (p: PropertyInfo) =
-    persimmonTests (p.GetValue(null, null), p.Name, p)
+  let persimmonTestProps (p: PropertyInfo, parentContext : ITestMetadata option) =
+    persimmonTests (p.GetValue(null, null), p.Name, p, parentContext)
   
   /// Retreive test object via target method, and traverse.
-  let persimmonTestMethods (m: MethodInfo) =
-    persimmonTests (m.Invoke(null, [||]), m.Name, m)
+  let persimmonTestMethods (m: MethodInfo, parentContext : ITestMetadata option) =
+    persimmonTests (m.Invoke(null, [||]), m.Name, m, parentContext)
   
   /// Retreive test object via target type, and traverse.
-  let rec testObjects (typ: Type) =
+  let rec testObjects (typ: Type, parentContext : ITestMetadata option) =
     seq {
       // For properties (value binding):
       yield!
         typ.GetProperties(BindingFlags.Static ||| BindingFlags.Public)
-        |> Seq.collect persimmonTestProps
+        |> Seq.collect (fun p -> persimmonTestProps(p, parentContext))
       // For methods (function binding):
       yield!
         typ.GetMethods(BindingFlags.Static ||| BindingFlags.Public)
         |> Seq.filter (fun m -> not m.IsSpecialName) // ignore getter methods
         |> Seq.filter (fun m -> m.GetParameters() |> Array.isEmpty)
-        |> Seq.collect persimmonTestMethods
+        |> Seq.collect (fun m -> persimmonTestMethods(m, parentContext))
       // For nested modules:
       for nestedType in publicNestedTypes typ do
-        let objs = testObjects nestedType
-        if Seq.isEmpty objs then ()
-        else yield Context(nestedType.Name, nestedType.GetConstructors().[0], objs |> Seq.toList) // TODO: Is constructor exactly defined?
-          :> ITestObject
+        let testCases = testObjects (nestedType, parentContext)
+        if Seq.isEmpty testCases then ()
+        else yield Context(Some nestedType.Name, testCases) :> ITestMetadata
     }
 
 [<Sealed>]
 type TestCollector() =
-  
-  /// Recursively apply declared type for Context.
-  let rec fixupDeclaredType (testObject:ITestObject) =
-    match testObject with
-    | :? Context as context ->
-        context.CreateAdditionalMetadataIfNeed(
-          context.Name.Value,
-          testObject.DeclaredMember.Value,
-          Some fixupDeclaredType) :> ITestObject
-    | _ -> testObject
 
   /// Remove contexts and flatten structured test objects.
-  let rec flattenTestCase (testObject:ITestObject) =
+  let rec flattenTestCase (testMetadata: ITestMetadata) =
     seq {
-      match testObject with
+      match testMetadata with
       | :? Context as context ->
         for child in context.Children do
-          // TODO: Apply context-path into FullName?
           yield! flattenTestCase child
       | :? ITestCase as testCase -> yield testCase
       | _ -> ()
@@ -96,8 +80,7 @@ type TestCollector() =
   /// Collect test objects with basic procedure.
   member __.Collect(target: Assembly) =
     target |> TestCollectorImpl.publicTypes
-      |> Seq.collect TestCollectorImpl.testObjects
-      |> Seq.map fixupDeclaredType
+      |> Seq.collect (fun t -> TestCollectorImpl.testObjects(t, None))
 
   /// Collect test cases.
   member this.CollectOnlyTestCases(target: Assembly) =

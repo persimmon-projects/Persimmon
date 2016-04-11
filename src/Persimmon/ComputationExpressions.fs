@@ -18,7 +18,7 @@ type TestBuilder private (name: string option) =
   member __.ReturnFrom(x: BindingValue<_>) =
     match x with
     | UnitAssertionResult x | NonUnitAssertionResult x -> TestCase.make name [] x
-    | UnitTestCase x | NonUnitTestCase x -> TestCase<_>(name, x.Parameters, x.Run)
+    | UnitTestCase x | NonUnitTestCase x -> TestCase<_>(name, x.Parameters, fun _ -> x.Run())
   // let! a = (x: AssertionResult<unit>) in ...
   member __.Source(x: AssertionResult<unit>) = UnitAssertionResult x
   // let! a = (x: AssertionResult<_>) in ...
@@ -35,13 +35,13 @@ type TestBuilder private (name: string option) =
       let c = f x // TODO: try-with
       match box x with
       | :? exn as e ->
-        TestCase(c.Metadata, fun () ->
+        TestCase<_>(c.Name, c.Parameters, fun _ ->
           match c.Run() with
           | Done (_, (Passed _, []), _) as d -> d
-          | Done (meta, assertionResults, duration) ->
+          | Done (tc, assertionResults, duration) ->
             match assertionResults |> NonEmptyList.toList |> AssertionResult.List.onlyNotPassed with
             | [] -> failwith "oops!"
-            | notPassed -> Error (meta, [e], notPassed, duration)
+            | notPassed -> Error (tc, [e], notPassed, duration)
           | Error _ as e -> e
         )
       | _ -> c
@@ -87,8 +87,7 @@ type ParameterizeBuilder() =
     source
     |> Seq.map (fun x ->
       let ret = f x
-      let metadata = TestMetadata.init ret.Metadata.Name (toList x)
-      TestCase<_>(metadata, ret.Run) :> TestObject)
+      TestCase<_>(ret.Name, (toList x), fun testCase -> ret.Run()) :> TestCase)
 
 type TrapBuilder () =
   member __.Zero () = ()

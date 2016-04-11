@@ -16,27 +16,25 @@ type TestCaseType<'T> =
 
 module TestCase =
   let make name parameters x =
-    let meta = TestMetadata.init name parameters
-    TestCase(meta, fun () -> Done (meta, NonEmptyList.singleton x, TimeSpan.Zero))
+    new TestCase<_>(name, parameters, fun testCase -> Done (testCase, NonEmptyList.singleton x, TimeSpan.Zero))
 
   let makeError name parameters exn =
-    let meta = TestMetadata.init name parameters
-    TestCase(meta, fun () -> Error (meta, [exn], [], TimeSpan.Zero))
+    new TestCase<_>(name, parameters, fun testCase -> Error (testCase, [exn], [], TimeSpan.Zero))
 
   let addNotPassed notPassedCause (x: TestCase<_>) =
-    TestCase(x.Metadata, fun () -> x.Run() |> TestResult.addAssertionResult (NotPassed notPassedCause))
+    new TestCase<_>(x.Name, x.Parameters, fun testCase -> x.Run() |> TestResult.addAssertionResult (NotPassed notPassedCause))
 
   let private runNoValueTest (x: TestCase<'T>) (rest: 'T -> TestCase<'U>) =
     match x.Run() with
-    | Done (meta, (Passed unit, []), duration) ->
+    | Done (testCase, (Passed unit, []), duration) ->
       let watch = Stopwatch.StartNew()
       try
         try (rest unit).Run() |> TestResult.addDuration duration
         finally watch.Stop()
       with e ->
         watch.Stop()
-        Error (meta, [e], [], duration + watch.Elapsed)
-    | Done (meta, assertionResults, duration) ->
+        Error (testCase, [e], [], duration + watch.Elapsed)
+    | Done (testCase, assertionResults, duration) ->
       // If the TestCase does not have any values,
       // even if the assertion is not passed,
       // the test is continuable.
@@ -59,8 +57,8 @@ module TestCase =
           |> TestResult.addDuration duration
       with e ->
         watch.Stop()
-        Error (meta, [e], notPassed, duration + watch.Elapsed)
-    | Error (meta, es, results, duration) ->
+        Error (testCase, [e], notPassed, duration + watch.Elapsed)
+    | Error (testCase, es, results, duration) ->
       // If the TestCase does not have any values,
       // even if the assertion is not passed,
       // the test is continuable.
@@ -79,11 +77,11 @@ module TestCase =
           |> TestResult.addDuration duration
       with e ->
         watch.Stop()
-        Error (meta, e::es, results, duration + watch.Elapsed)
+        Error (testCase, e::es, results, duration + watch.Elapsed)
 
   let private runHasValueTest (x: TestCase<'T>) (rest: 'T -> TestCase<'U>) =
     match x.Run() with
-    | Done (meta, (Passed value, []), duration) ->
+    | Done (testCase, (Passed value, []), duration) ->
       let watch = Stopwatch.StartNew()
       try
         let result = (rest value).Run()
@@ -91,8 +89,8 @@ module TestCase =
         result
       with e ->
         watch.Stop()
-        Error (meta, [e], [], duration + watch.Elapsed)
-    | Done (meta, assertionResults, duration) ->
+        Error (testCase, [e], [], duration + watch.Elapsed)
+    | Done (testCase, assertionResults, duration) ->
       // If the TestCase has some values,
       // the test is not continuable.
       let notPassed =
@@ -101,15 +99,15 @@ module TestCase =
         |> AssertionResult.List.onlyNotPassed
       match notPassed with
       | [] -> failwith "oops!"
-      | head::tail -> Done (meta, NonEmptyList.make (NotPassed head) (tail |> List.map NotPassed), duration)
-    | Error (meta, es, results, duration) ->
+      | head::tail -> Done (testCase, NonEmptyList.make (NotPassed head) (tail |> List.map NotPassed), duration)
+    | Error (testCase, es, results, duration) ->
       // If the TestCase has some values,
       // the test is not continuable.
-      Error (meta, es, results, duration)
+      Error (testCase, es, results, duration)
 
   let combine (x: TestCaseType<'T>) (rest: 'T -> TestCase<'U>) =
     match x with
     | NoValueTest x ->
-      TestCase(x.Metadata, fun () -> runNoValueTest x rest)
+      TestCase<_>(x.Name, x.Parameters, fun _ -> runNoValueTest x rest)
     | HasValueTest x ->
-      TestCase(x.Metadata, fun () -> runHasValueTest x rest)
+      TestCase<_>(x.Name, x.Parameters, fun _ -> runHasValueTest x rest)

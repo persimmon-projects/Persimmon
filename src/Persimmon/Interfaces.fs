@@ -3,54 +3,27 @@
 open System
 open System.Reflection
 
-/// This interface total abstraction represents a test metadata. (non-generic view)
-type ITestNode =
-  /// The test name. It doesn't contain the parameters.
-  abstract Name: string option
-  /// Metadata symbol name
-  abstract SymbolName: string
+///////////////////////////////////////////////////////////////////////////
+// Test interfaces
 
-/// This interface represents a test case metadata. (non-generic view)
+/// Non generic view for metadata.
 type ITestMetadata =
-  inherit ITestNode
-  /// The test name(if the test has parameters then the value contains them).
-  abstract FullName : string
-  /// The test parameters.
-  /// If the test has no parameters then the value is empty list.
-  abstract Parameters: (Type * obj) list
+  abstract Name : string option
+  abstract Parent : ITestMetadata option
+  abstract SymbolName : string
+  abstract UniqueName : string
 
-/// The interface that is treated as tests by Persimmon. (non-generic view)
-type ITestObject =
-  inherit ITestNode
+/// Non generic view for test case.
+and ITestCase =
+  inherit ITestMetadata
+  abstract Parameters : (Type * obj) seq
+  abstract Run : unit -> ITestResult
 
-/// This interface represents a test result. (non-generic view)
-/// You should use the ActivePatterns
-/// if you want to process derived objects through this interface.
-type ITestResultNode =
-  /// The test name. It doesn't contain the parameters.
-  abstract Name: string
-  /// Metadata symbol name
-  abstract SymbolName: string
-
-type ITestResult =
-  inherit ITestResultNode
-  /// The test name(if the test has parameters then the value contains them).
-  abstract FullName : string
-  /// The test parameters.
-  /// If the test has no parameters then the value is empty list.
-  abstract Parameters: (Type * obj) list
-  /// The test result
+/// Non generic view for test result.
+and ITestResult =
+  abstract TestCase : ITestCase
   abstract Exceptions : exn []
   abstract Duration : TimeSpan
-
-/// This interface represents a test case. (non-generic view)
-/// In order to run the test represented this class, use the "Run" method.
-type ITestCase =
-  inherit ITestObject
-  inherit ITestMetadata
-  /// (For internal use only)
-  abstract CreateAdditionalMetadataIfNeed: string * MemberInfo -> ITestCase
-  abstract Run: unit -> ITestResult
 
 namespace Persimmon.Output
 
@@ -58,6 +31,6 @@ open Persimmon
 
 /// This interface abstraction how output results running on tests.
 type IReporter =
-  abstract ReportProgress: ITestResultNode -> unit
-  abstract ReportSummary: ITestResultNode seq -> unit
+  abstract ReportProgress: ITestResult -> unit
+  abstract ReportSummary: ITestResult seq -> unit
   abstract ReportError: string -> unit

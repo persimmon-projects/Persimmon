@@ -1,12 +1,15 @@
 ﻿module Persimmon.ActivePatterns
 
-let (|Context|TestCase|) (test: ITestObject) =
-  match test with
-  | :? Context as ctx -> Context ctx
-  | tc -> TestCase (tc.GetType().GetMethod("BoxTypeParam").Invoke(tc, [||]) :?> TestCase<obj>)
+open System
 
-let (|ContextResult|TestResult|EndMarker|) (res: ITestResultNode) =
-  match res with
-  | :? ContextResult as cr -> ContextResult cr
+let (|Context|TestCase|) (testMetadata: ITestMetadata) =
+  match testMetadata with
+  | :? Context as context -> Context context
+  | :? ITestCase as testCase -> TestCase testCase
+  | _ -> new InvalidOperationException() |> raise
+
+let (|TestResult|EndMarker|) (result: ITestResult) =
+  match result with
   | marker when marker = TestResult.endMarker -> EndMarker
-  | tr -> TestResult (tr.GetType().GetMethod("BoxTypeParam").Invoke(tr, [||]) :?> TestResult<obj>)
+  | _ -> TestResult result
+  

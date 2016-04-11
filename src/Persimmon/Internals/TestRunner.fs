@@ -11,13 +11,15 @@ open Persimmon.ActivePatterns
 
 module private TestRunnerImpl =
 
-  let runTest progress test =
+  let rec runTest progress test = seq {
     match test with
-    | Context ctx -> ctx.Run(progress) :> ITestResultNode
-    | TestCase tc ->
-      let result = tc.Run()
+    | Context context ->
+      yield! context.Children |> Seq.collect (fun child -> runTest progress child)
+    | TestCase testCase ->
+      let result = testCase.Run()
       progress result
-      result :> ITestResultNode
+      yield result
+  }
 
   let rec countErrors = function
   | ContextResult cr ->
@@ -35,37 +37,33 @@ module private TestRunnerImpl =
 
 type RunResult = {
   Errors: int
-  ExecutedRootTestResults: ITestResultNode seq
+  ExecutedRootTestResults: ITestResult seq
 }
 
 [<Sealed>]
 type TestRunner() =
 
   /// Collect test objects and run tests.
-  member __.RunAllTests progress (tests: #ITestObject seq) =
-    let rootResults = tests |> Seq.map (TestRunnerImpl.runTest progress)
+  member __.RunAllTests progress (tests: ITestMetadata seq) =
+    let rootResults = tests |> Seq.collect (TestRunnerImpl.runTest progress)
     let errors = rootResults |> Seq.sumBy TestRunnerImpl.countErrors
     { Errors = errors; ExecutedRootTestResults = rootResults }
     
   /// Collect test objects and run tests on async context.
-  member __.AsyncRunAllTests progress (tests: #ITestObject seq) =
+  member __.AsyncRunAllTests progress (tests: ITestMetadata seq) =
     let asyncRun test = async {
-        return TestRunnerImpl.runTest progress test
+        return TestRunnerImpl.runTest progress test |> Seq.toList
     }
     async {
         let! rootResults = tests |> Seq.map asyncRun |> Async.Parallel
-        let errors = Seq.ofArray rootResults |> Seq.sumBy TestRunnerImpl.countErrors
-        return { Errors = errors; ExecutedRootTestResults = rootResults }
+        let results = rootResults |> Seq.collect (fun r -> r) |> Seq.toArray
+        let errors = results |> Seq.sumBy TestRunnerImpl.countErrors
+        return { Errors = errors; ExecutedRootTestResults = results }
     }
       
   /// RunTestsAndCallback run test cases and callback. (Internal use only)
   /// If fullyQualifiedTestNames is empty, try all tests.
   member __.RunTestsAndCallback (target: Assembly, fullyQualifiedTestNames: string[], callback: Action<obj>) =
-    let progress (testResult: ITestResultNode) =
-      match testResult with
-      // Call f if testResult is ITestResult (ignoring ContextResult)
-      | :? ITestResult as tr -> callback.Invoke(tr)
-      | _ -> ()
 
     // Make fqtn dicts.
     let targetNames = Dictionary<string, string>()
@@ -83,5 +81,5 @@ type TestRunner() =
 
     // Run tests.
     do testCases
-      |> Seq.filter (fun testCase -> containsKey testCase.FullName)
-      |> Seq.iter (fun testCase -> TestRunnerImpl.runTest progress testCase |> ignore)
+      |> Seq.filter (fun testCase -> containsKey testCase.UniqueName)
+      |> Seq.iter (fun testCase -> TestRunnerImpl.runTest callback.Invoke testCase |> ignore)
