@@ -43,71 +43,114 @@ module AssertionResult =
           | _, _ -> x
       )
 
-/// The metadata that is common to each test case and test result.
-[<StructuredFormatDisplay("{FullName}")>]
-type TestMetadata = {
+///////////////////////////////////////////////////////////////////////////
+// Test metadata base class
+
+[<AbstractClass>]
+[<StructuredFormatDisplay("{UniqueName}")>]
+type TestMetadata internal (name: string) =
+
+  let mutable _parent : TestMetadata option = None
+
   /// The test name. It doesn't contain the parameters.
-  Name: string option
-  /// The test defined member. Storing by TestCollector.
-  DeclaredMember: MemberInfo option
+  member __.Name = name
+
+  /// Parent metadata. Storing by TestCollector.
+  member __.Parent = _parent
+
+  /// Metadata symbol name.
+  member this.SymbolName =
+    match _parent with
+    | Some parent -> parent.SymbolName + "." + name
+    | None -> name
+
+  /// The test unique name (if the test has parameters then the value contains them).
+  member this.UniqueName = this.ToString()
+
+  /// Metadata string.
+  override this.ToString() = this.SymbolName
+
+  /// Execute the test.
+  abstract member Run : unit -> unit
+
+  /// For internal use only.
+  member internal this.SetParent(parent: TestMetadata) =
+    _parent <- Some parent
+
+///////////////////////////////////////////////////////////////////////////
+// Test result class
+
+[<AbstractClass>]
+type TestResult internal (testMetadata: TestMetadata) =
+  /// Target test metadata.
+  member __.Metadata = testMetadata
+
+[<Sealed>]
+type TestResult<'T> (testMetadata: TestMetadata) =
+  inherit TestResult(testMetadata)
+  
+
+///////////////////////////////////////////////////////////////////////////
+// Test case class
+
+[<AbstractClass>]
+type TestCase internal (name: string, parameters: (Type * obj) list) =
+  inherit TestMetadata (name)
+
   /// The test parameters.
   /// If the test has no parameters then the value is empty list.
-  Parameters: (Type * obj) list
-}
-with
-  /// The test name(if the test has parameters then the value contains them).
-  member this.FullName = this.ToString()
-
-  override this.ToString() =
-    match this.Name with
-    | Some name when this.Parameters.IsEmpty -> name
-    | Some name ->
-      sprintf "%s(%s)" name (this.Parameters |> PrettyPrinter.printAll)
-    | None -> ""
-
-  interface ITestMetadata with
-    member this.Name = this.Name
-    member this.DeclaredMember = this.DeclaredMember
-    member this.FullName = this.FullName
-    member this.Parameters = this.Parameters
-
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
-module TestMetadata =
-  // Construct TestMetadata
-  let init name parameters =
-    { Name = name; DeclaredMember = None; Parameters = parameters }
-
-/// The type that is treated as tests by Persimmon.
-/// Derived class of this class are only two classes,
-/// they are Context and TestCase<'T>.
-/// When the TestObject is executed becomes TestResult.
-/// You should use the ActivePatterns
-/// if you want to process derived objects through this class.
-[<AbstractClass>]
-type TestObject internal () =
-
-  /// The test name. It doesn't contain the parameters.
-  abstract member Name: string option
-  /// The test defined member. Storing by TestCollector.
-  abstract member DeclaredMember: MemberInfo option
-
-  interface ITestObject with
-    member this.Name = this.Name
-    member this.DeclaredMember = this.DeclaredMember
+  member __.Parameters = parameters
     
+  /// Metadata string.
+  override this.ToString() =
+    match this.Parameters.IsEmpty with
+    | true -> sprintf "%s(%s)" this.Name (this.Parameters |> PrettyPrinter.printAll)
+    | false -> this.Name
+
+[<Sealed>]
+type TestCase<'T> (name: string, parameters: (Type * obj) list, body: Lazy<TestResult<'T>>) =
+  inherit TestCase (name, parameters)
+
+  /// Execute the test.
+  override __.Run() =
+    let watch = Stopwatch.StartNew()
+    let result = body.Value
+    watch.Stop()
+    match result with
+    | Error (_, errs, res, _) -> Error (metadata, errs, res, watch.Elapsed)
+    | Done (_, res, _) -> Done (metadata, res, watch.Elapsed)
+
+///////////////////////////////////////////////////////////////////////////
+// Test context class (structuring nested test node)
+
+[<Sealed>]
+type Context (name: string, children: TestMetadata list) =
+  inherit TestMetadata (name)
+    
+  /// Metadata string.
+  override this.ToString() =
+    match this.Parameters.IsEmpty with
+    | true -> sprintf "%s(%s)" this.Name (this.Parameters |> PrettyPrinter.printAll)
+    | false -> this.Name
+
+
+
+
+
+
 /// This class represents a nested test result.
 /// After running tests, the Context objects become the ContextReults objects.
-type ContextResult internal (name: string, declaredMember: MemberInfo, children: ITestResultNode list) =
+type ContextResult internal (name: string, testMetadata: TestMetadata, children: ITestResultNode list) =
 
   member __.Name = name
-  member __.DeclaredMember = declaredMember
+  member __.SymbolName = testMetadata.SymbolName
   member __.Children = children
 
   override this.ToString() = sprintf "%A" this
 
   interface ITestResultNode with
-    member __.Name = name
-    member __.DeclaredMember = declaredMember
+    member this.Name = this.Name
+    member this.SymbolName = this.SymbolName
     
 /// The result of each test.
 /// After running tests, the TestCase objects become the TestResult objects.
@@ -122,8 +165,8 @@ type TestResult<'T> =
 
     /// The test name. It doesn't contain the parameters.
     member this.Name = this.Metadata.Name.Value
-    /// The test defined member. Storing by TestCollector.
-    member this.DeclaredMember = this.Metadata.DeclaredMember.Value
+    /// Metadata symbol name
+    member this.SymbolName = this.Metadata.SymbolName
 
     /// The test name(if the test has parameters then the value contains them).
     member this.FullName = this.Metadata.FullName
@@ -150,7 +193,7 @@ type TestResult<'T> =
 
     interface ITestResult with
       member this.Name = this.Name
-      member this.DeclaredMember = this.DeclaredMember
+      member this.SymbolName = this.SymbolName
       member this.FullName = this.FullName
       member this.Parameters = this.Parameters
       member this.Exceptions = this.Exceptions
@@ -158,23 +201,27 @@ type TestResult<'T> =
 
 /// This class represents a nested test.
 /// We can use this class for grouping of the tests.
-type Context private (name: string, declaredMember: MemberInfo option, children: ITestObject list) =
+type Context private (name: string, testMetadata: TestMetadata option, children: ITestObject list) =
   inherit TestObject ()
 
   new(name: string, children: ITestObject seq) = Context(name, None, children |> Seq.toList)
-  new(name: string, declaredMember: MemberInfo, children: ITestObject seq) = Context(name, Some declaredMember, children |> Seq.toList)
+  new(name: string, testMetadata: TestMetadata, children: ITestObject seq) = Context(name, Some testMetadata, children |> Seq.toList)
 
   /// The context name.
   override __.Name = Some name
-  /// The test defined member. Storing by TestCollector.
-  override __.DeclaredMember = declaredMember
+  /// Metadata symbol name
+  override __.SymbolName =
+    match testMetadata with
+    | Some tm -> tm.SymbolName
+    | None -> "(Unknown)"
+
   /// (For internal use only)
-  member __.CreateAdditionalMetadataIfNeed(newName: string, newDeclaredMember: MemberInfo, mapper: (ITestObject -> ITestObject) option) =
+  member __.CreateAdditionalMetadataIfNeed(newName: string, newTestMetadata: TestMetadata, mapper: (ITestObject -> ITestObject) option) =
     Context(
       (if name = "" then newName else name),
-      (match declaredMember with
-       | Some _ -> declaredMember
-       | None -> Some newDeclaredMember),
+      (match testMetadata with
+       | Some _ -> testMetadata
+       | None -> Some newTestMetadata),
       (match mapper with
        | Some m -> children |> Seq.map m |> Seq.toList
        | None -> children))
@@ -184,7 +231,7 @@ type Context private (name: string, declaredMember: MemberInfo option, children:
 
   /// Execute tests recursively.
   member __.Run(reporter: ITestResultNode -> unit) =
-    ContextResult(name, declaredMember.Value, children
+    ContextResult(name, testMetadata.Value, children
       |> Seq.map (function
         | :? Context as c ->
             let res = c.Run(reporter) :> ITestResultNode

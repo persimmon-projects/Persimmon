@@ -7,8 +7,8 @@ open System.Reflection
 type ITestNode =
   /// The test name. It doesn't contain the parameters.
   abstract Name: string option
-  /// The test defined member. Storing by TestCollector.
-  abstract DeclaredMember: MemberInfo option
+  /// Metadata symbol name
+  abstract SymbolName: string
 
 /// This interface represents a test case metadata. (non-generic view)
 type ITestMetadata =
@@ -29,8 +29,8 @@ type ITestObject =
 type ITestResultNode =
   /// The test name. It doesn't contain the parameters.
   abstract Name: string
-  /// The test defined member. Storing by TestCollector.
-  abstract DeclaredMember: MemberInfo
+  /// Metadata symbol name
+  abstract SymbolName: string
 
 type ITestResult =
   inherit ITestResultNode
