@@ -108,7 +108,8 @@ type TestCase internal (name: string option, parameters: (Type * obj) seq) =
   member __.Parameters = parameters
     
   /// Execute this test case.
-  member this.Run() : ITestResult = new InvalidOperationException() |> raise
+  member this.Run() =
+    (this :> ITestCase).Run()
 
   /// Metadata string.
   override this.ToString() =
@@ -157,10 +158,10 @@ and TestResult<'T> =
       sprintf "%A: Result=%s" (result |> fst) (result |> snd)
 
     interface ITestResult with
-      member this.TestCase =
+      member this.Metadata =
         match this with
-        | Error (testCase, _, _, _) -> testCase :> ITestCase
-        | Done (testCase, _, _) -> testCase :> ITestCase
+        | Error (testCase, _, _, _) -> testCase :> ITestMetadata
+        | Done (testCase, _, _) -> testCase :> ITestMetadata
       member this.Exceptions =
         match this with
         | Error (_, exns, _, _) -> exns |> Seq.toArray
@@ -178,16 +179,28 @@ type Context (name: string option, children: ITestMetadata seq) =
   inherit TestMetadata (name)
 
   /// Execute this test cases.
-  member __.Run() = seq {
-    for child in children do
-      match child with
-      | :? Context as context -> yield! context.Run()
-      | :? TestCase as testCase -> yield testCase.Run()
-      | _ -> ()
-  }
+  member this.Run() =
+    new ContextResult(this, seq {
+      for child in children do
+        match child with
+        | :? Context as context -> yield! context.Run()
+        | :? TestCase as testCase -> yield testCase.Run() :> ITestResultNode
+        | _ -> ()
+    }
+    |> Seq.toArray)
 
   override this.ToString() =
     sprintf "Context(%A, %A)" this.Name children
 
   /// For internal use only.
   member internal __.Children = children
+
+///////////////////////////////////////////////////////////////////////////
+
+and ContextResult internal (context: Context, children: ITestResultNode[]) =
+
+  member __.Context = context
+  member __.Children = children
+
+  interface ITestResultNode with
+    member this.Metadata = this.Context :> ITestMetadata

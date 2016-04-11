@@ -19,9 +19,13 @@ and ITestCase =
   abstract Parameters : (Type * obj) seq
   abstract Run : unit -> ITestResult
 
+/// Non generic view for test result (node).
+and ITestResultNode =
+  abstract Metadata : ITestMetadata
+
 /// Non generic view for test result.
 and ITestResult =
-  abstract TestCase : ITestCase
+  inherit ITestResultNode
   abstract Exceptions : exn []
   abstract Duration : TimeSpan
 
