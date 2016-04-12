@@ -15,9 +15,9 @@ type NotPassedCause =
 
 /// Non union view for NotPassedCause
 type AssertionStatus =
-  | Passed
-  | Skipped
-  | Violated
+  | StatusPassed
+  | StatusSkipped
+  | StatusViolated
 
 /// The result of each assertion. (fake base type)
 type AssertionResult =
@@ -33,37 +33,45 @@ type AssertionResult<'T> =
   interface AssertionResult with
     member this.Status =
       match this with
-      | Passed _ -> AssertionStatus.Passed
+      | Passed _ -> StatusPassed
       | NotPassed cause ->
         match cause with
-        | NotPassedCause.Skipped _ -> AssertionStatus.Skipped
-        | NotPassedCause.Violated _ -> AssertionStatus.Violated
+        | NotPassedCause.Skipped _ -> StatusSkipped
+        | NotPassedCause.Violated _ -> StatusViolated
 
+/// NotPassedCause manipulators.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module NotPassedCause =
-  module List =
-    let toAssertionResultList xs = xs |> List.map NotPassed
 
+  /// NotPassedCause via sequence manipulators.
+  module Seq =
+
+    let toAssertionResultList xs = xs |> Seq.map NotPassed
+
+/// AssertionResult manipulators.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module AssertionResult =
-  module List =
-    let onlyNotPassed xs =
-      xs |> List.choose (function NotPassed x -> Some x | _ -> None)
 
   let private selector (current: #AssertionResult) (next: #AssertionResult) =
     match current.Status, next.Status with
-    | Violated, _ -> current
-    | _, Violated -> next
-    | Skipped, _ -> current
-    | _, Skipped -> next
+    | StatusViolated, _ -> current
+    | _, StatusViolated -> next
+    | StatusSkipped, _ -> current
+    | _, StatusSkipped -> next
     | _, _ -> current
 
+  /// AssertionResult via sequence manipulators.
   module Seq =
+
+    let onlyNotPassed xs =
+      xs |> Seq.choose (function NotPassed x -> Some x | _ -> None)
+
     /// Calculate the typical assertion result.
     /// It returns most important result.
     /// For example, "Violated" is more important than "Passed"
     let typicalResult (xs: #AssertionResult seq) = xs |> Seq.reduce selector
 
+  /// AssertionResult via NonEmptyList manipulators.
   module NonEmptyList =
     /// Calculate the typical assertion result.
     /// It returns most important result.
@@ -235,9 +243,9 @@ type TestCase<'T> =
 /// Test result union type.
 and TestResult<'T> =
   /// This case represents the error.
-  | Error of TestCase<'T> * exn list * NotPassedCause list * TimeSpan
+  | Error of TestCase * exn list * NotPassedCause list * TimeSpan
   /// This case represents that all of the assertions is finished.
-  | Done of TestCase<'T> * NonEmptyList<AssertionResult<'T>> * TimeSpan
+  | Done of TestCase * NonEmptyList<AssertionResult<'T>> * TimeSpan
   with
     override this.ToString() =
       let result =
@@ -264,7 +272,7 @@ and TestResult<'T> =
       | Done (_, res, _) -> res |> NonEmptyList.toList |> Seq.map (fun ar -> ar :> AssertionResult) |> Seq.toArray
 
     interface TestResult with
-      member this.TestCase = this.TestCase :> TestCase
+      member this.TestCase = this.TestCase
       member this.Exceptions = this.Exceptions
       member this.Duration = this.Duration
       member this.Results = this.Results
@@ -278,8 +286,8 @@ and TestResult<'T> =
 
 /// Test context class. (structuring nested test node)
 [<Sealed>]
-type Context (name: string option, children: TestMetadata seq) =
-  inherit TestMetadata (name)
+type Context (name: string, children: TestMetadata seq) =
+  inherit TestMetadata (Some name)
 
   /// Child tests.
   member __.Children = children

@@ -4,6 +4,7 @@ open System
 open System.Diagnostics
 
 // Utility functions of TestResult<'T>
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module TestResult =
 
   let private endMarkerTestBody (tc:TestCase<unit>) : TestResult<unit> =
@@ -18,20 +19,21 @@ module TestResult =
         member __.TestCase = endMarkerTestCase
         member __.Exceptions = [||]
         member __.Duration = TimeSpan.Zero
+        member __.Results = [||]
     }
 
   let addAssertionResult x = function
-    | Done (metadata, (Passed _, []), d) -> Done (metadata, NonEmptyList.singleton x, d)
-    | Done (metadata, results, d) -> Done (metadata, NonEmptyList.cons x results, d)
-    | Error (metadata, es, results, d) -> Error (metadata, es, (match x with Passed _ -> results | NotPassed x -> x::results), d)
+    | Done (testCase, (Passed _, []), d) -> Done (testCase, NonEmptyList.singleton x, d)
+    | Done (testCase, results, d) -> Done (testCase, NonEmptyList.cons x results, d)
+    | Error (testCase, es, results, d) -> Error (testCase, es, (match x with Passed _ -> results | NotPassed x -> x::results), d)
 
   let addAssertionResults (xs: NonEmptyList<AssertionResult<_>>) = function
-    | Done (metadata, (Passed _, []), d) -> Done (metadata, xs, d)
-    | Done (metadata, results, d) ->
-      Done (metadata, NonEmptyList.appendList xs (results |> NonEmptyList.toList |> AssertionResult.List.onlyNotPassed |> NotPassedCause.List.toAssertionResultList), d)
-    | Error (metadata, es, results, d) ->
-      Error (metadata, es, (xs |> NonEmptyList.toList |> AssertionResult.List.onlyNotPassed)@results, d)
+    | Done (testCase, (Passed _, []), d) -> Done (testCase, xs, d)
+    | Done (testCase, results, d) ->
+      Done (testCase, NonEmptyList.appendList xs (results |> NonEmptyList.toList |> AssertionResult.Seq.onlyNotPassed |> NotPassedCause.Seq.toAssertionResultList), d)
+    | Error (testCase, es, results, d) ->
+      Error (testCase, es, (xs |> NonEmptyList.toSeq |> AssertionResult.Seq.onlyNotPassed |> Seq.toList)@results, d)
 
   let addDuration x = function
-    | Done (metadata, results, d) -> Done (metadata, results, d + x)
-    | Error (metadata, es, results, ts) -> Error (metadata, es, results, ts + x)
+    | Done (testCase, results, d) -> Done (testCase, results, d + x)
+    | Error (testCase, es, results, ts) -> Error (testCase, es, results, ts + x)

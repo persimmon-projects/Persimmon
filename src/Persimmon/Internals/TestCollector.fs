@@ -28,7 +28,7 @@ module private TestCollectorImpl =
         context.Fixup(declared.Name, parent)
         yield! fixupAndCollectTests(context.Children, name, declared, Some (context :> TestMetadata))
       // For test objects (sequence, ex: array):
-      | :? (ITestMetadata seq) as tests ->
+      | :? (TestMetadata seq) as tests ->
         yield! tests |> Seq.collect (fun child -> fixupAndCollectTests(child, name, declared, parent))
       // Unknown type, ignored.
       | _ -> ()
@@ -59,7 +59,7 @@ module private TestCollectorImpl =
       for nestedType in publicNestedTypes typ do
         let testCases = collectTests (nestedType, parent)
         if Seq.isEmpty testCases then ()
-        else yield Context(Some nestedType.Name, testCases) :> TestMetadata
+        else yield Context(nestedType.Name, testCases) :> TestMetadata
     }
 
 [<Sealed>]

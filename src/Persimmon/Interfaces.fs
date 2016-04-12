@@ -26,12 +26,3 @@ and ITestResult =
   abstract Exceptions : exn []
   abstract Duration : TimeSpan
 
-namespace Persimmon.Output
-
-open Persimmon
-
-/// This interface abstraction how output results running on tests.
-type IReporter =
-  abstract ReportProgress: ITestResult -> unit
-  abstract ReportSummary: ITestResult seq -> unit
-  abstract ReportError: string -> unit

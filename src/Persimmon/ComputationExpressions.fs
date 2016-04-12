@@ -30,7 +30,7 @@ type TestBuilder private (name: string option) =
   // let! a = (x: BindingValue<_>) in ...
   member __.Bind(x, f: 'T -> TestCase<'U>) =
     match x with
-    | UnitAssertionResult (Passed x) ->  f x // TODO: try-with
+    | UnitAssertionResult (Passed x) -> f x // TODO: try-with
     | NonUnitAssertionResult (Passed x) ->
       let c = f x // TODO: try-with
       match box x with
@@ -39,7 +39,7 @@ type TestBuilder private (name: string option) =
           match c.Run() with
           | Done (_, (Passed _, []), _) as d -> d
           | Done (tc, assertionResults, duration) ->
-            match assertionResults |> NonEmptyList.toList |> AssertionResult.List.onlyNotPassed with
+            match assertionResults |> NonEmptyList.toSeq |> AssertionResult.Seq.onlyNotPassed |> Seq.toList with
             | [] -> failwith "oops!"
             | notPassed -> Error (tc, [e], notPassed, duration)
           | Error _ as e -> e
@@ -87,7 +87,7 @@ type ParameterizeBuilder() =
     source
     |> Seq.map (fun x ->
       let ret = f x
-      TestCase<_>(ret.Name, (toList x), fun testCase -> ret.Run()) :> TestCase)
+      TestCase<_>(ret.Name, (toList x), fun _ -> ret.Run()) :> TestCase)
 
 type TrapBuilder () =
   member __.Zero () = ()

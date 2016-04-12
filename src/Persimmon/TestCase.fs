@@ -14,15 +14,31 @@ type TestCaseType<'T> =
     /// It means that the TestCase is not TestCase<unit>.
   | HasValueTest of TestCase<'T>
 
+/// Test case manipulators.
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module TestCase =
+
+  /// Create test case manually.
+  let init name parameters (asyncBody: TestCase<_> -> Async<TestResult<_>>) =
+    new TestCase<_>(name, parameters, asyncBody)
+
+  /// Create test case manually.
+  /// TODO: Omit all synch caller.
+  //[<Obsolete>]
+  let initForSynch name parameters (body: TestCase<_> -> TestResult<_>) =
+    new TestCase<_>(name, parameters, body)
+
+  /// Create always completion test case.
   let make name parameters x =
     new TestCase<_>(name, parameters, fun testCase -> Done (testCase, NonEmptyList.singleton x, TimeSpan.Zero))
 
+  /// Create always error test case.
   let makeError name parameters exn =
     new TestCase<_>(name, parameters, fun testCase -> Error (testCase, [exn], [], TimeSpan.Zero))
 
+  /// Add not passed test after test.
   let addNotPassed notPassedCause (x: TestCase<_>) =
-    new TestCase<_>(x.Name, x.Parameters, fun testCase -> x.Run() |> TestResult.addAssertionResult (NotPassed notPassedCause))
+    new TestCase<_>(x.Name, x.Parameters, fun _ -> x.Run() |> TestResult.addAssertionResult (NotPassed notPassedCause))
 
   let private runNoValueTest (x: TestCase<'T>) (rest: 'T -> TestCase<'U>) =
     match x.Run() with
@@ -41,8 +57,7 @@ module TestCase =
       // So, continue the test.
       let notPassed =
         assertionResults
-        |> NonEmptyList.toList
-        |> AssertionResult.List.onlyNotPassed
+        |> NonEmptyList.toSeq |> AssertionResult.Seq.onlyNotPassed |> Seq.toList
       let watch = Stopwatch.StartNew()
       try
         match notPassed with
@@ -95,8 +110,7 @@ module TestCase =
       // the test is not continuable.
       let notPassed =
         assertionResults
-        |> NonEmptyList.toList
-        |> AssertionResult.List.onlyNotPassed
+        |> NonEmptyList.toSeq |> AssertionResult.Seq.onlyNotPassed |> Seq.toList
       match notPassed with
       | [] -> failwith "oops!"
       | head::tail -> Done (testCase, NonEmptyList.make (NotPassed head) (tail |> List.map NotPassed), duration)
@@ -105,9 +119,10 @@ module TestCase =
       // the test is not continuable.
       Error (testCase, es, results, duration)
 
+  /// Combine tests.
   let combine (x: TestCaseType<'T>) (rest: 'T -> TestCase<'U>) =
     match x with
     | NoValueTest x ->
-      TestCase<_>(x.Name, x.Parameters, fun _ -> runNoValueTest x rest)
+      TestCase<'U>(x.Name, x.Parameters, fun _ -> runNoValueTest x rest)
     | HasValueTest x ->
-      TestCase<_>(x.Name, x.Parameters, fun _ -> runHasValueTest x rest)
+      TestCase<'U>(x.Name, x.Parameters, fun _ -> runHasValueTest x rest)

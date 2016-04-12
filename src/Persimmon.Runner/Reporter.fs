@@ -3,17 +3,25 @@
 open System
 open Persimmon
 
+open Persimmon
+
+/// This interface abstraction how output results running on tests.
+type IReporter =
+  abstract ReportProgress: TestResult -> unit
+  abstract ReportSummary: TestResult seq -> unit
+  abstract ReportError: string -> unit
+
 type Reporter
   (
-    progressPrinter: Printer<ITestResultNode>,
-    summaryPrinter: Printer<ITestResultNode seq>,
+    progressPrinter: Printer<TestResult>,
+    summaryPrinter: Printer<TestResult seq>,
     errorPrinter: Printer<string>
   ) =
 
-  member __.ReportProgress(test: ITestResultNode) =
+  member __.ReportProgress(test: TestResult) =
     progressPrinter.Print(test)
 
-  member __.ReportSummary(rootTests: ITestResultNode seq) =
+  member __.ReportSummary(rootTests: TestResult seq) =
     summaryPrinter.Print(rootTests)
 
   member __.ReportError(message: string) =

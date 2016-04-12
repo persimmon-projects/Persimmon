@@ -11,20 +11,19 @@ module Formatter =
 
   module ProgressFormatter =
     let dot =
-      { new IFormatter<ITestResultNode> with
-          member x.Format(test: ITestResultNode): IWritable = 
+      { new IFormatter<TestResult> with
+          member x.Format(test: TestResult): IWritable = 
             match test with
-            | ContextResult _ctx -> Writable.doNothing
             | EndMarker -> Writable.newline
             | TestResult tr ->
-                match tr with
-                | Error _ -> Writable.char 'E'
-                | Done (_, res, _) ->
-                    let typicalRes = res |> AssertionResult.NonEmptyList.typicalResult
-                    match typicalRes with
-                    | Passed _ -> Writable.char '.'
-                    | NotPassed (Skipped _) -> Writable.char '_'
-                    | NotPassed (Violated _) -> Writable.char 'x'
+                match Seq.isEmpty tr.Exceptions with
+                | false -> Writable.char 'E'
+                | true ->
+                  let typicalRes = tr.Results |> AssertionResult.Seq.typicalResult
+                  match typicalRes.Status with
+                  | StatusPassed -> Writable.char '.'
+                  | StatusSkipped -> Writable.char '_'
+                  | StatusViolated -> Writable.char 'x'
           }
 
   module SummaryFormatter =
@@ -134,8 +133,8 @@ module Formatter =
           | NotPassed (Violated _) -> { summary with Run = summary.Run + 1; Violated = summary.Violated + 1 }
 
     let normal (watch: Stopwatch) =
-      { new IFormatter<ITestResultNode seq> with
-          member x.Format(results: ITestResultNode seq): IWritable = 
+      { new IFormatter<TestResult seq> with
+          member x.Format(results: TestResult seq): IWritable = 
             Writable.stringSeq begin
               seq {
                 yield! results |> Seq.collect (toStrs 0)
@@ -221,8 +220,8 @@ module Formatter =
       suites
 
     let junitStyle watch =
-      { new IFormatter<ITestResultNode seq> with
-        member __.Format(results: ITestResultNode seq) =
+      { new IFormatter<TestResult seq> with
+        member __.Format(results: TestResult seq) =
           let xdocument = XDocument(XElement(xname "testsuites", results |> Seq.map toXDocument) |> addSummary watch results)
           Writable.xdocument(xdocument)
       }

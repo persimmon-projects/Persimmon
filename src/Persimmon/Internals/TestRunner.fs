@@ -23,12 +23,12 @@ module private TestRunnerImpl =
       }
   }
 
-  let rec countErrors (testResult: #TestResult) =
+  let rec countErrors (testResult: TestResult) =
     match testResult with
     | TestResult testResult ->
       let typicalRes = AssertionResult.Seq.typicalResult testResult.Results
       match typicalRes.Status with
-      | Violated -> 1
+      | StatusViolated -> 1
       | _ -> 0
     | EndMarker -> 0
 
@@ -51,7 +51,10 @@ type TestRunner() =
   /// TODO: Omit all synch caller.
   //[<Obsolete>]
   member this.RunAllTests progress (tests: #TestMetadata seq) =
-    this.AsyncRunAllTests progress tests |> Async.RunSynchronously
+    // Keep forward sequence.
+    let results = tests |> Seq.collect (TestRunnerImpl.asyncRunTest progress) |> Seq.map Async.RunSynchronously |> Seq.toArray
+    let errors = results |> Seq.sumBy TestRunnerImpl.countErrors
+    { Errors = errors; ExecutedRootTestResults = results }
       
   /// RunTestsAndCallback run test cases and callback. (Internal use only)
   /// If fullyQualifiedTestNames is empty, try all tests.
