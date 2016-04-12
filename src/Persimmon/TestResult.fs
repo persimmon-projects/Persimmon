@@ -6,8 +6,10 @@ open System.Diagnostics
 // Utility functions of TestResult<'T>
 module TestResult =
 
+  let private endMarkerTestBody (tc:TestCase<unit>) : TestResult<unit> =
+    new InvalidOperationException() |> raise
   let private endMarkerTestCase =
-    new TestCase<unit>(Some "endMarker", [], fun _ -> new InvalidOperationException() |> raise) :> ITestCase
+    new TestCase<unit>(Some "endMarker", [], endMarkerTestBody) :> ITestCase
 
   /// The marker represents the end of tests.
   /// The progress reporter needs the end marker in order to print new line at the end.

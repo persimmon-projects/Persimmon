@@ -61,17 +61,22 @@ type TestMetadata internal (name: string option) =
   /// Parent metadata. Storing by TestCollector.
   member __.Parent = _parent
 
+  /// Metadata unique name (if the test has parameters then the value contains them).
+  abstract UniqueName : string
+  default this.UniqueName = this.SymbolName
+
   /// Metadata symbol name.
   member this.SymbolName =
     match _parent with
     | Some parent -> parent.SymbolName + "." + TestMetadata.safeName(_name)
     | None -> TestMetadata.safeName(None) + "." + TestMetadata.safeName(_name)
 
-  /// The test unique name (if the test has parameters then the value contains them).
-  member this.UniqueName = this.ToString()
+  /// Metadata display name.
+  abstract DisplayName : string
+  default this.DisplayName = this.UniqueName
 
   /// Metadata string.
-  override this.ToString() = this.SymbolName
+  override this.ToString() = this.UniqueName
 
   /// For internal use only.
   static member internal safeName(name: string option) = 
@@ -96,6 +101,7 @@ type TestMetadata internal (name: string option) =
     member this.Parent = this.Parent
     member this.SymbolName = this.SymbolName
     member this.UniqueName = this.UniqueName
+    member this.DisplayName = this.DisplayName
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -108,38 +114,72 @@ type TestCase internal (name: string option, parameters: (Type * obj) seq) =
   member __.Parameters = parameters
     
   /// Execute this test case.
-  member this.Run() =
-    (this :> ITestCase).Run()
+  member this.AsyncRun() =
+    (this :> ITestCase).AsyncRun()
 
-  /// Metadata string.
-  override this.ToString() =
-    let name = TestMetadata.safeName(this.Name)
+  /// Metadata unique name (if the test has parameters then the value contains them).
+  override this.UniqueName =
     match this.Parameters |> Seq.isEmpty with
-    | true -> name
+    | true -> this.SymbolName
+    | false -> sprintf "%s(%s)" this.SymbolName (this.Parameters |> PrettyPrinter.printAll)
+
+  /// Metadata display name.
+  override this.DisplayName =
+    let name = TestMetadata.safeName this.Name
+    match this.Parameters |> Seq.isEmpty with
+    | true -> this.SymbolName
     | false -> sprintf "%s(%s)" name (this.Parameters |> PrettyPrinter.printAll)
 
   interface ITestCase with
     member this.Parameters = this.Parameters
-    member __.Run() = new InvalidOperationException() |> raise  // HACK
+    member __.AsyncRun() = new InvalidOperationException() |> raise  // HACK
 
 ///////////////////////////////////////////////////////////////////////////
 
 /// Test case class.
 [<Sealed>]
-type TestCase<'T> (name: string option, parameters: (Type * obj) seq, body: TestCase<'T> -> TestResult<'T>) =
-  inherit TestCase (name, parameters)
+type TestCase<'T> =
+  inherit TestCase
+
+  val _asyncBody : TestCase<'T> -> Async<TestResult<'T>>
+
+  /// Constructor.
+  /// Test body is async operation.
+  new(name: string option, parameters: (Type * obj) seq, asyncBody: TestCase<'T> -> Async<TestResult<'T>>) = {
+    inherit TestCase(name, parameters)
+    _asyncBody = asyncBody
+  }
+
+  /// Constructor.
+  /// Test body is synch operation.
+  new(name: string option, parameters: (Type * obj) seq, body: TestCase<'T> -> TestResult<'T>) = {
+    inherit TestCase(name, parameters)
+    _asyncBody = fun tc -> async {
+      return body(tc)
+    }
+  }
 
   /// Execute this test case.
-  member this.Run() =
+  member this.AsyncRun() : Async<TestResult<'T>> = async {
     let watch = Stopwatch.StartNew()
-    let result = body(this)
+    let! result = this._asyncBody(this)
     watch.Stop()
-    match result with
-    | Error (_, errs, res, _) -> Error (this, errs, res, watch.Elapsed)
-    | Done (_, res, _) -> Done (this, res, watch.Elapsed)
+    return
+      match result with
+        | Error (_, errs, res, _) -> Error (this, errs, res, watch.Elapsed)
+        | Done (_, res, _) -> Done (this, res, watch.Elapsed)
+  }
+
+  /// Execute this test case.
+  /// TODO: Omit all synch caller.
+  member this.Run() =
+    this.AsyncRun() |> Async.RunSynchronously
 
   interface ITestCase with
-    override this.Run() = this.Run() :> ITestResult
+    override this.AsyncRun() = async {
+      let! result = this.AsyncRun()
+      return result :> ITestResult
+    }
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -158,10 +198,10 @@ and TestResult<'T> =
       sprintf "%A: Result=%s" (result |> fst) (result |> snd)
 
     interface ITestResult with
-      member this.Metadata =
+      member this.TestCase =
         match this with
-        | Error (testCase, _, _, _) -> testCase :> ITestMetadata
-        | Done (testCase, _, _) -> testCase :> ITestMetadata
+        | Error (testCase, _, _, _) -> testCase :> ITestCase
+        | Done (testCase, _, _) -> testCase :> ITestCase
       member this.Exceptions =
         match this with
         | Error (_, exns, _, _) -> exns |> Seq.toArray
@@ -178,29 +218,8 @@ and TestResult<'T> =
 type Context (name: string option, children: ITestMetadata seq) =
   inherit TestMetadata (name)
 
-  /// Execute this test cases.
-  member this.Run() =
-    new ContextResult(this, seq {
-      for child in children do
-        match child with
-        | :? Context as context -> yield! context.Run()
-        | :? TestCase as testCase -> yield testCase.Run() :> ITestResultNode
-        | _ -> ()
-    }
-    |> Seq.toArray)
-
-  override this.ToString() =
-    sprintf "Context(%A, %A)" this.Name children
-
-  /// For internal use only.
-  member internal __.Children = children
-
-///////////////////////////////////////////////////////////////////////////
-
-and ContextResult internal (context: Context, children: ITestResultNode[]) =
-
-  member __.Context = context
+  /// Child tests.
   member __.Children = children
 
-  interface ITestResultNode with
-    member this.Metadata = this.Context :> ITestMetadata
+  override this.ToString() =
+    sprintf "%s(%A)" this.SymbolName children

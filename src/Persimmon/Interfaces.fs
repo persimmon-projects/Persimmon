@@ -10,22 +10,19 @@ open System.Reflection
 type ITestMetadata =
   abstract Name : string option
   abstract Parent : ITestMetadata option
-  abstract SymbolName : string
   abstract UniqueName : string
+  abstract SymbolName : string
+  abstract DisplayName : string
 
 /// Non generic view for test case.
 and ITestCase =
   inherit ITestMetadata
   abstract Parameters : (Type * obj) seq
-  abstract Run : unit -> ITestResult
-
-/// Non generic view for test result (node).
-and ITestResultNode =
-  abstract Metadata : ITestMetadata
+  abstract AsyncRun : unit -> Async<ITestResult>
 
 /// Non generic view for test result.
 and ITestResult =
-  inherit ITestResultNode
+  abstract TestCase : ITestCase
   abstract Exceptions : exn []
   abstract Duration : TimeSpan
 

@@ -11,29 +11,30 @@ open Persimmon.ActivePatterns
 
 module private TestRunnerImpl =
 
-  let rec runTest progress test = seq {
+  let rec asyncRunTest (progress: ITestResult -> Async<unit>) test = seq {
     match test with
     | Context context ->
-      yield! context.Children |> Seq.collect (fun child -> runTest progress child)
-    | TestCase testCase ->
-      let result = testCase.Run()
-      progress result
-      yield result
+      yield! context.Children |> Seq.collect (fun child ->
+        asyncRunTest progress child)
+    | TestCase testCase -> yield async {
+        let! result = testCase.AsyncRun()
+        do! progress result
+        return result
+      }
   }
 
-  let rec countErrors = function
-  | ContextResult cr ->
-    cr.Children |> List.sumBy countErrors
-  | TestResult tr ->
-    match tr with
-    | Error _ -> 1
-    | Done (_, res, _) ->
-        let typicalRes = AssertionResult.NonEmptyList.typicalResult res
-        match typicalRes with
-        | NotPassed (Violated _) -> 1
-        | NotPassed (Skipped _) -> 0
-        | Passed _ -> 0
-  | EndMarker -> 0
+  let rec countErrors (result: ITestResult) =
+    match result with
+    | TestResult result ->
+      match result with
+      | Error _ -> 1
+      | Done (_, res, _) ->
+          let typicalRes = AssertionResult.NonEmptyList.typicalResult res
+          match typicalRes with
+          | NotPassed (Violated _) -> 1
+          | NotPassed (Skipped _) -> 0
+          | Passed _ -> 0
+    | EndMarker -> 0
 
 type RunResult = {
   Errors: int
@@ -44,10 +45,11 @@ type RunResult = {
 type TestRunner() =
 
   /// Collect test objects and run tests.
-  member __.RunAllTests progress (tests: ITestMetadata seq) =
-    let rootResults = tests |> Seq.collect (TestRunnerImpl.runTest progress)
-    let errors = rootResults |> Seq.sumBy TestRunnerImpl.countErrors
+  member __.AsyncRunAllTests progress (tests: ITestMetadata seq) = async {
+    let! results = tests |> Seq.collect (TestRunnerImpl.asyncRunTest progress) |> Async.Parallel
+    let errors = results |> Seq.sumBy TestRunnerImpl.countErrors
     { Errors = errors; ExecutedRootTestResults = rootResults }
+  }
     
   /// Collect test objects and run tests on async context.
   member __.AsyncRunAllTests progress (tests: ITestMetadata seq) =
