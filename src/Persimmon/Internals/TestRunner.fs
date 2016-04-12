@@ -11,7 +11,7 @@ open Persimmon.ActivePatterns
 
 module private TestRunnerImpl =
 
-  let rec asyncRunTest (progress: ITestResult -> Async<unit>) test = seq {
+  let rec asyncRunTest (progress: TestResult -> Async<unit>) test = seq {
     match test with
     | Context context ->
       yield! context.Children |> Seq.collect (fun child ->
@@ -23,7 +23,7 @@ module private TestRunnerImpl =
       }
   }
 
-  let rec countErrors (result: ITestResult) =
+  let rec countErrors (result: TestResult) =
     match result with
     | TestResult result ->
       match result with

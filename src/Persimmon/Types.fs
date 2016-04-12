@@ -53,7 +53,7 @@ module AssertionResult =
 type TestMetadata internal (name: string option) =
 
   let mutable _name : string option = name
-  let mutable _parent : ITestMetadata option = None
+  let mutable _parent : TestMetadata option = None
 
   /// The test name. It doesn't contain the parameters.
   member __.Name = _name
@@ -85,7 +85,7 @@ type TestMetadata internal (name: string option) =
     | None -> "[Unknown]"
 
   /// For internal use only.
-  member internal this.Fixup(name: string, parent: ITestMetadata option) =
+  member internal this.Fixup(name: string, parent: TestMetadata option) =
     match (_name, _parent) with
     | (Some _, Some _) -> ()
     | (Some _, None) ->
@@ -96,16 +96,17 @@ type TestMetadata internal (name: string option) =
       _name <- Some name
       _parent <- parent
 
-  interface ITestMetadata with
-    member this.Name = this.Name
-    member this.Parent = this.Parent
-    member this.SymbolName = this.SymbolName
-    member this.UniqueName = this.UniqueName
-    member this.DisplayName = this.DisplayName
+//  interface ITestMetadata with
+//    member this.Name = this.Name
+//    member this.Parent = this.Parent
+//    member this.SymbolName = this.SymbolName
+//    member this.UniqueName = this.UniqueName
+//    member this.DisplayName = this.DisplayName
 
 ///////////////////////////////////////////////////////////////////////////
 
 /// Test case base class.
+[<AbstractClass>]
 type TestCase internal (name: string option, parameters: (Type * obj) seq) =
   inherit TestMetadata (name)
 
@@ -113,9 +114,16 @@ type TestCase internal (name: string option, parameters: (Type * obj) seq) =
   /// If the test has no parameters then the value is empty list.
   member __.Parameters = parameters
     
+  /// For internal use only.
+  abstract member OnAsyncRun: unit -> Async<TestResult>
+
   /// Execute this test case.
-  member this.AsyncRun() =
-    (this :> ITestCase).AsyncRun()
+  member this.AsyncRun() = this.OnAsyncRun()
+  
+  /// Execute this test case.
+  /// TODO: Omit all synch caller.
+  //[<Obsolete>]
+  member this.Run() = this.OnAsyncRun() |> Async.RunSynchronously
 
   /// Metadata unique name (if the test has parameters then the value contains them).
   override this.UniqueName =
@@ -130,9 +138,15 @@ type TestCase internal (name: string option, parameters: (Type * obj) seq) =
     | true -> this.SymbolName
     | false -> sprintf "%s(%s)" name (this.Parameters |> PrettyPrinter.printAll)
 
-  interface ITestCase with
-    member this.Parameters = this.Parameters
-    member __.AsyncRun() = new InvalidOperationException() |> raise  // HACK
+//  interface ITestCase with
+//    member this.Parameters = this.Parameters
+//    member __.AsyncRun() = new InvalidOperationException() |> raise  // HACK
+
+/// Non generic view for test result. (fake base type)
+and TestResult =
+  abstract TestCase: TestCase
+  abstract Exceptions: exn[]
+  abstract Duration: TimeSpan
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -159,8 +173,8 @@ type TestCase<'T> =
     }
   }
 
-  /// Execute this test case.
-  member this.AsyncRun() : Async<TestResult<'T>> = async {
+  /// For internal use only.
+  member private this.InternalAsyncRun() = async {
     let watch = Stopwatch.StartNew()
     let! result = this._asyncBody(this)
     watch.Stop()
@@ -171,15 +185,24 @@ type TestCase<'T> =
   }
 
   /// Execute this test case.
+  member this.AsyncRun() = this.InternalAsyncRun()
+    
+  /// Execute this test case.
   /// TODO: Omit all synch caller.
-  member this.Run() =
-    this.AsyncRun() |> Async.RunSynchronously
+  //[<Obsolete>]
+  member this.Run() = this.InternalAsyncRun() |> Async.RunSynchronously
 
-  interface ITestCase with
-    override this.AsyncRun() = async {
-      let! result = this.AsyncRun()
-      return result :> ITestResult
-    }
+  /// For internal use only.
+  override this.OnAsyncRun() = async {
+    let! result = this.InternalAsyncRun()
+    return result :> TestResult
+  }
+
+//  interface ITestCase with
+//    override this.AsyncRun() = async {
+//      let! result = this.InternalAsyncRun()
+//      return result :> ITestResult
+//    }
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -197,25 +220,34 @@ and TestResult<'T> =
         | Done (testCase, _, _) -> (testCase, "Done")
       sprintf "%A: Result=%s" (result |> fst) (result |> snd)
 
-    interface ITestResult with
-      member this.TestCase =
-        match this with
-        | Error (testCase, _, _, _) -> testCase :> ITestCase
-        | Done (testCase, _, _) -> testCase :> ITestCase
-      member this.Exceptions =
-        match this with
-        | Error (_, exns, _, _) -> exns |> Seq.toArray
-        | Done (_, _, _) -> [||]
-      member this.Duration =
-        match this with
-        | Error (_, _, _, duration) -> duration
-        | Done (_, _, duration) -> duration
+    member this.TestCase =
+      match this with
+      | Error (testCase, _, _, _) -> testCase
+      | Done (testCase, _, _) -> testCase
+    member this.Exceptions =
+      match this with
+      | Error (_, exns, _, _) -> exns |> Seq.toArray
+      | Done (_, _, _) -> [||]
+    member this.Duration =
+      match this with
+      | Error (_, _, _, duration) -> duration
+      | Done (_, _, duration) -> duration
+
+    interface TestResult with
+      member this.TestCase = this.TestCase :> TestCase
+      member this.Exceptions = this.Exceptions
+      member this.Duration = this.Duration
+
+//    interface ITestResult with
+//      member this.TestCase = this.TestCase :> TestCase
+//      member this.Exceptions = this.Exceptions
+//      member this.Duration = this.Duration
 
 ///////////////////////////////////////////////////////////////////////////
 
 /// Test context class. (structuring nested test node)
 [<Sealed>]
-type Context (name: string option, children: ITestMetadata seq) =
+type Context (name: string option, children: TestMetadata seq) =
   inherit TestMetadata (name)
 
   /// Child tests.

@@ -16,63 +16,63 @@ module private TestCollectorImpl =
     |> Seq.filter (fun typ -> typ.IsNestedPublic)
 
   /// Traverse test instances recursive.
-  let rec private fixupAndCollectTests (testObject: obj, name: string, declared: MemberInfo, parentContext : ITestMetadata option) =
+  let rec private fixupAndCollectTests (testObject: obj, name: string, declared: MemberInfo, parent : TestMetadata option) =
     seq {
       match testObject with
       // For test case:
       | :? TestCase as testCase ->
-        testCase.Fixup(declared.Name, parentContext)
-        yield testCase :> ITestMetadata
+        testCase.Fixup(declared.Name, parent)
+        yield testCase :> TestMetadata
       // For context:
       | :? Context as context ->
-        context.Fixup(declared.Name, parentContext)
-        yield! fixupAndCollectTests(context.Children, name, declared, Some (context :> ITestMetadata))
+        context.Fixup(declared.Name, parent)
+        yield! fixupAndCollectTests(context.Children, name, declared, Some (context :> TestMetadata))
       // For test objects (sequence, ex: array):
       | :? (ITestMetadata seq) as tests ->
-        yield! tests |> Seq.collect (fun child -> fixupAndCollectTests(child, name, declared, parentContext))
+        yield! tests |> Seq.collect (fun child -> fixupAndCollectTests(child, name, declared, parent))
       // Unknown type, ignored.
       | _ -> ()
     }
 
   /// Retreive test object via target property, and traverse.
-  let private collectTestsFromProperty (p: PropertyInfo, parentContext : ITestMetadata option) =
-    fixupAndCollectTests (p.GetValue(null, null), p.Name, p, parentContext)
+  let private collectTestsFromProperty (p: PropertyInfo, parent : TestMetadata option) =
+    fixupAndCollectTests (p.GetValue(null, null), p.Name, p, parent)
   
   /// Retreive test object via target method, and traverse.
-  let private collectTestsFromMethod (m: MethodInfo, parentContext : ITestMetadata option) =
-    fixupAndCollectTests (m.Invoke(null, [||]), m.Name, m, parentContext)
+  let private collectTestsFromMethod (m: MethodInfo, parent : TestMetadata option) =
+    fixupAndCollectTests (m.Invoke(null, [||]), m.Name, m, parent)
   
   /// Retreive test object via target type, and traverse.
-  let rec collectTests (typ: Type, parentContext : ITestMetadata option) =
+  let rec collectTests (typ: Type, parent : TestMetadata option) =
     seq {
       // For properties (value binding):
       yield!
         typ.GetProperties(BindingFlags.Static ||| BindingFlags.Public)
-        |> Seq.collect (fun p -> collectTestsFromProperty(p, parentContext))
+        |> Seq.collect (fun p -> collectTestsFromProperty(p, parent))
       // For methods (function binding):
       yield!
         typ.GetMethods(BindingFlags.Static ||| BindingFlags.Public)
         |> Seq.filter (fun m -> not m.IsSpecialName) // ignore getter methods
         |> Seq.filter (fun m -> m.GetParameters() |> Array.isEmpty)
-        |> Seq.collect (fun m -> collectTestsFromMethod(m, parentContext))
+        |> Seq.collect (fun m -> collectTestsFromMethod(m, parent))
       // For nested modules:
       for nestedType in publicNestedTypes typ do
-        let testCases = collectTests (nestedType, parentContext)
+        let testCases = collectTests (nestedType, parent)
         if Seq.isEmpty testCases then ()
-        else yield Context(Some nestedType.Name, testCases) :> ITestMetadata
+        else yield Context(Some nestedType.Name, testCases) :> TestMetadata
     }
 
 [<Sealed>]
 type TestCollector() =
 
   /// Remove contexts and flatten structured test objects.
-  let rec flattenTestCase (testMetadata: ITestMetadata) =
+  let rec flattenTestCase (testMetadata: TestMetadata) =
     seq {
       match testMetadata with
       | :? Context as context ->
         for child in context.Children do
           yield! flattenTestCase child
-      | :? ITestCase as testCase -> yield testCase
+      | :? TestCase as testCase -> yield testCase
       | _ -> ()
     }
 

@@ -9,12 +9,12 @@ module TestResult =
   let private endMarkerTestBody (tc:TestCase<unit>) : TestResult<unit> =
     new InvalidOperationException() |> raise
   let private endMarkerTestCase =
-    new TestCase<unit>(Some "endMarker", [], endMarkerTestBody) :> ITestCase
+    new TestCase<unit>(Some "endMarker", [], endMarkerTestBody) :> TestCase
 
   /// The marker represents the end of tests.
   /// The progress reporter needs the end marker in order to print new line at the end.
   let endMarker = {
-      new ITestResult with
+      new TestResult with
         member __.TestCase = endMarkerTestCase
         member __.Exceptions = [||]
         member __.Duration = TimeSpan.Zero

@@ -4,7 +4,8 @@ open System
 open System.Reflection
 
 ///////////////////////////////////////////////////////////////////////////
-// Test interfaces
+// Test interfaces.
+// These interface types only use for non generic viewing.
 
 /// Non generic view for metadata.
 type ITestMetadata =
@@ -18,7 +19,6 @@ type ITestMetadata =
 and ITestCase =
   inherit ITestMetadata
   abstract Parameters : (Type * obj) seq
-  abstract AsyncRun : unit -> Async<ITestResult>
 
 /// Non generic view for test result.
 and ITestResult =
