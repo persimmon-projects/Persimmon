@@ -13,6 +13,16 @@ type NotPassedCause =
     /// The assertion is not passed because it is violated.
   | Violated of string
 
+/// Non union view for NotPassedCause
+type AssertionStatus =
+  | Passed
+  | Skipped
+  | Violated
+
+/// The result of each assertion. (fake base type)
+type AssertionResult =
+  abstract Status : AssertionStatus
+
 /// The result of each assertion.
 type AssertionResult<'T> =
     /// The assertion is passed.
@@ -20,30 +30,45 @@ type AssertionResult<'T> =
     /// The assertion is not passed.
   | NotPassed of NotPassedCause
 
+  interface AssertionResult with
+    member this.Status =
+      match this with
+      | Passed _ -> AssertionStatus.Passed
+      | NotPassed cause ->
+        match cause with
+        | NotPassedCause.Skipped _ -> AssertionStatus.Skipped
+        | NotPassedCause.Violated _ -> AssertionStatus.Violated
+
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module NotPassedCause =
   module List =
     let toAssertionResultList xs = xs |> List.map NotPassed
 
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module AssertionResult =
   module List =
     let onlyNotPassed xs =
       xs |> List.choose (function NotPassed x -> Some x | _ -> None)
 
+  let private selector (current: #AssertionResult) (next: #AssertionResult) =
+    match current.Status, next.Status with
+    | Violated, _ -> current
+    | _, Violated -> next
+    | Skipped, _ -> current
+    | _, Skipped -> next
+    | _, _ -> current
+
+  module Seq =
+    /// Calculate the typical assertion result.
+    /// It returns most important result.
+    /// For example, "Violated" is more important than "Passed"
+    let typicalResult (xs: #AssertionResult seq) = xs |> Seq.reduce selector
+
   module NonEmptyList =
     /// Calculate the typical assertion result.
     /// It returns most important result.
     /// For example, "Violated" is more important than "Passed"
-    let typicalResult xs =
-      xs
-      |> NonEmptyList.reduce (fun acc x ->
-          match acc, x with
-          | NotPassed (Violated _), _
-          | NotPassed (Skipped _), NotPassed (Skipped _)
-          | NotPassed (Skipped _), Passed _
-          | Passed _, Passed _ -> acc
-          | _, _ -> x
-      )
+    let typicalResult (xs: NonEmptyList<#AssertionResult>) = xs |> NonEmptyList.reduce selector
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -147,6 +172,7 @@ and TestResult =
   abstract TestCase: TestCase
   abstract Exceptions: exn[]
   abstract Duration: TimeSpan
+  abstract Results: AssertionResult[]
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -232,11 +258,16 @@ and TestResult<'T> =
       match this with
       | Error (_, _, _, duration) -> duration
       | Done (_, _, duration) -> duration
+    member this.Results =
+      match this with
+      | Error (_, _, _, _) -> [||]
+      | Done (_, res, _) -> res |> NonEmptyList.toList |> Seq.map (fun ar -> ar :> AssertionResult) |> Seq.toArray
 
     interface TestResult with
       member this.TestCase = this.TestCase :> TestCase
       member this.Exceptions = this.Exceptions
       member this.Duration = this.Duration
+      member this.Results = this.Results
 
 //    interface ITestResult with
 //      member this.TestCase = this.TestCase :> TestCase
