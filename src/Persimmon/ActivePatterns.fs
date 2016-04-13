@@ -2,14 +2,20 @@
 
 open System
 
+/// Retreive Context/TestCase from TestMetadata.
 let (|Context|TestCase|) (testMetadata: TestMetadata) =
   match testMetadata with
   | :? Context as context -> Context context
   | :? TestCase as testCase -> TestCase testCase
   | _ -> new InvalidOperationException() |> raise
 
-let (|TestResult|EndMarker|) (result: #TestResult) =
-  match result :> TestResult with
-  | marker when marker = TestResult.endMarker -> EndMarker
-  | _ -> TestResult result
+/// Retreive ContextResult/TestResult/EndMarker from test result.
+let (|ContextResult|TestResult|EndMarker|) (result: obj) =
+  match result with
+  | :? TestResult as testResult ->
+    match testResult with
+    | _ when testResult = TestResult.endMarker -> EndMarker
+    | _ -> TestResult testResult
+  | :? ContextResult as contextResult -> ContextResult contextResult
+  | _ -> new ArgumentException() |> raise
   

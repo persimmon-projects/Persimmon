@@ -23,8 +23,10 @@ module private TestRunnerImpl =
       }
   }
 
-  let rec countErrors (testResult: TestResult) =
-    match testResult with
+  let rec countErrors (result: obj) =
+    match result with
+    | ContextResult contextResult ->
+      
     | TestResult testResult ->
       let typicalRes = AssertionResult.Seq.typicalResult testResult.Results
       match typicalRes.Status with

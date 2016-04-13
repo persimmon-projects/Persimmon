@@ -3,6 +3,8 @@
 open System
 open System.Diagnostics
 open System.Reflection
+open System.Collections.Generic
+open System.Threading
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -207,7 +209,7 @@ type TestCase<'T> =
     }
   }
 
-  /// For internal use only.
+  /// Run test implementation core.
   member private this.InternalAsyncRun() = async {
     let watch = Stopwatch.StartNew()
     let! result = this._asyncBody(this)
@@ -294,3 +296,165 @@ type Context (name: string, children: TestMetadata seq) =
 
   override this.ToString() =
     sprintf "%s(%A)" this.SymbolName children
+
+
+
+
+
+
+///////////////////////////////////////////////////////////
+// TODO: AsyncLazy infrastructures.
+
+[<Sealed>]
+[<NoEquality>]
+[<NoComparison>]
+[<AutoSerializable(false)>]
+type internal AsyncCompletionSource<'T> =
+
+  [<DefaultValue>]
+  val mutable private _completed : 'T -> unit
+  [<DefaultValue>]
+  val mutable private _caught : exn -> unit
+  [<DefaultValue>]
+  val mutable private _canceled : OperationCanceledException -> unit
+
+  val private _async : Async<'T>
+
+  new () as this = {
+    _async = Async.FromContinuations<'T>(fun (completed, caught, canceled) ->
+      this._completed <- completed
+      this._caught <- caught
+      this._canceled <- canceled)
+  }
+
+  member this.Async = this._async
+  member this.SetResult value = this._completed value
+  member this.SetException exn = this._caught exn
+  member this.SetCanceled() =
+    this._canceled(new OperationCanceledException())
+
+[<Sealed>]
+[<NoEquality>]
+[<NoComparison>]
+[<AutoSerializable(false)>]
+type internal AsyncLock () =
+
+  let _queue = new Queue<unit -> unit>()
+  let mutable _enter = false
+
+  let locker continuation =
+    let result =
+      Monitor.Enter _queue
+      try
+        match _enter with
+        | true ->
+          _queue.Enqueue(continuation)
+          false
+        | false ->
+          _enter <- true
+          true
+      finally
+        Monitor.Exit _queue
+    match result with
+    | true -> continuation()
+    | false -> ()
+
+  let unlocker () =
+    let result =
+      Monitor.Enter _queue
+      try
+        match _queue.Count with
+        | 0 ->
+          _enter <- false
+          None
+        | _ ->
+          Some (_queue.Dequeue())
+      finally
+        Monitor.Exit _queue
+    match result with
+    | Some continuation -> continuation()
+    | None -> ()
+
+  let disposable = {
+    new IDisposable with
+      member __.Dispose() = unlocker()
+  }
+
+  member __.AsyncLock() =
+    let acs = new AsyncCompletionSource<IDisposable>()
+    locker (fun _ -> acs.SetResult disposable)
+    acs.Async
+
+[<Sealed>]
+[<NoEquality>]
+[<NoComparison>]
+[<AutoSerializable(false)>]
+type internal AsyncLazy<'T> =
+
+  val private _lock : AsyncLock
+  val private _asyncBody : unit -> Async<'T>
+  val mutable private _value : 'T option
+
+  new (asyncBody: unit -> Async<'T>) = {
+    _lock = new AsyncLock()
+    _asyncBody = asyncBody
+    _value = None
+  }
+
+  member this.AsyncGetValue() = async {
+    use! al = this._lock.AsyncLock()
+    match this._value with
+    | Some value -> return value
+    | None ->
+    let! value = this._asyncBody()
+    this._value <- Some value
+    return value
+  }
+
+///////////////////////////////////////////////////////////
+
+
+
+
+/// Test context result class. (structuring nested test result node)
+[<Sealed>]
+type ContextResult (context: Context) =
+
+  let asyncRetreiver (testMetadata: TestMetadata) =
+    match testMetadata with
+      | :? Context as child -> async { return new ContextResult(child) :> obj }
+      | :? TestCase as child -> async {
+        let! result = child.AsyncRun()
+        return result :> obj
+       }
+      | _ -> new ArgumentException() |> raise
+    
+  let asyncResults =
+    new AsyncLazy<obj[]>(fun _ -> async {
+      for result in
+        context.Children |> Seq.map (fun testMetadata ->
+        match testMetadata with
+        | :? Context as child -> async {
+          return new ContextResult(child) :> obj
+         }
+        | :? TestCase as child -> async {
+          let! result = child.AsyncRun()
+          return result :> obj
+         }
+        | _ -> new InvalidOperationException() |> raise) |> Seq.toArray)
+
+  /// Target context.
+  member __.Context = context
+
+  /// Retreive child test results.
+  member __.AsyncRetreive() =
+    context.Children |> Seq.map (fun testMetadata ->
+      match testMetadata with
+      | :? Context as child -> async {
+        return new ContextResult(child) :> obj
+       }
+      | :? TestCase as child -> async {
+        let! result = child.AsyncRun()
+        return result :> obj
+       }
+      | _ -> new InvalidOperationException() |> raise) |> Seq.toArray
