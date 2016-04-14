@@ -52,8 +52,8 @@ module private TestCollectorImpl =
       // For methods (function binding):
       yield!
         typ.GetMethods(BindingFlags.Static ||| BindingFlags.Public)
-        |> Seq.filter (fun m -> not m.IsSpecialName) // ignore getter methods
-        |> Seq.filter (fun m -> m.GetParameters() |> Array.isEmpty)
+        // Ignore getter methods / open generic method / has parameters
+        |> Seq.filter (fun m -> not m.IsSpecialName && not m.IsGenericMethodDefinition && (m.GetParameters() |> Array.isEmpty))
         |> Seq.collect (fun m -> collectTestsFromMethod(m, parent))
       // For nested modules:
       for nestedType in publicNestedTypes typ do
