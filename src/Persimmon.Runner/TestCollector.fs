@@ -6,6 +6,4 @@ open Persimmon.Internals
 
 let collectRootTestObjects (asms: Assembly seq) =
   let collector = TestCollector()
-  asms
-  |> Seq.collect collector.Collect
-  |> Seq.toList
+  asms |> Seq.collect collector.Collect

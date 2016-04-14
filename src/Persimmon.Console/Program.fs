@@ -11,7 +11,7 @@ open Persimmon.Output
 let entryPoint (args: Args) =
   let watch = Stopwatch()
   use progress = if args.NoProgress then IO.TextWriter.Null else Console.Out
-  let runAndReport: (Reporter -> TestMetadata list -> int) =
+  let runAndReport: (Reporter -> Context seq -> int) =
     if args.Parallel then
       fun reporter tests ->
         async {
