@@ -11,52 +11,88 @@ open Persimmon.ActivePatterns
 
 module private TestRunnerImpl =
 
-  let rec asyncRunTest (progress: TestResult -> unit) test = seq {
+  let rec traverseAsyncRunner test = seq {
     match test with
     | Context context ->
-      yield! context.Children |> Seq.collect (fun child ->
-        asyncRunTest progress child)
-    | TestCase testCase -> yield async {
-        let! result = testCase.AsyncRun()
-        do progress result
-        return result
-      }
+      yield! context.Children |> Seq.collect traverseAsyncRunner
+    | TestCase testCase ->
+      yield testCase.AsyncRun
+   }
+  /// Entire full parallelism test execution.
+  and asyncRunTest progress test =
+    traverseAsyncRunner test |> Seq.map (fun asyncRun -> async {
+      let! result = asyncRun()
+      do progress result
+      return result
+    }) |> Async.Parallel
+
+  let asyncSequential xs = async {
+    let list = new System.Collections.Generic.List<'T>()
+    for asy in xs do
+      let! v = asy
+      list.Add(v)
+    return list.ToArray()
   }
 
-  let rec countErrors (result: obj) =
+  // Oh... very hard...
+  let rec asyncRunSynchronouslyTest progress test =
+    match test with
+    | Context context ->
+      context.Children |> Seq.map (fun child -> async {
+        let! results = asyncRunSynchronouslyTest progress child
+        return new ContextResult(context, results) :> ResultNode
+      }) |> asyncSequential
+    | TestCase testCase -> async {
+        let! result = testCase.AsyncRun()
+        do progress result
+        return [| result :> ResultNode |]
+      }
+
+  let rec countErrors result =
     match result with
     | ContextResult contextResult ->
-      
+      contextResult.Results |> Seq.sumBy countErrors
     | TestResult testResult ->
-      let typicalRes = AssertionResult.Seq.typicalResult testResult.Results
+      let typicalRes = AssertionResult.Seq.typicalResult testResult.AssertionResults
       match typicalRes.Status with
       | StatusViolated -> 1
       | _ -> 0
     | EndMarker -> 0
 
-type RunResult = {
+/// Test results.
+type RunResult<'T> = {
   Errors: int
-  ExecutedRootTestResults: TestResult[]
+  Results: 'T[]
 }
 
 [<Sealed>]
 type TestRunner() =
 
   /// Collect test objects and run tests.
-  member __.AsyncRunAllTests progress (tests: #TestMetadata seq) = async {
-    let! results = tests |> Seq.collect (TestRunnerImpl.asyncRunTest progress) |> Async.Parallel
-    let errors = results |> Seq.sumBy TestRunnerImpl.countErrors
-    return { Errors = errors; ExecutedRootTestResults = results }
+  member __.AsyncRunAllTests progress tests = async {
+    let! testResultsList = tests |> Seq.map (TestRunnerImpl.asyncRunTest progress) |> TestRunnerImpl.asyncSequential
+    let testResults = testResultsList |> Seq.collect (fun tr -> tr) |> Seq.toArray
+    let errors = testResults |> Seq.sumBy TestRunnerImpl.countErrors
+    return { Errors = errors; Results = testResults }
+  }
+
+  /// Collect test objects and run tests.
+  member __.AsyncRunSynchronouslyAllTests progress tests = async {
+    let! testResultsList = tests |> Seq.map (TestRunnerImpl.asyncRunSynchronouslyTest progress) |> TestRunnerImpl.asyncSequential
+    let testResults = testResultsList |> Seq.collect (fun tr -> tr) |> Seq.toArray
+    let errors = testResults |> Seq.sumBy TestRunnerImpl.countErrors
+    return { Errors = errors; Results = testResults }
   }
 
   /// Collect test objects and run tests.
   /// TODO: Omit all synch caller.
   //[<Obsolete>]
-  member this.RunAllTests progress (tests: #TestMetadata seq) =
+  member this.RunSynchronouslyAllTests progress tests =
     // Keep forward sequence.
-    let results = tests |> Seq.collect (TestRunnerImpl.asyncRunTest progress) |> Seq.map Async.RunSynchronously |> Seq.toArray
-    let errors = results |> Seq.sumBy TestRunnerImpl.countErrors
-    { Errors = errors; ExecutedRootTestResults = results }
+    let testResultsList = tests |> Seq.map (TestRunnerImpl.asyncRunSynchronouslyTest progress) |> Seq.map Async.RunSynchronously
+    let testResults = testResultsList |> Seq.collect (fun tr -> tr) |> Seq.toArray
+    let errors = testResults |> Seq.sumBy TestRunnerImpl.countErrors
+    { Errors = errors; Results = testResults }
       
   /// RunTestsAndCallback run test cases and callback. (Internal use only)
   /// If fullyQualifiedTestNames is empty, try all tests.
@@ -76,7 +112,13 @@ type TestRunner() =
     let collector = TestCollector()
     let testCases = collector.CollectOnlyTestCases(target)
 
-    // Run tests.
-    do testCases
+    // Run tests with entire full parallelism.
+    testCases
+      // Include only fqtn
       |> Seq.filter (fun testCase -> containsKey testCase.UniqueName)
-      |> Seq.iter (fun testCase -> TestRunnerImpl.asyncRunTest callback.Invoke testCase |> ignore)
+      // Map test case to async runner (with callback side effect)
+      |> Seq.map (fun testCase -> TestRunnerImpl.asyncRunTest callback.Invoke testCase)
+      // Full parallelism
+      |> Async.Parallel
+      // Synchronous execution
+      |> Async.RunSynchronously |> ignore

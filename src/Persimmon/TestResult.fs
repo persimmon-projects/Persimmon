@@ -19,7 +19,7 @@ module TestResult =
         member __.TestCase = endMarkerTestCase
         member __.Exceptions = [||]
         member __.Duration = TimeSpan.Zero
-        member __.Results = [||]
+        member __.AssertionResults = [||]
     }
 
   let addAssertionResult x = function

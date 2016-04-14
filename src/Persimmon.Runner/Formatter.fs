@@ -19,7 +19,7 @@ module Formatter =
                 match Seq.isEmpty tr.Exceptions with
                 | false -> Writable.char 'E'
                 | true ->
-                  let typicalRes = tr.Results |> AssertionResult.Seq.typicalResult
+                  let typicalRes = tr.AssertionResults |> AssertionResult.Seq.typicalResult
                   match typicalRes.Status with
                   | StatusPassed -> Writable.char '.'
                   | StatusSkipped -> Writable.char '_'

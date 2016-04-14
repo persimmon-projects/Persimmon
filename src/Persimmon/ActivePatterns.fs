@@ -10,7 +10,7 @@ let (|Context|TestCase|) (testMetadata: TestMetadata) =
   | _ -> new InvalidOperationException() |> raise
 
 /// Retreive ContextResult/TestResult/EndMarker from test result.
-let (|ContextResult|TestResult|EndMarker|) (result: obj) =
+let (|ContextResult|TestResult|EndMarker|) (result: ResultNode) =
   match result with
   | :? TestResult as testResult ->
     match testResult with
