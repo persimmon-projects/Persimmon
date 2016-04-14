@@ -94,7 +94,7 @@ type TestMetadata internal (name: string option) =
   default this.UniqueName = this.SymbolName
 
   /// Metadata symbol name.
-  member this.SymbolName =
+  member __.SymbolName =
     match _parent with
     | Some parent -> parent.SymbolName + "." + TestMetadata.safeName(_name)
     | None -> TestMetadata.safeName(None) + "." + TestMetadata.safeName(_name)
@@ -113,16 +113,14 @@ type TestMetadata internal (name: string option) =
     | None -> "[Unknown]"
 
   /// For internal use only.
-  member internal __.Fixup(name: string, parent: TestMetadata option) =
-    match (_name, _parent) with
-    | (Some _, Some _) -> ()
-    | (Some _, None) ->
-      _parent <- parent
-    | (None, Some _) ->
-      _name <- Some name
-    | (None, None) ->
-      _name <- Some name
-      _parent <- parent
+  member internal __.fixupNaming(name: string) =
+    match _name with
+    | Some _ -> ()
+    | None -> _name <- Some name
+
+  /// For internal use only.
+  member internal __.setParent(parent: TestMetadata) =
+    _parent <- Some parent
 
 //  interface ITestMetadata with
 //    member this.Name = this.Name
@@ -289,14 +287,22 @@ and TestResult<'T> =
 
 /// Test context class. (structuring nested test node)
 [<Sealed>]
-type Context (name: string, children: TestMetadata seq) =
-  inherit TestMetadata (Some name)
+type Context =
+  inherit TestMetadata
+
+  [<DefaultValue>]
+  val mutable private _children : TestMetadata seq
+
+  /// Constructor.
+  new (name: string, children: TestMetadata seq) as this = { inherit TestMetadata(Some name) } then
+    this._children <- children
+    for child in this._children do child.setParent(this :> TestMetadata)
 
   /// Child tests.
-  member __.Children = children
+  member this.Children = this._children
 
   override this.ToString() =
-    sprintf "%s(%A)" this.SymbolName children
+    sprintf "%s(%A)" this.SymbolName this._children
 
 /// Test context and hold tested results class. (structuring nested test result node)
 /// Inherited from ResultNode
