@@ -20,7 +20,7 @@ let entryPoint (args: Args) =
           watch.Stop()
           // report
           reporter.ReportProgress(TestResult.endMarker)
-          reporter.ReportSummary(res.ExecutedRootTestResults)
+          reporter.ReportSummary(res.Results)
           return res.Errors
         }
         |> Async.RunSynchronously
@@ -31,7 +31,7 @@ let entryPoint (args: Args) =
         watch.Stop()
         // report
         reporter.ReportProgress(TestResult.endMarker)
-        reporter.ReportSummary(res.ExecutedRootTestResults)
+        reporter.ReportSummary(res.Results)
         res.Errors
   let requireFileName, outputs =
     let console = {

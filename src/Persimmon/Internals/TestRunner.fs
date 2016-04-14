@@ -53,9 +53,9 @@ module private TestRunnerImpl =
     | ContextResult contextResult ->
       contextResult.Results |> Seq.sumBy countErrors
     | TestResult testResult ->
-      let typicalRes = AssertionResult.Seq.typicalResult testResult.AssertionResults
-      match typicalRes.Status with
-      | StatusViolated -> 1
+      let ar = AssertionResult.Seq.typicalResult testResult.AssertionResults
+      match ar with
+      | NotPassed (Violated _) -> 1
       | _ -> 0
     | EndMarker -> 0
 
@@ -87,7 +87,7 @@ type TestRunner() =
   /// Collect test objects and run tests.
   /// TODO: Omit all synch caller.
   //[<Obsolete>]
-  member this.RunSynchronouslyAllTests progress tests =
+  member __.RunSynchronouslyAllTests progress tests =
     // Keep forward sequence.
     let testResultsList = tests |> Seq.map (TestRunnerImpl.asyncRunSynchronouslyTest progress) |> Seq.map Async.RunSynchronously
     let testResults = testResultsList |> Seq.collect (fun tr -> tr) |> Seq.toArray

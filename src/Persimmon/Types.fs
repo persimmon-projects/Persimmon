@@ -15,15 +15,10 @@ type NotPassedCause =
     /// The assertion is not passed because it is violated.
   | Violated of string
 
-/// Non union view for NotPassedCause
-type AssertionStatus =
-  | StatusPassed
-  | StatusSkipped
-  | StatusViolated
-
 /// The result of each assertion. (fake base type)
+/// Can use active recognizers: Passed / NotPassed cause
 type AssertionResult =
-  abstract Status : AssertionStatus
+  abstract Status : NotPassedCause option
 
 /// The result of each assertion.
 type AssertionResult<'T> =
@@ -35,11 +30,8 @@ type AssertionResult<'T> =
   interface AssertionResult with
     member this.Status =
       match this with
-      | Passed _ -> StatusPassed
-      | NotPassed cause ->
-        match cause with
-        | NotPassedCause.Skipped _ -> StatusSkipped
-        | NotPassedCause.Violated _ -> StatusViolated
+      | Passed _ -> None
+      | NotPassed cause -> Some cause
 
 /// NotPassedCause manipulators.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
@@ -55,11 +47,12 @@ module NotPassedCause =
 module AssertionResult =
 
   let private selector (current: #AssertionResult) (next: #AssertionResult) =
+    // Cannot use active recognizer, because forward reference.
     match current.Status, next.Status with
-    | StatusViolated, _ -> current
-    | _, StatusViolated -> next
-    | StatusSkipped, _ -> current
-    | _, StatusSkipped -> next
+    | (Some (Violated _)), _ -> current
+    | _, (Some (Violated _)) -> next
+    | (Some (Skipped _)), _ -> current
+    | _, (Some (Skipped _)) -> next
     | _, _ -> current
 
   /// AssertionResult via sequence manipulators.
@@ -120,7 +113,7 @@ type TestMetadata internal (name: string option) =
     | None -> "[Unknown]"
 
   /// For internal use only.
-  member internal this.Fixup(name: string, parent: TestMetadata option) =
+  member internal __.Fixup(name: string, parent: TestMetadata option) =
     match (_name, _parent) with
     | (Some _, Some _) -> ()
     | (Some _, None) ->
@@ -178,11 +171,12 @@ type TestCase internal (name: string option, parameters: (Type * obj) seq) =
 //    member __.AsyncRun() = new InvalidOperationException() |> raise  // HACK
 
 /// Non generic view for test result. (fake base type)
-/// Can use pattern matching: ContextResult, TestResult, EndMarker
+/// Can use active recognizers: ContextResult cr / TestResult tr / EndMarker
 and ResultNode =
   interface end
 
 /// Non generic view for test result. (fake base type)
+/// Inherited from ResultNode.
 and TestResult =
   inherit ResultNode
   abstract TestCase: TestCase
@@ -249,6 +243,7 @@ type TestCase<'T> =
 ///////////////////////////////////////////////////////////////////////////
 
 /// Test result union type.
+/// Inherited from ResultNode
 and TestResult<'T> =
   /// This case represents the error.
   | Error of TestCase * exn list * NotPassedCause list * TimeSpan
@@ -303,7 +298,8 @@ type Context (name: string, children: TestMetadata seq) =
   override this.ToString() =
     sprintf "%s(%A)" this.SymbolName children
 
-/// Test context result class. (structuring nested test result node)
+/// Test context and hold tested results class. (structuring nested test result node)
+/// Inherited from ResultNode
 [<Sealed>]
 type ContextResult (context: Context, results: ResultNode[]) =
 
