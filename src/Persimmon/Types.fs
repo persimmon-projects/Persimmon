@@ -116,7 +116,9 @@ type TestMetadata =
 
   /// Metadata display name.
   abstract DisplayName : string
-  default this.DisplayName = this.UniqueName
+  default this.DisplayName =
+    let name = TestMetadata.safeName(this._name, "[Unresolved]")
+    TestMetadata.safeName(this._symbolName, name)
 
   /// Metadata string.
   override this.ToString() = this.UniqueName
@@ -178,7 +180,7 @@ type TestCase internal (name: string option, parameters: (Type * obj) seq) =
   override this.UniqueName = this.SymbolName |> this.createName
 
   /// Metadata display name.
-  override this.DisplayName = TestMetadata.safeName(this.Name, base.DisplayName) |> this.createName
+  override this.DisplayName = base.DisplayName |> this.createName
 
 //  interface ITestCase with
 //    member this.Parameters = this.Parameters
