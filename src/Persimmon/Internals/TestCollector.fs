@@ -34,6 +34,7 @@ module private TestCollectorImpl =
       yield! fixupAndCollectTests(context.Children, None)
     // For test objects (sequence, ex: array/list):
     | :? (TestMetadata seq) as tests ->
+      // NOT consume symbol name.
       yield! tests |> Seq.collect (fun child -> fixupAndCollectTests(child, symbolName))
     // Unknown type, ignored.
     | _ -> ()
