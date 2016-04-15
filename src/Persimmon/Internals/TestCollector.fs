@@ -16,17 +16,23 @@ module private TestCollectorImpl =
     |> Seq.filter (fun typ -> typ.IsNestedPublic)
 
   /// Traverse test instances recursive.
-  let rec private fixupAndCollectTests (testObject: obj, symbolName: string) = seq {
+  let rec private fixupAndCollectTests (testObject: obj, symbolName: string option) = seq {
     match testObject with
     // For test case:
     | :? TestCase as testCase ->
-      testCase.trySetSymbolName symbolName
+      // Consume symbol name.
+      match symbolName with
+      | Some sn -> testCase.trySetSymbolName sn
+      | None -> ()
       yield testCase :> TestMetadata
     // For context:
     | :? Context as context ->
-      context.trySetSymbolName symbolName
-      yield! fixupAndCollectTests(context.Children, symbolName)
-    // For test objects (sequence, ex: array):
+      // Consume symbol name.
+      match symbolName with
+      | Some sn -> context.trySetSymbolName sn
+      | None -> ()
+      yield! fixupAndCollectTests(context.Children, None)
+    // For test objects (sequence, ex: array/list):
     | :? (TestMetadata seq) as tests ->
       yield! tests |> Seq.collect (fun child -> fixupAndCollectTests(child, symbolName))
     // Unknown type, ignored.
@@ -35,11 +41,11 @@ module private TestCollectorImpl =
 
   /// Retreive test object via target property, and traverse.
   let private collectTestsFromProperty (p: PropertyInfo) =
-    fixupAndCollectTests (p.GetValue(null, null), p.Name)
+    fixupAndCollectTests (p.GetValue(null, null), Some p.Name)
   
   /// Retreive test object via target method, and traverse.
   let private collectTestsFromMethod (m: MethodInfo) =
-    fixupAndCollectTests (m.Invoke(null, [||]), m.Name)
+    fixupAndCollectTests (m.Invoke(null, [||]), Some m.Name)
   
   /// Retreive test object via target type, and traverse.
   let rec collectTests (typ: Type) = seq {
