@@ -20,11 +20,11 @@ module private TestCollectorImpl =
     match testObject with
     // For test case:
     | :? TestCase as testCase ->
-      testCase.setSymbolName symbolName
+      testCase.trySetSymbolName symbolName
       yield testCase :> TestMetadata
     // For context:
     | :? Context as context ->
-      context.setSymbolName symbolName
+      context.trySetSymbolName symbolName
       yield! fixupAndCollectTests(context.Children, symbolName)
     // For test objects (sequence, ex: array):
     | :? (TestMetadata seq) as tests ->

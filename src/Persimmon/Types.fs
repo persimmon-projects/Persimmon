@@ -81,23 +81,19 @@ module AssertionResult =
 type TestMetadata =
 
   val _name : string option
+  [<DefaultValue>]
   val mutable _symbolName : string option
-
   [<DefaultValue>]
   val mutable _parent : TestMetadata option
 
   /// Constructor.
   internal new (name: string option) = {
     _name = name
-    _symbolName = name
   }
 
   /// The test name. It doesn't contain the parameters.
   /// If not set, fallback to raw symbol name.
-  member this.Name =
-    match this._name with
-    | Some name -> Some name
-    | None -> this._symbolName
+  member this.Name = this._name
 
   /// Parent metadata. Storing by TestCollector.
   member this.Parent = this._parent
@@ -110,9 +106,13 @@ type TestMetadata =
   /// Metadata symbol name.
   /// This naming contains parent context symbol names.
   member this.SymbolName =
+    let name = TestMetadata.safeName(this._name, "[Unresolved]")
+    let symbolName = TestMetadata.safeName(this._symbolName, name)
+
+    // Combine parent symbol name.
     match this._parent with
-    | Some parent -> parent.SymbolName + "." + TestMetadata.safeName(this._symbolName)
-    | None -> TestMetadata.safeName(this._symbolName)
+    | Some parent -> parent.SymbolName + "." + symbolName
+    | None -> symbolName
 
   /// Metadata display name.
   abstract DisplayName : string
@@ -122,18 +122,22 @@ type TestMetadata =
   override this.ToString() = this.UniqueName
 
   /// For internal use only.
-  static member internal safeName(name: string option) = 
+  static member internal safeName(name: string option, unresolved: string) = 
     match name with
     | Some name -> name
-    | None -> "[Unknown]"
+    | None -> unresolved
 
   /// For internal use only.
-  member internal this.setSymbolName(symbolName: string) =
-    this._symbolName <- Some symbolName
+  member internal this.trySetSymbolName(symbolName: string) =
+    match this._symbolName with
+    | None -> this._symbolName <- Some symbolName
+    | _ -> ()
 
   /// For internal use only.
-  member internal this.setParent(parent: TestMetadata) =
-    this._parent <- Some parent
+  member internal this.trySetParent(parent: TestMetadata) =
+    match this._parent with
+    | None -> this._parent <- Some parent
+    | _ -> ()
 
 //  interface ITestMetadata with
 //    member this.Name = this.Name
@@ -163,20 +167,18 @@ type TestCase internal (name: string option, parameters: (Type * obj) seq) =
   /// TODO: Omit all synch caller.
   //[<Obsolete>]
   member this.Run() = this.OnAsyncRun() |> Async.RunSynchronously
+  
+  member private this.createName baseName =
+    match Array.isEmpty this.Parameters with
+    | true -> baseName
+    | false -> sprintf "%s(%s)" baseName (this.Parameters |> PrettyPrinter.printAll)
 
   /// Metadata unique name.
   /// If the test has parameters then the value contains them.
-  override this.UniqueName =
-    match Array.isEmpty this.Parameters with
-    | true -> this.SymbolName
-    | false -> sprintf "%s(%s)" this.SymbolName (this.Parameters |> PrettyPrinter.printAll)
+  override this.UniqueName = this.SymbolName |> this.createName
 
   /// Metadata display name.
-  override this.DisplayName =
-    let name = TestMetadata.safeName this.Name
-    match Array.isEmpty this.Parameters with
-    | true -> name
-    | false -> sprintf "%s(%s)" name (this.Parameters |> PrettyPrinter.printAll)
+  override this.DisplayName = TestMetadata.safeName(this.Name, base.DisplayName) |> this.createName
 
 //  interface ITestCase with
 //    member this.Parameters = this.Parameters
@@ -311,7 +313,7 @@ type Context =
   new (name: string, children: TestMetadata seq) as this =
     { inherit TestMetadata(Some name) } then
       this._children <- children |> Seq.toArray
-      for child in this._children do child.setParent(this :> TestMetadata)
+      for child in this._children do child.trySetParent(this :> TestMetadata)
 
   /// Child tests.
   member this.Children = this._children
