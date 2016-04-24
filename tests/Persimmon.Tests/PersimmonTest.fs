@@ -83,6 +83,46 @@ module PersimmonTest =
 
   open ActivePatterns
 
+  let ``catch parameterized test error`` =
+
+    let getTestCase xs =
+      xs |> Seq.choose (function TestCase c -> Some c | _ -> None) |> Seq.head
+
+    let x () = 3
+    let y () = failwith "error"
+
+    let stub x = test "not execute" {
+      do! x |> assertEquals 3
+    }
+
+    let sourcePattern =
+      parameterize {
+        source [
+          x ()
+          y ()
+        ]
+        run stub
+      }
+      |> getTestCase
+
+    let casePattern =
+      parameterize {
+        case (x ())
+        case (y ())
+        run stub
+      }
+      |> getTestCase
+
+    parameterize {
+      source [
+        sourcePattern
+        casePattern
+      ]
+      run (fun error -> test "catch parameterized test error" {
+        do! shouldFirstRaise<exn, obj> error
+      })
+    }
+
   let ``ordering parameters`` =
     let getMetadata parameters =
       parameters
