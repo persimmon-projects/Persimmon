@@ -75,7 +75,13 @@ module private Util =
 
 type ParameterizeBuilder() =
   member __.Delay(f: unit -> _) = f
-  member __.Run(f) = f ()
+  member __.Run(f) =
+    try
+      f ()
+    with e ->
+      let e = exn("Failed to initialize `source` or `case` in `parameterize` computation expression.", e)
+      TestCase.makeError None [] e :> TestObject
+      |> Seq.singleton
   member __.Yield(()) = Seq.empty
   member __.Yield(x) = Seq.singleton x
   member __.YieldFrom(xs: _ seq) = xs

@@ -14,7 +14,12 @@ type ScriptTestBuilder internal (name: string) =
 
 type ScriptParameterizeBuilder() =
   member __.Delay(f) = parameterize.Delay(f)
-  member __.Run(f) = parameterize.Run(f)
+  member __.Run(f) =
+    try
+      f ()
+    with e ->
+      let e = exn("Failed to initialize `source` or `case` in `parameterize` computation expression.", e)
+      [ TestCase.makeError None [] e ]
   member __.Yield(()) = parameterize.Yield(())
   member __.Yield(xs: _ seq) = parameterize.Yield(xs)
   [<CustomOperation("case")>]
