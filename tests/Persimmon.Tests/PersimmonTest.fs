@@ -152,3 +152,17 @@ module PersimmonTest =
       do! shouldFirstRaise<TestException, unit> ex
       do! assertPred value.Disposed
     }
+
+  let ``check try finally`` =
+    let count = ref 0
+    let test1 () = test "use and exception" {
+      try
+        return raise TestException
+      finally
+       incr count
+    }
+    test "check try finally" {
+      let ex = test1 ()
+      do! shouldFirstRaise<TestException, unit> ex
+      do! assertEquals 1 !count
+    }

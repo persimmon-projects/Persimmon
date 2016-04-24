@@ -57,6 +57,7 @@ type TestBuilder private (name: string option) =
   member __.Using(x: #IDisposable, f: #IDisposable -> TestCase<_>) =
     try f x
     finally match box x with null -> () | _ -> x.Dispose()
+  member __.TryFinally(f, g) = try f () finally g ()
   member __.Delay(f) = f
   member __.Run(f) =
     try f ()
