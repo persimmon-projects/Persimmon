@@ -13,10 +13,11 @@ function findPos(obj) {
         return [obj.offsetLeft + 10, obj.offsetTop + 30];
 
     var curleft = 0;
-    var curtop = 0;
-    if (obj) {
-        curleft = obj.offsetLeft;
-        curtop = obj.offsetHeight + obj.offsetTop;
+    var curtop = obj.offsetHeight;
+    while (obj) {
+        curleft += obj.offsetLeft;
+        curtop += obj.offsetTop;
+        obj = obj.offsetParent;
     };
     return [curleft, curtop];
 }
@@ -32,7 +33,7 @@ function showTip(evt, name, unique, owner) {
     currentTip = unique;
     currentTipElement = name;
 
-    var pos = findPos(owner ? owner : evt.target);
+    var pos = findPos(owner ? owner : (evt.srcElement ? evt.srcElement : evt.target));
     var posx = pos[0];
     var posy = pos[1];
 
