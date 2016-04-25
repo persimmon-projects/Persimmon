@@ -101,7 +101,9 @@ type TestMetadata =
   /// Metadata unique name.
   /// If the test has parameters then the value contains them.
   abstract UniqueName : string
-  default this.UniqueName = this.SymbolName
+
+  /// Metadata display name.
+  abstract DisplayName : string
 
   /// Metadata symbol name.
   /// This naming contains parent context symbol names.
@@ -113,12 +115,6 @@ type TestMetadata =
     match this._parent with
     | Some parent -> parent.SymbolName + "." + symbolName
     | None -> symbolName
-
-  /// Metadata display name.
-  abstract DisplayName : string
-  default this.DisplayName =
-    let name = TestMetadata.safeName(this._name, "[Unresolved]")
-    TestMetadata.safeName(this._symbolName, name)
 
   /// Metadata string.
   override this.ToString() = this.UniqueName
@@ -139,7 +135,9 @@ type TestMetadata =
   member internal this.trySetParent(parent: TestMetadata) =
     match this._parent with
     | None -> this._parent <- Some parent
-    | _ -> ()
+    | _ -> //()
+      Debug.Assert(false, parent.ToString())
+      this._parent <- Some parent
 
 //  interface ITestMetadata with
 //    member this.Name = this.Name
@@ -170,17 +168,20 @@ type TestCase internal (name: string option, parameters: (Type * obj) seq) =
   //[<Obsolete>]
   member this.Run() = this.OnAsyncRun() |> Async.RunSynchronously
   
-  member private this.createName baseName =
+  member private this.createUniqueName baseName =
     match Array.isEmpty this.Parameters with
     | true -> baseName
     | false -> sprintf "%s(%s)" baseName (this.Parameters |> PrettyPrinter.printAll)
 
   /// Metadata unique name.
   /// If the test has parameters then the value contains them.
-  override this.UniqueName = this.SymbolName |> this.createName
+  override this.UniqueName =
+    this.createUniqueName this.SymbolName
 
   /// Metadata display name.
-  override this.DisplayName = base.DisplayName |> this.createName
+  override this.DisplayName =
+    let name = TestMetadata.safeName(this.Name, this.SymbolName)
+    this.createUniqueName name
 
 //  interface ITestCase with
 //    member this.Parameters = this.Parameters
@@ -316,6 +317,13 @@ type Context =
     { inherit TestMetadata(Some name) } then
       this._children <- children |> Seq.toArray
       for child in this._children do child.trySetParent(this :> TestMetadata)
+
+  /// Metadata unique name.
+  /// If the test has parameters then the value contains them.
+  override this.UniqueName = this.SymbolName
+
+  /// Metadata display name.
+  override this.DisplayName = this.Name.Value
 
   /// Child tests.
   member this.Children = this._children

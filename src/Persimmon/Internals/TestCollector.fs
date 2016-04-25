@@ -9,11 +9,11 @@ module private TestCollectorImpl =
 
   let publicTypes (asm: Assembly) =
     asm.GetTypes()
-    |> Seq.filter (fun typ -> typ.IsPublic)
+    |> Seq.filter (fun typ -> typ.IsPublic && typ.IsClass && not typ.IsGenericTypeDefinition)
 
   let private publicNestedTypes (typ: Type) =
     typ.GetNestedTypes()
-    |> Seq.filter (fun typ -> typ.IsNestedPublic)
+    |> Seq.filter (fun typ -> typ.IsNestedPublic && typ.IsClass && not typ.IsGenericTypeDefinition)
 
   /// Traverse test instances recursive.
   let rec private fixupAndCollectTests (testObject: obj, symbolName: string option) = seq {
@@ -31,7 +31,9 @@ module private TestCollectorImpl =
       match symbolName with
       | Some sn -> context.trySetSymbolName sn
       | None -> ()
-      yield! fixupAndCollectTests(context.Children, None)
+      // Consume children.
+      //fixupAndCollectTests(context.Children, None) |> Seq.iter ignore
+      yield context :> TestMetadata
     // For test objects (sequence, ex: array/list):
     | :? (TestMetadata seq) as tests ->
       // NOT consume symbol name.
@@ -53,6 +55,8 @@ module private TestCollectorImpl =
     // For properties (value binding):
     yield!
       typ.GetProperties(BindingFlags.Static ||| BindingFlags.Public)
+      // Ignore setter only property / indexers
+      |> Seq.filter (fun p -> p.CanRead && (p.GetGetMethod() <> null) && (p.GetIndexParameters() |> Array.isEmpty))
       |> Seq.collect collectTestsFromProperty
     // For methods (function binding):
     yield!
@@ -64,7 +68,7 @@ module private TestCollectorImpl =
     for nestedType in publicNestedTypes typ do
       let testCases = collectTests nestedType |> Seq.toArray
       if Array.isEmpty testCases then ()
-      else yield Context(nestedType.Name, testCases) :> TestMetadata
+      else yield new Context(nestedType.Name, testCases) :> TestMetadata
   }
 
 [<Sealed>]
@@ -74,7 +78,7 @@ type TestCollector() =
   let collect targetAssembly =
     targetAssembly
     |> TestCollectorImpl.publicTypes
-    |> Seq.map (fun typ -> new Context(typ.FullName, (TestCollectorImpl.collectTests typ |> Seq.toArray)))
+    |> Seq.map (fun typ -> new Context(typ.FullName, TestCollectorImpl.collectTests typ))
 
   /// Remove contexts and flatten structured test objects.
   let rec flattenTestCase (testMetadata: TestMetadata) = seq {
