@@ -105,6 +105,9 @@ type TestMetadata =
   /// Metadata display name.
   abstract DisplayName : string
 
+  /// For internal use only.
+  member internal this.RawSymbolName = this._symbolName
+
   /// Metadata symbol name.
   /// This naming contains parent context symbol names.
   member this.SymbolName =
@@ -120,7 +123,7 @@ type TestMetadata =
   override this.ToString() = this.UniqueName
 
   /// For internal use only.
-  static member internal safeName(name: string option, unresolved: string) = 
+  static member internal safeName (name: string option, unresolved: string) = 
     match name with
     | Some name -> name
     | None -> unresolved
@@ -135,9 +138,7 @@ type TestMetadata =
   member internal this.trySetParent(parent: TestMetadata) =
     match this._parent with
     | None -> this._parent <- Some parent
-    | _ -> //()
-      Debug.Assert(false, parent.ToString())
-      this._parent <- Some parent
+    | _ -> ()
 
 //  interface ITestMetadata with
 //    member this.Name = this.Name
@@ -180,7 +181,8 @@ type TestCase internal (name: string option, parameters: (Type * obj) seq) =
 
   /// Metadata display name.
   override this.DisplayName =
-    let name = TestMetadata.safeName(this.Name, this.SymbolName)
+    let symbolName = TestMetadata.safeName(this.RawSymbolName, "[Unresolved]")
+    let name = TestMetadata.safeName(this.Name, symbolName)
     this.createUniqueName name
 
 //  interface ITestCase with
