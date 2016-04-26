@@ -16,39 +16,53 @@ module private TestCollectorImpl =
     |> Seq.filter (fun typ -> typ.IsNestedPublic && typ.IsClass && not typ.IsGenericTypeDefinition)
 
   /// Traverse test instances recursive.
-  let rec private fixupAndCollectTests (testObject: obj, symbolName: string option) = seq {
+  /// <param name="partialSuggest">Nested sequence children is true: symbol naming is pseudo.</param>
+  let rec private fixupAndCollectTests (testObject: obj, symbolName: string, partialSuggest) = seq {
     match testObject with
+
+    /////////////////////////////////////////////////////
     // For test case:
     | :? TestCase as testCase ->
-      // Consume symbol name.
-      match symbolName with
-      | Some sn -> testCase.trySetSymbolName sn
-      | None -> ()
+      // Set symbol name.
+      if not partialSuggest then
+        testCase.trySetSymbolName symbolName
       yield testCase :> TestMetadata
+
+    /////////////////////////////////////////////////////
     // For context:
     | :? Context as context ->
-      // Consume symbol name.
-      match symbolName with
-      | Some sn -> context.trySetSymbolName sn
-      | None -> ()
-      // Consume children.
-      //fixupAndCollectTests(context.Children, None) |> Seq.iter ignore
+      // Set symbol name.
+      if not partialSuggest then
+        context.trySetSymbolName symbolName
       yield context :> TestMetadata
+
+    /////////////////////////////////////////////////////
     // For test objects (sequence, ex: array/list):
+    // let tests = [                     --+
+    //  test "success test(list)" {        |
+    //    ...                              |
+    //  }                                  | testObject
+    //  test "failure test(list)" {        |
+    //    ...                              |
+    //  }                                  |
+    // ]                                 --+
     | :? (TestMetadata seq) as tests ->
-      // NOT consume symbol name.
-      yield! tests |> Seq.collect (fun child -> fixupAndCollectTests(child, symbolName))
+      // Nested children's symbol naming is pseudo, so partialSuggest = true
+      let children = tests |> Seq.collect (fun child -> fixupAndCollectTests(child, symbolName, true))
+      yield new Context(symbolName, children) :> TestMetadata
+
+    /////////////////////////////////////////////////////
     // Unknown type, ignored.
     | _ -> ()
   }
 
   /// Retreive test object via target property, and traverse.
   let private collectTestsFromProperty (p: PropertyInfo) =
-    fixupAndCollectTests (p.GetValue(null, null), Some p.Name)
+    fixupAndCollectTests (p.GetValue(null, null), p.Name, false)
   
   /// Retreive test object via target method, and traverse.
   let private collectTestsFromMethod (m: MethodInfo) =
-    fixupAndCollectTests (m.Invoke(null, [||]), Some m.Name)
+    fixupAndCollectTests (m.Invoke(null, [||]), m.Name, false)
   
   /// Retreive test object via target type, and traverse.
   let rec collectTests (typ: Type) = seq {
