@@ -78,18 +78,18 @@ let tests4 = [
   }
 ]
 
-// Persimmon.Sample.tests5.case parameterize test
 let tests5 =
   parameterize {
     case (1, 1)
     case (1, 2)
+    // Persimmon.Sample.tests5.case parameterize test
     run (fun (x, y) -> test "case parameterize test" {
       do! assertEquals x y
     })
   }
 
-// Persimmon.Sample.tests6.source parameterize test
 let tests6 =
+  // Persimmon.Sample.tests6.source parameterize test
   let innerTest (x, y) = test "source parameterize test" {
     do! assertEquals x y
   }

@@ -1,6 +1,7 @@
 ﻿namespace Persimmon.Internals
 
 open System
+open System.Diagnostics
 open System.Reflection
 open Microsoft.FSharp.Collections
 open Persimmon
