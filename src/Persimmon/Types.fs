@@ -111,13 +111,14 @@ type TestMetadata =
   /// Metadata symbol name.
   /// This naming contains parent context symbol names.
   member this.SymbolName =
-    let name = TestMetadata.safeName(this._name, "[Unresolved]")
-    let symbolName = TestMetadata.safeName(this._symbolName, name)
-
     // Combine parent symbol name.
-    match this._parent with
-    | Some parent -> parent.SymbolName + "." + symbolName
-    | None -> symbolName
+    match (this._name, this._symbolName, this._parent) with
+    | (_, Some sn, Some p) -> p.SymbolName + "." + sn
+    | (_, Some sn, _) -> sn
+    | (Some n, _, Some p) -> p.SymbolName + "." + n
+    | (Some n, _, _) -> n
+    | (_, _, Some p) -> p.SymbolName
+    | _ -> "[Unresolved]"
 
   /// Metadata string.
   override this.ToString() = this.UniqueName
