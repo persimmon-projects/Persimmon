@@ -113,8 +113,8 @@ type TestMetadata =
   member this.SymbolName =
     // Combine parent symbol name.
     match (this._name, this._symbolName, this._parent) with
-    | (_, Some sn, Some p) -> p.SymbolName + "." + sn
-    | (_, Some sn, _) -> sn
+    | (_, Some rsn, Some p) -> p.SymbolName + "." + rsn
+    | (_, Some rsn, _) -> rsn
     | (Some n, _, Some p) -> p.SymbolName + "." + n
     | (Some n, _, _) -> n
     | (_, _, Some p) -> p.SymbolName
@@ -182,8 +182,12 @@ type TestCase internal (name: string option, parameters: (Type * obj) seq) =
 
   /// Metadata display name.
   override this.DisplayName =
-    let symbolName = TestMetadata.safeName(this.RawSymbolName, "[Unresolved]")
-    let name = TestMetadata.safeName(this.Name, symbolName)
+    // Combine parent symbol name.
+    let name =
+      match (this.Name, this.RawSymbolName) with
+      | (Some n, _) -> n
+      | (_, Some rsn) -> rsn
+      | _ -> this.SymbolName
     this.createUniqueName name
 
 //  interface ITestCase with
