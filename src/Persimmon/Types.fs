@@ -155,6 +155,21 @@ type TestMetadata =
 type TestCase internal (name: string option, parameters: (Type * obj) seq) =
   inherit TestMetadata (name)
 
+  /// Recursive traverse display name (this --> parent).
+  let rec traverseDisplayName (this: TestMetadata) =
+    match (this.Name, this.RawSymbolName) with
+    // First priority: this.Name
+    | (Some n, _) -> n
+    // Second priority: this.RawSymbolName
+    | (_, Some rsn) -> rsn
+    // Both None
+    | _ ->
+      match this.Parent with
+      // this is child: recursive.
+      | Some p -> traverseDisplayName p
+      // Root: unresolved.
+      | None -> "[Unresolved]"
+
   /// The test parameters.
   /// If the test has no parameters then the value is empty list.
   member __.Parameters = parameters |> Seq.toArray
@@ -178,17 +193,11 @@ type TestCase internal (name: string option, parameters: (Type * obj) seq) =
   /// Metadata unique name.
   /// If the test has parameters then the value contains them.
   override this.UniqueName =
-    this.createUniqueName this.SymbolName
+    this.SymbolName |> this.createUniqueName
 
   /// Metadata display name.
   override this.DisplayName =
-    // Combine parent symbol name.
-    let name =
-      match (this.Name, this.RawSymbolName) with
-      | (Some n, _) -> n
-      | (_, Some rsn) -> rsn
-      | _ -> this.SymbolName
-    this.createUniqueName name
+    traverseDisplayName this |> this.createUniqueName
 
 //  interface ITestCase with
 //    member this.Parameters = this.Parameters
