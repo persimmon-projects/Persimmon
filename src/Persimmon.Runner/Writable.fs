@@ -3,6 +3,8 @@
 open System.IO
 open System.Xml.Linq
 
+open Persimmon.Internals
+
 /// This interface represents something that can write to TextWriter.
 type IWritable =
   abstract WriteTo: writer:TextWriter -> unit

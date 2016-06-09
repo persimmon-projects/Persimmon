@@ -11,26 +11,23 @@ module Formatter =
 
   module ProgressFormatter =
     let dot =
-      { new IFormatter<ITestResult> with
-          member x.Format(test: ITestResult): IWritable = 
+      { new IFormatter<ResultNode> with
+          member x.Format(test: ResultNode): IWritable = 
             match test with
-            | ContextResult _ctx -> Writable.doNothing
+            | ContextResult _ -> Writable.doNothing
             | EndMarker -> Writable.newline
-            | TestResult tr ->
-                match tr with
-                | Error _ -> Writable.char 'E'
-                | Done (_, res, _) ->
-                    let typicalRes = res |> AssertionResult.NonEmptyList.typicalResult
-                    match typicalRes with
-                    | Passed _ -> Writable.char '.'
-                    | NotPassed (Skipped _) -> Writable.char '_'
-                    | NotPassed (Violated _) -> Writable.char 'x'
+            | TestResult testResult ->
+                match Seq.isEmpty testResult.Exceptions with
+                | false -> Writable.char 'E'
+                | true ->
+                  let ar = testResult.AssertionResults |> AssertionResult.Seq.typicalResult
+                  match ar with
+                  | Passed -> Writable.char '.'
+                  | NotPassed (Skipped _) -> Writable.char '_'
+                  | NotPassed (Violated _) -> Writable.char 'x'
           }
 
   module SummaryFormatter =
-    let private tryGetCause = function
-    | Passed _ -> None
-    | NotPassed cause -> Some cause
 
     let private indentStr indent =
       String.replicate indent " "
@@ -42,7 +39,7 @@ module Formatter =
       let right = width - res.Length
       res + (String.replicate right (string barChar))
 
-    let private causesToStrs indent (causes: NotPassedCause list) =
+    let private causesToStrs indent (causes: NotPassedCause seq) =
       causes
       |> Seq.mapi (fun i (Skipped c | Violated c) -> (i + 1, c))
       |> Seq.collect (fun (i, c) ->
@@ -53,10 +50,9 @@ module Formatter =
                 let no = (string i) + ". "
                 yield indent + no + x
                 yield! xs |> Seq.map (fun x -> indent + (String.replicate no.Length " ") + x)
-          }
-         )
+          })
 
-    let private exnsToStrs indent (exns: exn list) =
+    let private exnsToStrs indent (exns: exn seq) =
       exns
       |> Seq.mapi (fun i exn -> (i + 1, exn))
       |> Seq.collect (fun (i, exn) ->
@@ -67,44 +63,48 @@ module Formatter =
                 let no = (string i) + ". "
                 yield indent + no + x
                 yield! xs |> Seq.map (fun x -> indent + (String.replicate no.Length " ") + x)
-          }
-         )
+          })
 
     let rec private toStrs indent = function
     | EndMarker -> Seq.empty
-    | ContextResult ctx ->
-        let rs = ctx.Children |> Seq.collect (toStrs (indent + 1))
+    | ContextResult contextResult ->
+        let rs = contextResult.Results |> Seq.collect (toStrs (indent + 1))
         if Seq.isEmpty rs then Seq.empty
         else
           seq {
-            yield (indentStr indent) + "begin " + ctx.Name
+            yield (indentStr indent) + "begin " + contextResult.Context.DisplayName
             yield! rs
-            yield (indentStr indent) + "end " + ctx.Name
+            yield (indentStr indent) + "end " + contextResult.Context.DisplayName
           }
-    | TestResult tr ->
-        match tr with
-        | Error (meta, es, res, _) ->
-            seq {
-              let indent = indentStr indent
-              yield indent + "FATAL ERROR: " + meta.FullName
-              if not (res.IsEmpty) then
-                yield (bar (70 - indent.Length) '-' "finished assertions")
-                yield! res |> causesToStrs indent
-              yield indent + (bar (70 - indent.Length) '-' "exceptions")
-              yield! es |> List.rev |> exnsToStrs indent
-            }
-        | Done (meta, res, _) ->
-            seq {
-              let indent = indentStr indent
-              match res |> AssertionResult.NonEmptyList.typicalResult with
-              | Passed _ -> ()
-              | NotPassed (Skipped _) ->
-                  yield indent + "Assertion skipped: " + meta.FullName
-              | NotPassed (Violated _) ->
-                  yield indent + "Assertion Violated: " + meta.FullName
-              let causes = res |> NonEmptyList.toList |> List.choose tryGetCause
-              yield! causes |> causesToStrs indent
-            }
+    | TestResult testResult ->
+      match testResult.Exceptions with
+      | exns when exns.Length >= 1 ->
+          seq {
+            let indent = indentStr indent
+            yield indent + "FATAL ERROR: " + testResult.TestCase.DisplayName
+            if testResult.AssertionResults.Length >= 1 then
+              yield (bar (70 - indent.Length) '-' "finished assertions")
+              yield! testResult.AssertionResults
+                |> Seq.filter (fun ar -> ar.Status <> None)
+                |> Seq.map (fun ar -> ar.Status.Value)
+                |> causesToStrs indent
+            yield indent + (bar (70 - indent.Length) '-' "exceptions")
+            yield! exns |> Seq.toList |> List.rev |> exnsToStrs indent
+          }
+      | _ ->
+          seq {
+            let indent = indentStr indent
+            match (testResult.AssertionResults |> AssertionResult.Seq.typicalResult).Status with
+            | None -> ()
+            | Some (Skipped _) ->
+                yield indent + "Assertion skipped: " + testResult.TestCase.DisplayName
+            | Some (Violated _) ->
+                yield indent + "Assertion Violated: " + testResult.TestCase.DisplayName
+            yield! testResult.AssertionResults
+              |> Seq.filter (fun ar -> ar.Status <> None)
+              |> Seq.map (fun ar -> ar.Status.Value)
+              |> causesToStrs indent
+          }
 
     type Summary = {
       Run: int
@@ -123,19 +123,19 @@ module Formatter =
 
       let rec collectSummary summary = function
       | EndMarker -> summary
-      | ContextResult ctx ->
-          ctx.Children |> Seq.fold collectSummary summary
-      | TestResult (Error (_, _, _, d)) ->
+      | ContextResult contextResult ->
+          contextResult.Results |> Seq.fold collectSummary summary
+      | TestResult (Error (_, _, _, _)) ->
           { summary with Run = summary.Run + 1; Error = summary.Error + 1 }
-      | TestResult (Done (_, res, d)) ->
-          match res |> AssertionResult.NonEmptyList.typicalResult with
+      | TestResult (Done (_, res, _)) ->
+          match res |> AssertionResult.Seq.typicalResult with
           | Passed _ -> { summary with Run = summary.Run + 1 }
           | NotPassed (Skipped _) -> { summary with Run = summary.Run + 1; Skipped = summary.Skipped + 1 }
           | NotPassed (Violated _) -> { summary with Run = summary.Run + 1; Violated = summary.Violated + 1 }
 
     let normal (watch: Stopwatch) =
-      { new IFormatter<ITestResult seq> with
-          member x.Format(results: ITestResult seq): IWritable = 
+      { new IFormatter<ResultNode seq> with
+          member x.Format(results: ResultNode seq): IWritable = 
             Writable.stringSeq begin
               seq {
                 yield! results |> Seq.collect (toStrs 0)
@@ -164,28 +164,28 @@ module Formatter =
     let private toXDocument result =
       let rec inner (acc: XElement) = function
       | EndMarker -> acc
-      | ContextResult ctx ->
+      | ContextResult contextResult ->
         let name =
           match acc.Attribute(xname "name") with
-          | null -> ctx.Name
+          | null -> contextResult.Context.DisplayName
           | x ->
             x.Remove()
-            sprintf "%s.%s" x.Value ctx.Name
+            sprintf "%s.%s" x.Value contextResult.Context.DisplayName
         let nameAttr = XAttribute(xname "name", name)
         acc.Add(nameAttr)
-        ctx.Children |> Seq.fold inner acc
+        contextResult.Results |> Seq.fold inner acc
       | TestResult tr ->
-        let testCase = XElement(xname "testcase", XAttribute(xname "name", tr.FullName))
+        let testCase = XElement(xname "testcase", XAttribute(xname "name", tr.TestCase.DisplayName))
         match tr with
-        | Error (meta, es, res, duration) as e ->
+        | Error (_, es, res, duration) as e ->
           testCase.Add(
             XElement(xname "error",
               XAttribute(xname "type", e.GetType().FullName),
               // TODO: fix message
               XAttribute(xname "message", res.ToString() + es.ToString())),
             XAttribute(xname "time", duration.ToString()))
-        | Done (meta, res, duration) ->
-          match res |> AssertionResult.NonEmptyList.typicalResult with
+        | Done (_, res, duration) ->
+          match res |> AssertionResult.Seq.typicalResult with
           | Passed _ ->
             testCase.Add(
               XAttribute(xname "time", duration.ToString()))
@@ -221,8 +221,8 @@ module Formatter =
       suites
 
     let junitStyle watch =
-      { new IFormatter<ITestResult seq> with
-        member __.Format(results: ITestResult seq) =
+      { new IFormatter<ResultNode seq> with
+        member __.Format(results: ResultNode seq) =
           let xdocument = XDocument(XElement(xname "testsuites", results |> Seq.map toXDocument) |> addSummary watch results)
           Writable.xdocument(xdocument)
       }

@@ -12,9 +12,9 @@ module NonEmptyList =
     let x, xs = xs
     let y, ys = ys
     (x, (xs@(y::ys)))
-  let appendList (xs: NonEmptyList<_>) ys =
+  let appendList (xs: NonEmptyList<'T>) (ys: 'T seq) =
     let x, xs = xs
-    (x, xs@ys)
+    (x, xs |> Seq.append ys |> Seq.toList)
   let reduce f (list: NonEmptyList<'T>) =
     let head, tail = list
     List.fold f head tail
@@ -25,6 +25,11 @@ module NonEmptyList =
     let head, tail = list
     action head
     List.iter action tail
+  let toSeq (list: NonEmptyList<'T>) = seq {
+    let head, tail = list
+    yield head
+    yield! tail
+  }
   let toList (list: NonEmptyList<'T>) =
     let head, tail = list
     [ yield head; yield! tail ]

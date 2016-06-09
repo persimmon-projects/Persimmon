@@ -1,7 +1,7 @@
 ﻿namespace Persimmon.Output
 
-open System.IO
 open System
+open System.IO
 
 type PrinterInfo<'T> = { Writer: TextWriter; Formatter: IFormatter<'T> }
 
