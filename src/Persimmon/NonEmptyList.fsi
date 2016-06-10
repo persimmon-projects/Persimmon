@@ -6,6 +6,7 @@ type NonEmptyList<'T> = 'T * 'T list
 module NonEmptyList =
   val head: NonEmptyList<'T> -> 'T
   val make: 'T -> 'T list -> NonEmptyList<'T>
+  val fromSeq: 'T seq -> NonEmptyList<'T>
   val cons: 'T -> NonEmptyList<'T> -> NonEmptyList<'T>
   val singleton: 'T -> NonEmptyList<'T>
   val append: NonEmptyList<'T> -> NonEmptyList<'T> -> NonEmptyList<'T>

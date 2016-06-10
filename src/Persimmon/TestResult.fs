@@ -14,13 +14,17 @@ module TestResult =
 
   /// The marker represents the end of tests.
   /// The progress reporter needs the end marker in order to print new line at the end.
-  let endMarker = {
-      new TestResult with
-        member __.TestCase = endMarkerTestCase
-        member __.Exceptions = [||]
-        member __.Duration = TimeSpan.Zero
-        member __.AssertionResults = [||]
-    }
+  let endMarker = Done (endMarkerTestCase, [] |> NonEmptyList.fromSeq, TimeSpan.Zero) :> TestResult
+  
+//   {
+//      new TestResult with
+//        member __.TestCase = endMarkerTestCase
+//        member __.IsFailed = false
+//        member __.Exceptions = [||]
+//        member __.Duration = TimeSpan.Zero
+//        member __.AssertionResults = [||]
+//        member __.Box() : TestResult<obj> = NotImplementedException() |> raise
+//    }
 
   let addAssertionResult x = function
     | Done (testCase, (Passed _, []), d) -> Done (testCase, NonEmptyList.singleton x, d)

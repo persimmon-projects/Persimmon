@@ -80,7 +80,7 @@ type ParameterizeBuilder() =
       f ()
     with e ->
       let e = exn("Failed to initialize `source` or `case` in `parameterize` computation expression.", e)
-      TestCase.makeError None [] e :> TestObject
+      TestCase.makeError None [] e :> TestCase
       |> Seq.singleton
   member __.Yield(()) = Seq.empty
   member __.Yield(x) = Seq.singleton x

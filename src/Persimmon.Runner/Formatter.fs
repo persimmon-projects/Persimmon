@@ -21,10 +21,10 @@ module Formatter =
                 | false -> Writable.char 'E'
                 | true ->
                   let ar = testResult.AssertionResults |> AssertionResult.Seq.typicalResult
-                  match ar with
-                  | Passed -> Writable.char '.'
-                  | NotPassed (Skipped _) -> Writable.char '_'
-                  | NotPassed (Violated _) -> Writable.char 'x'
+                  match ar.Status with
+                  | None -> Writable.char '.'
+                  | Some (Skipped _) -> Writable.char '_'
+                  | Some (Violated _) -> Writable.char 'x'
           }
 
   module SummaryFormatter =
