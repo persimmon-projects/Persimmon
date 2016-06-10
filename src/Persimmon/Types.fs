@@ -5,6 +5,7 @@ open System.Diagnostics
 open System.Reflection
 open System.Collections.Generic
 open System.Threading
+open Microsoft.FSharp.Control
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -233,28 +234,29 @@ and
   TestCase<'T> =
   inherit TestCase
 
-  val _asyncBody : TestCase<'T> -> Async<TestResult<'T>>
+  //val private _asyncBody : TestCase<'T> -> Async<TestResult<'T>>
+  val private _asyncBody : AsyncLazy<TestResult<'T>>
 
   /// Constructor.
   /// Test body is async operation.
-  new(name: string option, parameters: (Type * obj) seq, asyncBody: TestCase<'T> -> Async<TestResult<'T>>) = {
+  new(name: string option, parameters: (Type * obj) seq, asyncBody: TestCase<'T> -> Async<TestResult<'T>>) as this = {
     inherit TestCase(name, parameters)
-    _asyncBody = asyncBody
+    _asyncBody = new AsyncLazy<TestResult<'T>>(fun _ -> asyncBody(this))
   }
 
   /// Constructor.
   /// Test body is synch operation.
-  new(name: string option, parameters: (Type * obj) seq, body: TestCase<'T> -> TestResult<'T>) = {
+  new(name: string option, parameters: (Type * obj) seq, body: TestCase<'T> -> TestResult<'T>) as this = {
     inherit TestCase(name, parameters)
-    _asyncBody = fun tc -> async {
-      return body(tc)
-    }
+    _asyncBody = new AsyncLazy<TestResult<'T>>(fun _ -> async {
+      return body(this)
+    })
   }
 
   /// Run test implementation core.
   member private this.InternalAsyncRun() = async {
     let watch = Stopwatch.StartNew()
-    let! result = this._asyncBody(this)
+    let! result = this._asyncBody.asyncGetValue()
     watch.Stop()
     return
       match result with
