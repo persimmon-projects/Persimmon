@@ -11,20 +11,12 @@ module TestResult =
     new InvalidOperationException() |> raise
   let private endMarkerTestCase =
     new TestCase<unit>(Some "endMarker", [], endMarkerTestBody) :> TestCase
+  let private endMarkerResult : AssertionResult<unit> = NotPassed (Skipped "endMarker")
+  let private endMarkerResults = [endMarkerResult] |> NonEmptyList.fromSeq
 
   /// The marker represents the end of tests.
   /// The progress reporter needs the end marker in order to print new line at the end.
-  let endMarker = Done (endMarkerTestCase, [] |> NonEmptyList.fromSeq, TimeSpan.Zero) :> TestResult
-  
-//   {
-//      new TestResult with
-//        member __.TestCase = endMarkerTestCase
-//        member __.IsFailed = false
-//        member __.Exceptions = [||]
-//        member __.Duration = TimeSpan.Zero
-//        member __.AssertionResults = [||]
-//        member __.Box() : TestResult<obj> = NotImplementedException() |> raise
-//    }
+  let endMarker = Done (endMarkerTestCase, endMarkerResults, TimeSpan.Zero) :> TestResult
 
   let addAssertionResult x = function
     | Done (testCase, (Passed _, []), d) -> Done (testCase, NonEmptyList.singleton x, d)
