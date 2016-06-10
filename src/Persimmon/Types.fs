@@ -90,7 +90,7 @@ module AssertionResult =
 
 /// Test metadata base class.
 [<AbstractClass>]
-[<StructuredFormatDisplay("{UniqueName}")>]
+[<StructuredFormatDisplay("{DebugName}")>]
 type TestMetadata =
 
   val _name : string option
@@ -117,6 +117,13 @@ type TestMetadata =
 
   /// Metadata display name.
   abstract DisplayName : string
+
+  /// (For use debugger display)
+  abstract DebugName : string
+  default this.DebugName =
+    match this.Name with
+    | Some name -> name
+    | None -> this.DisplayName
 
   /// For internal use only.
   member internal this.RawSymbolName = this._symbolName
@@ -207,6 +214,15 @@ type TestCase internal (name: string option, parameters: (Type * obj) seq) =
   /// Metadata display name.
   override this.DisplayName =
     traverseDisplayName this |> this.createUniqueName
+
+  /// (For use debugger display)
+  override this.DebugName =
+    match this.Name with
+    | Some name when this.Parameters.Length = 0 -> name
+    | Some name ->
+      sprintf "%s(%s)" name (this.Parameters |> PrettyPrinter.printAll)
+    | None -> this.DisplayName
+
 
 /// Non generic view for test result. (fake base type)
 /// Can use active recognizers: ContextResult cr / TestResult tr / EndMarker
