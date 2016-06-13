@@ -20,18 +20,19 @@ let (|ContextResult|TestResult|EndMarker|) (result: ResultNode) =
   | _ -> new ArgumentException() |> raise
   
 /// Retreive information from non generic AssertionResult.
-let (|Passed|NotPassed|) (ar: #AssertionResult) =
+let (|Passed|NotPassed|) (ar: AssertionResult) =
   match ar.Status with
   | None -> Passed
   | Some cause -> NotPassed cause
 
 /// Retreive information from non generic TestResult.
-let (|Done|Error|) (result: #TestResult) =
-  if result.Exceptions.Length >= 1 then
+let (|Done|Error|) (result: TestResult) =
+  match result.IsFailed with
+  | true ->
     Error (
       result.TestCase,
       result.Exceptions,
       result.AssertionResults |> Seq.choose (function NotPassed cause -> Some cause | _ -> None) |> Seq.toArray,
       result.Duration)
-  else
+  | false ->
     Done (result.TestCase, result.AssertionResults, result.Duration)

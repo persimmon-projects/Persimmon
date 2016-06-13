@@ -29,12 +29,22 @@ module TestCase =
     new TestCase<_>(name, parameters, body)
 
   /// Create always completion test case.
-  let make name parameters x =
+  let makeDone name parameters x =
     new TestCase<_>(name, parameters, fun testCase -> Done (testCase, NonEmptyList.singleton x, TimeSpan.Zero))
 
   /// Create always error test case.
   let makeError name parameters exn =
     new TestCase<_>(name, parameters, fun testCase -> Error (testCase, [exn], [], TimeSpan.Zero))
+
+//  let box (testCase: #TestCase) =
+//    let asyncBody (tcobj: TestCase<obj>) = async {
+//      let! result = testCase.AsyncRun()
+//      return
+//        match result with
+//        | Error (_, errs, res, _) -> Error (this, errs, res, watch.Elapsed)
+//        | Done (_, res, _) -> Done (this, res, watch.Elapsed)
+//    }
+//    new TestCase<obj>(testCase.Name, testCase.Parameters, asyncBody)
 
   /// Add not passed test after test.
   let addNotPassed notPassedCause (x: TestCase<_>) =

@@ -5,6 +5,7 @@ open System.Diagnostics
 open System.Reflection
 open System.Collections.Generic
 open System.Threading
+open Microsoft.FSharp.Control
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -18,20 +19,33 @@ type NotPassedCause =
 /// The result of each assertion. (fake base type)
 /// Can use active recognizers: Passed / NotPassed cause
 type AssertionResult =
+  abstract Value : obj option
   abstract Status : NotPassedCause option
+  abstract Box : unit -> AssertionResult<obj>
 
 /// The result of each assertion.
-type AssertionResult<'T> =
+and AssertionResult<'T> =
     /// The assertion is passed.
   | Passed of 'T
     /// The assertion is not passed.
   | NotPassed of NotPassedCause
 
+  /// For internal use only.
+  member this.Box() =
+    match this with
+    | Passed value -> Passed (value :> obj)
+    | NotPassed cause -> NotPassed cause
+
   interface AssertionResult with
+    member this.Value =
+      match this with
+      | Passed value -> Some (value :> obj)
+      | NotPassed _ -> None
     member this.Status =
       match this with
       | Passed _ -> None
       | NotPassed cause -> Some cause
+    member this.Box() = this.Box()
 
 /// NotPassedCause manipulators.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
@@ -77,7 +91,7 @@ module AssertionResult =
 
 /// Test metadata base class.
 [<AbstractClass>]
-[<StructuredFormatDisplay("{UniqueName}")>]
+[<StructuredFormatDisplay("{DisplayName}")>]
 type TestMetadata =
 
   val _name : string option
@@ -141,13 +155,6 @@ type TestMetadata =
     | None -> this._parent <- Some parent
     | _ -> ()
 
-//  interface ITestMetadata with
-//    member this.Name = this.Name
-//    member this.Parent = this.Parent
-//    member this.SymbolName = this.SymbolName
-//    member this.UniqueName = this.UniqueName
-//    member this.DisplayName = this.DisplayName
-
 ///////////////////////////////////////////////////////////////////////////
 
 /// Test case base class.
@@ -176,6 +183,9 @@ type TestCase internal (name: string option, parameters: (Type * obj) seq) =
     
   /// For internal use only.
   abstract member OnAsyncRun: unit -> Async<TestResult>
+    
+  /// For internal use only.
+  abstract member Box: unit -> TestCase<obj>
 
   /// Execute this test case.
   member this.AsyncRun() = this.OnAsyncRun()
@@ -199,9 +209,6 @@ type TestCase internal (name: string option, parameters: (Type * obj) seq) =
   override this.DisplayName =
     traverseDisplayName this |> this.createUniqueName
 
-//  interface ITestCase with
-//    member this.Parameters = this.Parameters
-//    member __.AsyncRun() = new InvalidOperationException() |> raise  // HACK
 
 /// Non generic view for test result. (fake base type)
 /// Can use active recognizers: ContextResult cr / TestResult tr / EndMarker
@@ -213,44 +220,48 @@ and ResultNode =
 and TestResult =
   inherit ResultNode
   abstract TestCase: TestCase
+  abstract IsFailed: bool
   abstract Exceptions: exn[]
   abstract Duration: TimeSpan
   abstract AssertionResults: AssertionResult[]
+  abstract Box: unit -> TestResult<obj>
 
 ///////////////////////////////////////////////////////////////////////////
 
 /// Test case class.
-[<Sealed>]
-type TestCase<'T> =
+and
+  [<Sealed>]
+  TestCase<'T> =
   inherit TestCase
 
-  val _asyncBody : TestCase<'T> -> Async<TestResult<'T>>
+  //val private _asyncBody : TestCase<'T> -> Async<TestResult<'T>>
+  val private _asyncBody : AsyncLazy<TestResult<'T>>
 
   /// Constructor.
   /// Test body is async operation.
-  new(name: string option, parameters: (Type * obj) seq, asyncBody: TestCase<'T> -> Async<TestResult<'T>>) = {
+  new(name: string option, parameters: (Type * obj) seq, asyncBody: TestCase<'T> -> Async<TestResult<'T>>) as this = {
     inherit TestCase(name, parameters)
-    _asyncBody = asyncBody
+    _asyncBody = new AsyncLazy<TestResult<'T>>(fun _ -> asyncBody(this))
   }
 
   /// Constructor.
   /// Test body is synch operation.
-  new(name: string option, parameters: (Type * obj) seq, body: TestCase<'T> -> TestResult<'T>) = {
+  new(name: string option, parameters: (Type * obj) seq, body: TestCase<'T> -> TestResult<'T>) as this = {
     inherit TestCase(name, parameters)
-    _asyncBody = fun tc -> async {
-      return body(tc)
-    }
+    _asyncBody = new AsyncLazy<TestResult<'T>>(fun _ -> async {
+      return body(this)
+    })
   }
 
   /// Run test implementation core.
   member private this.InternalAsyncRun() = async {
     let watch = Stopwatch.StartNew()
-    let! result = this._asyncBody(this)
+    let! result = this._asyncBody.asyncGetValue()
     watch.Stop()
     return
       match result with
-        | Error (_, errs, res, _) -> Error (this, errs, res, watch.Elapsed)
-        | Done (_, res, _) -> Done (this, res, watch.Elapsed)
+      | Error (_, errs, res, _) -> Error (this, errs, res, watch.Elapsed)
+      | Done (_, res, _) -> Done (this, res, watch.Elapsed)
   }
 
   /// Execute this test case.
@@ -267,11 +278,13 @@ type TestCase<'T> =
     return result :> TestResult
   }
 
-//  interface ITestCase with
-//    override this.AsyncRun() = async {
-//      let! result = this.InternalAsyncRun()
-//      return result :> ITestResult
-//    }
+  /// For internal use only.
+  override this.Box() =
+    let asyncBody tcobj = async {
+      let! result = this.AsyncRun()
+      return result.Box()
+    }
+    new TestCase<obj>(this.Name, this.Parameters, asyncBody)
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -294,6 +307,10 @@ and TestResult<'T> =
       match this with
       | Error (testCase, _, _, _) -> testCase
       | Done (testCase, _, _) -> testCase
+    member this.IsFailed =
+      match this with
+      | Error _ -> true
+      | Done _ -> false
     member this.Exceptions =
       match this with
       | Error (_, exns, _, _) -> exns |> Seq.toArray
@@ -307,16 +324,21 @@ and TestResult<'T> =
       | Error (_, _, _, _) -> [||]
       | Done (_, res, _) -> res |> NonEmptyList.toList |> Seq.map (fun ar -> ar :> AssertionResult) |> Seq.toArray
 
+    /// For internal use only.
+    member this.Box() : TestResult<obj> =
+      match this with
+      | Error (testCase, exns, causes, duration) ->
+        Error (testCase, exns, causes, duration)
+      | Done (testCase, res, duration) ->
+        Done (testCase, res |> NonEmptyList.toSeq |> Seq.map (fun ar -> ar.Box()) |> NonEmptyList.fromSeq, duration)
+
     interface TestResult with
       member this.TestCase = this.TestCase
+      member this.IsFailed = this.IsFailed
       member this.Exceptions = this.Exceptions
       member this.Duration = this.Duration
       member this.AssertionResults = this.AssertionResults
-
-//    interface ITestResult with
-//      member this.TestCase = this.TestCase :> TestCase
-//      member this.Exceptions = this.Exceptions
-//      member this.Duration = this.Duration
+      member this.Box() = this.Box()
 
 ///////////////////////////////////////////////////////////////////////////
 

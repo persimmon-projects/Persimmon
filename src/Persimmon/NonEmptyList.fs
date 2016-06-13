@@ -6,6 +6,7 @@ type NonEmptyList<'T> = 'T * 'T list
 module NonEmptyList =
   let head (xs: NonEmptyList<_>) = let head, _ = xs in head
   let make head tail : NonEmptyList<_> = (head, tail)
+  let fromSeq xs = make (xs |> Seq.head) (xs |> Seq.skip(1) |> Seq.toList)
   let cons head tail : NonEmptyList<_> = let second, tail = tail in (head, second::tail)
   let singleton head : NonEmptyList<_> = (head, [])
   let append (xs: NonEmptyList<_>) (ys: NonEmptyList<_>) : NonEmptyList<_> =
