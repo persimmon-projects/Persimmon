@@ -21,11 +21,14 @@ open System.Threading
 type private AsyncCompletionSource<'T> =
 
   [<DefaultValue>]
-  val mutable private _completed : 'T -> unit
+  val mutable private _value : 'T option
   [<DefaultValue>]
-  val mutable private _caught : exn -> unit
+  val mutable private _exn : exn option
+
   [<DefaultValue>]
-  val mutable private _canceled : OperationCanceledException -> unit
+  val mutable private _completed : ('T -> unit) option
+  [<DefaultValue>]
+  val mutable private _caught : (exn -> unit) option
 
   val private _async : Async<'T>
 
@@ -33,10 +36,18 @@ type private AsyncCompletionSource<'T> =
   /// Constructor.
   /// </summary>
   new () as this = {
-    _async = Async.FromContinuations<'T>(fun (completed, caught, canceled) ->
-      this._completed <- completed
-      this._caught <- caught
-      this._canceled <- canceled)
+    _async = Async.FromContinuations<'T>(fun (completed, caught, _) ->
+      lock (this) (fun _ ->
+        match this._value, this._exn with
+        | Some value, None -> completed value
+        | None, Some exn -> caught exn
+        | Some value, Some exn ->
+          completed value
+          caught exn
+        | None, None -> ()
+
+        this._completed <- Some completed
+        this._caught <- Some caught))
   }
 
   /// <summary>
@@ -48,13 +59,21 @@ type private AsyncCompletionSource<'T> =
   /// Set result value and continue continuation.
   /// </summary>
   /// <param name="value">Result value</param>
-  member this.SetResult value = this._completed value
+  member this.SetResult value =
+    lock (this) (fun () ->
+      match this._completed with
+      | Some completed -> completed value
+      | None -> this._value <- Some value)
 
   /// <summary>
   /// Set exception and continue continuation.
   /// </summary>
   /// <param name="exn">Exception instance</param>
-  member this.SetException exn = this._caught exn
+  member this.SetException exn =
+    lock (this) (fun () ->
+      match this._caught with
+      | Some caught -> caught exn
+      | None -> this._exn <- Some exn)
 
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -73,33 +92,27 @@ type private AsyncLock () =
 
   let locker continuation =
     let result =
-      Monitor.Enter _queue
-      try
+      lock (_queue) (fun _ ->
         match _enter with
         | true ->
           _queue.Enqueue(continuation)
           false
         | false ->
           _enter <- true
-          true
-      finally
-        Monitor.Exit _queue
+          true)
     match result with
     | true -> continuation()
     | false -> ()
 
   let unlocker () =
     let result =
-      Monitor.Enter _queue
-      try
+      lock (_queue) (fun _ ->
         match _queue.Count with
         | 0 ->
           _enter <- false
           None
         | _ ->
-          Some (_queue.Dequeue())
-      finally
-        Monitor.Exit _queue
+          Some (_queue.Dequeue()))
     match result with
     | Some continuation -> continuation()
     | None -> ()
@@ -147,7 +160,7 @@ type internal AsyncLazy<'T> =
     match this._value with
     | Some value -> return value
     | None ->
-    let! value = this._asyncBody()
-    this._value <- Some value
-    return value
+      let! value = this._asyncBody()
+      this._value <- Some value
+      return value
   }
