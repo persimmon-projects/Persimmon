@@ -29,7 +29,7 @@ module TestCase =
     new TestCase<_>(name, parameters, body)
 
   /// Create always completion test case.
-  let make name parameters x =
+  let makeDone name parameters x =
     new TestCase<_>(name, parameters, fun testCase -> Done (testCase, NonEmptyList.singleton x, TimeSpan.Zero))
 
   /// Create always error test case.

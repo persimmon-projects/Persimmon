@@ -10,9 +10,9 @@ type ScriptTestBuilder internal (name: string) =
   member __.Source(x: TestCase<_>) = NonUnitTestCase x
   member __.Bind(x, f: 'T -> TestCase<'U>) = test.Bind(x, f)
   member __.Delay(f) = test.Delay(f)
-  member __.Run(f) = test.Run(f)
+  member __.Run(f) = test.Run(f).Box()
 
-type ScriptParameterizeBuilder() =
+type ScriptParameterizeBuilder internal () =
   member __.Delay(f) = parameterize.Delay(f)
   member __.Run(f) =
     try
@@ -29,6 +29,7 @@ type ScriptParameterizeBuilder() =
   [<CustomOperation("run")>]
   member __.RunTests(source, f: _ -> TestCase<'T>) =
     parameterize.RunTests(source, f)
+    |> Seq.map (fun tc -> tc.Box())
     |> Seq.toList
 
 module Helper =
@@ -58,7 +59,7 @@ with
   member __.test(name) = ScriptSyntax.test name
   member __.parameterize = ScriptSyntax.parameterize
   member this.Run(f: ScriptContext -> TestCase<obj> list) =
-    let res = f this |> List.map (fun t -> t.Run())
+    let res = f this |> List.map (fun tc -> tc.Run())
     this.OnFinished(res)
 
 module ScriptRunner =
