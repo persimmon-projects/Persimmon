@@ -70,6 +70,7 @@
     <Compile Include="Internals\RuntimeUtil.fs" />
     <Compile Include="Internals\TestCollector.fs" />
     <Compile Include="Internals\TestRunner.fs" />
+    <Compile Include="Internals\Attributes.fs" />
     <None Include="..\..\Persimmon.snk">
       <Link>Persimmon.snk</Link>
     </None>
