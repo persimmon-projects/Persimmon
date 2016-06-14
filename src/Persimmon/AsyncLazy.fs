@@ -139,7 +139,6 @@ type internal AsyncLazy<'T> =
   /// Constructor.
   /// </summary>
   /// <param name="asyncBody">Lazy instance factory.</param>
-  /// </summary>
   new (asyncBody: unit -> Async<'T>) = {
     _lock = new AsyncLock()
     _asyncBody = asyncBody
