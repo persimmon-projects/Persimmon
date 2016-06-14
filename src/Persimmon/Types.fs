@@ -353,7 +353,7 @@ and TestResult<'T> =
       | Error (testCase, exns, causes, duration) ->
         Error (testCase, exns, causes, duration)
       | Done (testCase, res, duration) ->
-        Done (testCase, res |> NonEmptyList.toSeq |> Seq.map (fun ar -> ar.Box()) |> NonEmptyList.fromSeq, duration)
+        Done (testCase, res |> NonEmptyList.toSeq |> Seq.map (fun ar -> ar.Box()) |> NonEmptyList.ofSeq, duration)
 
     interface TestResult with
       member this.TestCase = this.TestCase

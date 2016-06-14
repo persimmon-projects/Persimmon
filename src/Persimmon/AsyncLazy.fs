@@ -14,10 +14,7 @@ open System.Threading
 /// Simulate TaskCompletionSource&lt;'T&gt; for F#'s Async&lt;'T&gt;.
 /// </description>
 /// <typeparam name="'T">Computation result type</typeparam> 
-[<Sealed>]
-[<NoEquality>]
-[<NoComparison>]
-[<AutoSerializable(false)>]
+[<Sealed; NoEquality; NoComparison; AutoSerializable(false)>]
 type private AsyncCompletionSource<'T> =
 
   [<DefaultValue>]
@@ -81,10 +78,7 @@ type private AsyncCompletionSource<'T> =
 /// Pseudo lock primitive on F#'s async workflow/.NET Task.
 /// (From FSharp.Control.FusionTasks https://github.com/kekyo/FSharp.Control.FusionTasks)
 /// </summary>
-[<Sealed>]
-[<NoEquality>]
-[<NoComparison>]
-[<AutoSerializable(false)>]
+[<Sealed; NoEquality; NoComparison; AutoSerializable(false)>]
 type private AsyncLock () =
 
   let _queue = new Queue<unit -> unit>()
@@ -134,10 +128,7 @@ type private AsyncLock () =
 /// (From FSharp.Control.FusionTasks https://github.com/kekyo/FSharp.Control.FusionTasks)
 /// </summary>
 /// <typeparam name="'T">Computation result type</typeparam> 
-[<Sealed>]
-[<NoEquality>]
-[<NoComparison>]
-[<AutoSerializable(false)>]
+[<Sealed; NoEquality; NoComparison; AutoSerializable(false)>]
 type internal AsyncLazy<'T> =
 
   val private _lock : AsyncLock
