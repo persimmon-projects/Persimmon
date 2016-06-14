@@ -18,23 +18,25 @@ module private TestCollectorImpl =
 
   /// Traverse test instances recursive.
   /// <param name="partialSuggest">Nested sequence children is true: symbol naming is pseudo.</param>
-  let rec private fixupAndCollectTests (testObject: obj, symbolName: string, partialSuggest) = seq {
+  let rec private fixupAndCollectTests (testObject: obj, symbolName: string, index: int option) = seq {
     match testObject with
 
     /////////////////////////////////////////////////////
     // For test case:
     | :? TestCase as testCase ->
       // Set symbol name.
-      if not partialSuggest then
-        testCase.trySetSymbolName symbolName
+      match index with
+      | Some i -> testCase.trySetIndex i
+      | None -> testCase.trySetSymbolName symbolName
       yield testCase :> TestMetadata
 
     /////////////////////////////////////////////////////
     // For context:
     | :? Context as context ->
       // Set symbol name.
-      if not partialSuggest then
-        context.trySetSymbolName symbolName
+      match index with
+      | Some i -> context.trySetIndex i
+      | None -> context.trySetSymbolName symbolName
       yield context :> TestMetadata
 
     /////////////////////////////////////////////////////
@@ -48,8 +50,12 @@ module private TestCollectorImpl =
     //  }                                  |
     // ]                                 --+
     | :? (TestMetadata seq) as tests ->
-      // Nested children's symbol naming is pseudo, so partialSuggest = true
-      let children = tests |> Seq.collect (fun child -> fixupAndCollectTests(child, symbolName, true))
+      // Nested children's symbol naming is pseudo.
+      // "parentNamed[0]", "parentNamed[0][0]", ...
+      let children =
+        tests
+        |> Seq.mapi (fun index -> fun child -> child, index)
+        |> Seq.collect (fun entry -> fixupAndCollectTests(fst entry, symbolName, Some (snd entry)))
       yield new Context(symbolName, children) :> TestMetadata
 
     /////////////////////////////////////////////////////
@@ -59,11 +65,11 @@ module private TestCollectorImpl =
 
   /// Retreive test object via target property, and traverse.
   let private collectTestsFromProperty (p: PropertyInfo) =
-    fixupAndCollectTests (p.GetValue(null, null), p.Name, false)
+    fixupAndCollectTests (p.GetValue(null, null), p.Name, None)
   
   /// Retreive test object via target method, and traverse.
   let private collectTestsFromMethod (m: MethodInfo) =
-    fixupAndCollectTests (m.Invoke(null, [||]), m.Name, false)
+    fixupAndCollectTests (m.Invoke(null, [||]), m.Name, None)
   
   /// Retreive test object via target type, and traverse.
   let rec collectTests (typ: Type) = seq {

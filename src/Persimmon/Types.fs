@@ -94,15 +94,17 @@ module AssertionResult =
 [<StructuredFormatDisplay("{DisplayName}")>]
 type TestMetadata =
 
-  val _name : string option
+  val private _name : string option
   [<DefaultValue>]
-  val mutable _symbolName : string option
+  val mutable private _symbolName : string option
   [<DefaultValue>]
-  val mutable _parent : TestMetadata option
+  val mutable private _parent : TestMetadata option
+  [<DefaultValue>]
+  val mutable private _index : int option
 
   /// Constructor.
   internal new (name: string option) = {
-    _name = name
+    _name = name;
   }
 
   /// The test name. It doesn't contain the parameters.
@@ -118,6 +120,9 @@ type TestMetadata =
 
   /// Metadata display name.
   abstract DisplayName : string
+  
+  /// Index if metadata place into sequence.
+  member this.Index = this._index
 
   /// For internal use only.
   member internal this.RawSymbolName = this._symbolName
@@ -132,7 +137,7 @@ type TestMetadata =
     | (Some n, _, Some p) -> p.SymbolName + "." + n
     | (Some n, _, _) -> n
     | (_, _, Some p) -> p.SymbolName
-    | _ -> "[Unresolved]"
+    | _ -> ""
 
   /// Metadata string.
   override this.ToString() = this.UniqueName
@@ -142,6 +147,12 @@ type TestMetadata =
     match name with
     | Some name -> name
     | None -> unresolved
+
+  /// For internal use only.
+  member internal this.trySetIndex(index: int) =
+    match this._index with
+    | None -> this._index <- Some index
+    | _ -> ()
 
   /// For internal use only.
   member internal this.trySetSymbolName(symbolName: string) =
@@ -154,21 +165,19 @@ type TestMetadata =
     match this._parent with
     | None -> this._parent <- Some parent
     | _ -> ()
-
+    
 ///////////////////////////////////////////////////////////////////////////
 
-/// Test case base class.
-[<AbstractClass>]
-type TestCase internal (name: string option, parameters: (Type * obj) seq) =
-  inherit TestMetadata (name)
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+module private TestMetadata =
 
   /// Recursive traverse display name (this --> parent).
   let rec traverseDisplayName (this: TestMetadata) =
-    match (this.Name, this.RawSymbolName) with
+    match this.Name, this.RawSymbolName with
     // First priority: this.Name
-    | (Some n, _) -> n
+    | Some n, _ -> n
     // Second priority: this.RawSymbolName
-    | (_, Some rsn) -> rsn
+    | _, Some rsn -> rsn
     // Both None
     | _ ->
       match this.Parent with
@@ -176,6 +185,13 @@ type TestCase internal (name: string option, parameters: (Type * obj) seq) =
       | Some p -> traverseDisplayName p
       // Root: unresolved.
       | None -> "[Unresolved]"
+
+///////////////////////////////////////////////////////////////////////////
+
+/// Test case base class.
+[<AbstractClass>]
+type TestCase internal (name: string option, parameters: (Type * obj) seq) =
+  inherit TestMetadata (name)
 
   /// The test parameters.
   /// If the test has no parameters then the value is empty list.
@@ -195,10 +211,17 @@ type TestCase internal (name: string option, parameters: (Type * obj) seq) =
   //[<Obsolete>]
   member this.Run() = this.OnAsyncRun() |> Async.RunSynchronously
   
+  /// Create unique name.
   member private this.createUniqueName baseName =
-    match Array.isEmpty this.Parameters with
-    | true -> baseName
-    | false -> sprintf "%s(%s)" baseName (this.Parameters |> PrettyPrinter.printAll)
+    let parameters = this.Parameters |> PrettyPrinter.printAll
+    match this.Index, parameters.Length, this.Parameters.Length with
+    // Not assigned index and parameters.
+    | None, 0, 0 -> baseName
+    // Assigned index and empty parameter strings (but may be assigned real parameters).
+    // Print with index:
+    | Some index, 0, _ -> sprintf "%s[%d]" baseName index
+    // Others, print with parameter strings.
+    | _, _, _ -> sprintf "%s(%s)" baseName parameters
 
   /// Metadata unique name.
   /// If the test has parameters then the value contains them.
@@ -207,7 +230,7 @@ type TestCase internal (name: string option, parameters: (Type * obj) seq) =
 
   /// Metadata display name.
   override this.DisplayName =
-    traverseDisplayName this |> this.createUniqueName
+    TestMetadata.traverseDisplayName this |> this.createUniqueName
 
 
 /// Non generic view for test result. (fake base type)
@@ -356,18 +379,25 @@ type Context =
       this._children <- children |> Seq.toArray
       for child in this._children do child.trySetParent(this :> TestMetadata)
 
+  /// Construct unique name.
+  member private this.createUniqueName baseName =
+    match this.Index with
+    // If index not assigned.
+    | None -> baseName
+    // Assigned index: print with index.
+    | Some index -> sprintf "%s[%d]" baseName index
+
   /// Metadata unique name.
   /// If the test has parameters then the value contains them.
-  override this.UniqueName = this.SymbolName
+  override this.UniqueName =
+    this.SymbolName |> this.createUniqueName
 
   /// Metadata display name.
-  override this.DisplayName = this.Name.Value
+  override this.DisplayName =
+    TestMetadata.traverseDisplayName this |> this.createUniqueName
 
   /// Child tests.
   member this.Children = this._children
-
-  override this.ToString() =
-    sprintf "%s(%A)" this.SymbolName this._children
 
 /// Test context and hold tested results class. (structuring nested test result node)
 /// Inherited from ResultNode
