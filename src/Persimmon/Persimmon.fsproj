@@ -12,7 +12,8 @@
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <TargetFSharpCoreVersion>2.3.0.0</TargetFSharpCoreVersion>
     <Name>Persimmon</Name>
-    <TargetFrameworkProfile />
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -33,26 +34,12 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Release\Persimmon.XML</DocumentationFile>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="NonEmptyList.fsi" />
-    <Compile Include="NonEmptyList.fs" />
-    <Compile Include="PrettyPrinter.fs" />
-    <Compile Include="Types.fs" />
-    <Compile Include="ActivePatterns.fs" />
-    <Compile Include="Assertions.fs" />
-    <Compile Include="ComputationExpressions.fs" />
-    <Compile Include="Syntax.fs" />
-  </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\Persimmon.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '11.0'">
@@ -67,6 +54,35 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="NonEmptyList.fsi" />
+    <Compile Include="NonEmptyList.fs" />
+    <Compile Include="PrettyPrinter.fs" />
+    <Compile Include="AsyncLazy.fs" />
+    <Compile Include="Types.fs" />
+    <Compile Include="TestResult.fs" />
+    <Compile Include="ActivePatterns.fs" />
+    <Compile Include="TestCase.fs" />
+    <Compile Include="Assertions.fs" />
+    <Compile Include="ComputationExpressions.fs" />
+    <Compile Include="Syntax.fs" />
+    <Compile Include="Internals\RuntimeUtil.fs" />
+    <Compile Include="Internals\TestCollector.fs" />
+    <Compile Include="Internals\TestRunner.fs" />
+    <Compile Include="Internals\Attributes.fs" />
+    <None Include="..\..\Persimmon.snk">
+      <Link>Persimmon.snk</Link>
+    </None>
+    <Content Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+  </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

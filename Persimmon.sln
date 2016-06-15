@@ -1,11 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{CE82B0A4-59E5-4B8E-8705-1D4960C471A7}"
 	ProjectSection(SolutionItems) = preProject
 		paket.dependencies = paket.dependencies
+		paket.lock = paket.lock
 	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon", "src\Persimmon\Persimmon.fsproj", "{F1D851FD-A776-4204-B287-5C14C3AA198C}"
@@ -24,6 +25,20 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.Script", "src\Persimmon.Script\Persimmon.Script.fsproj", "{5350367C-C03C-4E05-9D46-6ADB64F8BC6A}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.Script.Tests", "tests\Persimmon.Script.Tests\Persimmon.Script.Tests.fsproj", "{5CC5FE08-D88A-436E-83A8-57CDACD8E2CE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3FFD2939-6D98-47C3-ADD3-D495A1DB77B7}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		.travis.yml = .travis.yml
+		appveyor.yml = appveyor.yml
+		build.cmd = build.cmd
+		build.fsx = build.fsx
+		build.sh = build.sh
+		LICENSE = LICENSE
+		Persimmon.snk = Persimmon.snk
+		README.md = README.md
+		RELEASE_NOTES.md = RELEASE_NOTES.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

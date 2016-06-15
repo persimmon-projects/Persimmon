@@ -86,7 +86,7 @@ module PersimmonTest =
   let ``catch parameterized test error`` =
 
     let getTestCase xs =
-      xs |> Seq.choose (function TestCase c -> Some c | _ -> None) |> Seq.head
+      xs |> Seq.choose (function TestCase c -> Some (c.Box()) | _ -> None) |> Seq.head
 
     let x () = 3
     let y () = failwith "error"

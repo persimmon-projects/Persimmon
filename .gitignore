@@ -192,3 +192,4 @@ paket-files
 .fake/
 docs/content/release-notes.md
 temp/
+.nuget/

@@ -64,7 +64,6 @@ Target "AssemblyInfo" (fun _ ->
     [
         Attribute.Title "Persimmon"
         Attribute.Description ""
-        Attribute.InternalsVisibleTo "Persimmon.Tests"
         Attribute.Guid "F5EB6EEA-FA93-4F0D-9C23-60A91DB012DB"
     ] @ common
     |> CreateFSharpAssemblyInfo "./src/Persimmon/AssemblyInfo.fs"
@@ -109,7 +108,7 @@ Target "CleanDocs" (fun _ ->
 
 Target "Build" (fun _ ->
     !! solutionFile
-    |> MSBuildRelease "" "Rebuild"
+    |> MSBuildReleaseExt "" [ "Platform", "Any CPU" ] "Rebuild"
     |> ignore
 )
 

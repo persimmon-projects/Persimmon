@@ -13,18 +13,18 @@ let parameterize = ParameterizeBuilder()
 
 /// Skip the test case.
 let skip message (target: TestCase<'T>) : TestCase<'T> =
-  TestCase.make target.Name target.Parameters (NotPassed (Skipped message))
+  TestCase.makeDone target.Name target.Parameters (NotPassed (Skipped message))
 
 let timeout time (target: TestCase<'T>): TestCase<'T> =
-  let body () =
+  let body _ =
     let watch = Stopwatch.StartNew()
     try
       Async.RunSynchronously(async { return target.Run() }, time)
     with
     | :? System.TimeoutException as e ->
       watch.Stop()
-      Error(target.Metadata, [e], [], watch.Elapsed)
-  TestCase<'T>(target.Metadata, body)
+      Error(target, [e], [], watch.Elapsed)
+  TestCase<'T>(target.Name, target.Parameters, body)
 
 /// Trap the exception and convert to AssertionResult<exn>.
 let trap = TrapBuilder()
