@@ -27,7 +27,7 @@ module private TestRunnerImpl =
     }) |> Async.Parallel
 
   let asyncSequential xs = async {
-    let list = new System.Collections.Generic.List<'T>()
+    let list = new ResizeArray<'T>()
     for asy in xs do
       let! v = asy
       list.Add(v)
