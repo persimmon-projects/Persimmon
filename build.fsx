@@ -14,12 +14,6 @@ open SourceLink
 
 let project = "Persimmon"
 
-// List of author names (for NuGet package)
-let authors = [ "bleis-tift"; "Gab-km"; "pocketberserker" ]
-
-// Tags for your project (for NuGet package)
-let tags = "fsharp F# testing"
-
 // File system information
 let solutionFile  = "Persimmon.sln"
 
