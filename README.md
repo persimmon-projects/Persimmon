@@ -10,8 +10,6 @@ The first idea was brought by @Gab-km and @bleis-tift.
 
 ``master`` branch, Windows Server 2012(Appveyor) [![Build status](https://ci.appveyor.com/api/projects/status/89d7837yqc2kg8lt/branch/master?svg=true)](https://ci.appveyor.com/project/pocketberserker/persimmon/branch/master)
 
-``master`` branch, >= Mono 3.10, OSX(Travis) [![Build Status](https://travis-ci.org/persimmon-projects/Persimmon.svg?branch=master)](https://travis-ci.org/persimmon-projects/Persimmon)
-
 ## NuGet page link
 
 * Persimmon [![NuGet Status](http://img.shields.io/nuget/v/Persimmon.svg?style=flat)](https://www.nuget.org/packages/Persimmon/)
