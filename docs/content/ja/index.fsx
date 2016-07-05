@@ -40,7 +40,7 @@ PM> Install-Package Persimmon.Runner</pre>
     </tr>
     <tr>
       <td>Persimmon.Script</td>
-      <td><a href="https://www.nuget/org/packages/Persimmon.Script"><img src="http://img.shields.io/nuget/v/Persimmon.Script.svg?style=flat" /></a></td>
+      <td><a href="https://www.nuget.org/packages/Persimmon.Script"><img src="http://img.shields.io/nuget/v/Persimmon.Script.svg?style=flat" /></a></td>
     </tr>
   </tbody>
 </table>
