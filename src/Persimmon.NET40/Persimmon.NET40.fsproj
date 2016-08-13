@@ -1,20 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>fb2affd6-76d4-4c18-8750-588ada5c0e21</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>Persimmon.Console</RootNamespace>
-    <AssemblyName>Persimmon.Console</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <ProjectGuid>625effd3-ec0f-4e67-bfbf-938fa42e85fb</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Persimmon</RootNamespace>
+    <AssemblyName>Persimmon</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
-    <Name>Persimmon.Console</Name>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
+    <Name>Persimmon.NET40</Name>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -24,9 +23,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\Persimmon.Console.XML</DocumentationFile>
-    <StartArguments>..\..\..\..\tests\Persimmon.Tests\bin\Debug\Persimmon.Tests.dll ..\..\..\..\tests\Persimmon.Script.Tests\bin\Debug\Persimmon.Script.Tests.dll ..\..\..\..\tests\Persimmon.NET40.Tests\bin\Release\Persimmon.NET40.Tests.dll</StartArguments>
+    <DocumentationFile>bin\Debug\Persimmon.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -35,9 +32,11 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\Persimmon.Console.XML</DocumentationFile>
-    <StartArguments>..\..\..\..\tests\Persimmon.Tests\bin\Release\Persimmon.Tests.dll ..\..\..\..\tests\Persimmon.Script.Tests\bin\Release\Persimmon.Script.Tests.dll ..\..\..\..\tests\Persimmon.NET40.Tests\bin\Release\Persimmon.NET40.Tests.dll</StartArguments>
+    <DocumentationFile>bin\Release\Persimmon.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\Persimmon.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -49,32 +48,58 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="Args.fs" />
-    <Compile Include="Program.fs" />
-    <None Include="App.config" />
+    <Compile Include="..\Persimmon\NonEmptyList.fsi">
+      <Link>NonEmptyList.fsi</Link>
+    </Compile>
+    <Compile Include="..\Persimmon\NonEmptyList.fs">
+      <Link>NonEmptyList.fs</Link>
+    </Compile>
+    <Compile Include="..\Persimmon\PrettyPrinter.fs">
+      <Link>PrettyPrinter.fs</Link>
+    </Compile>
+    <Compile Include="..\Persimmon\AsyncLazy.fs">
+      <Link>AsyncLazy.fs</Link>
+    </Compile>
+    <Compile Include="..\Persimmon\Types.fs">
+      <Link>Types.fs</Link>
+    </Compile>
+    <Compile Include="..\Persimmon\TestResult.fs">
+      <Link>TestResult.fs</Link>
+    </Compile>
+    <Compile Include="..\Persimmon\ActivePatterns.fs">
+      <Link>ActivePatterns.fs</Link>
+    </Compile>
+    <Compile Include="..\Persimmon\TestCase.fs">
+      <Link>TestCase.fs</Link>
+    </Compile>
+    <Compile Include="..\Persimmon\Assertions.fs">
+      <Link>Assertions.fs</Link>
+    </Compile>
+    <Compile Include="..\Persimmon\ComputationExpressions.fs">
+      <Link>ComputationExpressions.fs</Link>
+    </Compile>
+    <Compile Include="..\Persimmon\Syntax.fs">
+      <Link>Syntax.fs</Link>
+    </Compile>
+    <Compile Include="..\Persimmon\Internals\Attributes.fs">
+      <Link>Attributes.fs</Link>
+    </Compile>
+    <Compile Include="..\Persimmon\Internals\RuntimeUtil.fs">
+      <Link>RuntimeUtil.fs</Link>
+    </Compile>
+    <Compile Include="..\Persimmon\Internals\TestCollector.fs">
+      <Link>TestCollector.fs</Link>
+    </Compile>
+    <Compile Include="..\Persimmon\Internals\TestRunner.fs">
+      <Link>TestRunner.fs</Link>
+    </Compile>
     <None Include="..\..\Persimmon.snk">
       <Link>Persimmon.snk</Link>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Persimmon.Runner\Persimmon.Runner.fsproj">
-      <Name>Persimmon.Runner</Name>
-      <Project>{eb676e7d-9d9d-47c2-a6dc-173b536641b1}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Persimmon\Persimmon.fsproj">
-      <Name>Persimmon</Name>
-      <Project>{f5eb6eea-fa93-4f0d-9c23-60a91db012db}</Project>
-      <Private>True</Private>
-    </ProjectReference>
+    <Compile Include="AssemblyInfo.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\Persimmon.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '11.0'">
@@ -89,10 +114,6 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
-  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

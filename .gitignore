@@ -194,3 +194,5 @@ docs/content/release-notes.md
 temp/
 .nuget/
 docs/files/images
+.vs/
+project.lock.json
