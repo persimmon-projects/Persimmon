@@ -1,3 +1,6 @@
+### 1.2.0 - September 4 2016
+* fix copy exceptions
+
 ### 1.1.0 - April 25 2016
 * add test suite summary for XML output [#102](https://github.com/persimmon-projects/Persimmon/pull/102)
 * fix evaluation count [#104](https://github.com/persimmon-projects/Persimmon/pull/104)
