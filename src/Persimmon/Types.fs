@@ -206,6 +206,17 @@ module TestResult =
   | Done (metadata, results, d) -> Done (metadata, results, d + x)
   | Error (metadata, es, results, ts) -> Error (metadata, es, results, ts + x)
 
+  let addExceptions (es: exn list) = function
+    | Done (testCase, (Passed _, []), d) -> Error(testCase, es, [], d)
+    | Done (testCase, results, d) ->
+      let results =
+        results
+        |> NonEmptyList.toList
+        |> AssertionResult.List.onlyNotPassed
+      Error(testCase, es, results, d)
+    | Error (testCase, es0, results, d) ->
+      Error (testCase, List.append es0 es, results, d)
+
 /// This DU represents the type of the test case.
 /// If the test has some return values, then the type of the test case is HasValueTest.
 /// If not, then it is NoValueTest.
@@ -275,11 +286,12 @@ module TestCase =
         let testRes = (rest Unchecked.defaultof<'T>).Run()
         watch.Stop()
         match results with
-        | [] -> testRes
+        | [] -> testRes |> TestResult.addExceptions es
         | head::tail ->
           testRes
           |> TestResult.addAssertionResults (NonEmptyList.make (NotPassed head) (tail |> List.map NotPassed))
           |> TestResult.addDuration duration
+          |> TestResult.addExceptions es
       with e ->
         watch.Stop()
         Error (meta, e::es, results, duration + watch.Elapsed)
