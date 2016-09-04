@@ -206,3 +206,15 @@ module PersimmonTest =
       do! shouldFirstRaise<TestException, unit> ex
       do! assertEquals 1 !count
     }
+
+  let ``first binding exception`` =
+    let raiseTest = test "raise exception" {
+      return raise TestException
+    }
+    let bindingTest = test "bind and fail" {
+      do! raiseTest
+      do! fail "fail test"
+    }
+    test "first binding exception" {
+      do! shouldFirstRaise<TestException, unit> bindingTest
+    }

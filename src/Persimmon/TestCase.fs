@@ -95,11 +95,12 @@ module TestCase =
         let testRes = (rest Unchecked.defaultof<'T>).Run()
         watch.Stop()
         match results with
-        | [] -> testRes
+        | [] -> testRes |> TestResult.addExceptions es
         | head::tail ->
           testRes
           |> TestResult.addAssertionResults (NonEmptyList.make (NotPassed head) (tail |> List.map NotPassed))
           |> TestResult.addDuration duration
+          |> TestResult.addExceptions es
       with e ->
         watch.Stop()
         Error (testCase, e::es, results, duration + watch.Elapsed)
