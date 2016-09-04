@@ -33,3 +33,15 @@ module TestResult =
   let addDuration x = function
     | Done (testCase, results, d) -> Done (testCase, results, d + x)
     | Error (testCase, es, results, ts) -> Error (testCase, es, results, ts + x)
+
+  let addExceptions (es: exn list) = function
+    | Done (testCase, (Passed _, []), d) -> Error(testCase, es, [], d)
+    | Done (testCase, results, d) ->
+      let results =
+        results
+        |> NonEmptyList.toList
+        |> AssertionResult.Seq.onlyNotPassed
+        |> Seq.toList
+      Error(testCase, es, results, d)
+    | Error (testCase, es0, results, d) ->
+      Error (testCase, List.append es0 es, results, d)
