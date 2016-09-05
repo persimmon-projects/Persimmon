@@ -1,3 +1,6 @@
+### 2.0.0 - Unreleased
+* support Visual Studio test explorer [#111](https://github.com/persimmon-projects/Persimmon/pull/111)
+
 ### 1.2.0 - September 4 2016
 * fix copy exceptions
 
