@@ -1,8 +1,8 @@
 (*** hide ***)
 // This block of code is omitted in the generated HTML documentation. Use
 // it to define helpers that you do not want to show in the documentation.
-#I "../../src/Persimmon/bin/Release"
-#I "../../src/Persimmon.Runner/bin/Release"
+#I "../../bin/Persimmon"
+#I "../../bin/Persimmon.Runner"
 open Persimmon
 
 type Provider() =
