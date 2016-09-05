@@ -29,3 +29,6 @@ GITHUB
   remote: fsharp/FAKE
     modules/Octokit/Octokit.fsx (73589a85a5e30a2c78d61efccdd3446a99483142)
       Octokit (>= 0.20)
+  remote: persimmon-projects/Persimmon.Materials
+    StandardIcons/persimmon.ico (1a99f5e2f177b3108a9b8633010db8269b6a6d9d)
+    StandardIcons/persimmon_128.png (1a99f5e2f177b3108a9b8633010db8269b6a6d9d)

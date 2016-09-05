@@ -197,6 +197,10 @@ Target "GenerateHelp" (fun _ ->
     CopyFile "docs/content/" "RELEASE_NOTES.md"
     Rename "docs/content/release-notes.md" "docs/content/RELEASE_NOTES.md"
 
+    ensureDirectory "docs/files/images"
+    CopyFile "docs/files/images/favicon.ico" "paket-files/build/persimmon-projects/Persimmon.Materials/StandardIcons/persimmon.ico"
+    CopyFile "docs/files/images/logo.png" "paket-files/build/persimmon-projects/Persimmon.Materials/StandardIcons/persimmon_128.png"
+
     generateHelp true
 )
 

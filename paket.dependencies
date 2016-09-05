@@ -9,3 +9,5 @@ group Build
   nuget FSharp.Formatting
 
   github fsharp/FAKE modules/Octokit/Octokit.fsx
+  github persimmon-projects/Persimmon.Materials StandardIcons/persimmon.ico
+  github persimmon-projects/Persimmon.Materials StandardIcons/persimmon_128.png
