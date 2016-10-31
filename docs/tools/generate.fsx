@@ -10,7 +10,6 @@ let info =
     "project-nuget", nugetLink + "/"
     "console-project-nuget", nugetLink + ".Console/"
     "runner-project-nuget", nugetLink + ".Runner/"
-    "script-project-nuget", nugetLink + ".Script/"
   ]
 
 #I "../../packages/build/FAKE/tools/"
