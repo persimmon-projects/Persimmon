@@ -3,8 +3,8 @@
 GROUP Build
 NUGET
   remote: http://api.nuget.org/v3/index.json
-    FAKE (4.39.1)
-    FAKE.Lib (4.39.1)
+    FAKE (4.43)
+    FAKE.Lib (4.43)
     FAKE.Persimmon (1.0.4)
       FAKE.Lib (>= 4.1)
       Persimmon.Console (>= 1.0.2)
@@ -21,13 +21,13 @@ NUGET
       Microsoft.Bcl (>= 1.1.10)
       Microsoft.Bcl.Build (>= 1.0.14)
     NuGet.CommandLine (3.4.3)
-    Octokit (0.22)
+    Octokit (0.23)
       Microsoft.Net.Http  - framework: net10, net11, net20, net30, net35, net40, net40-full
     Persimmon.Console (1.2)
     SourceLink.Fake (1.1)
 GITHUB
   remote: fsharp/FAKE
-    modules/Octokit/Octokit.fsx (73589a85a5e30a2c78d61efccdd3446a99483142)
+    modules/Octokit/Octokit.fsx (da711ab136889bead398d5ac1a10dc53e60a2c87)
       Octokit (>= 0.20)
   remote: persimmon-projects/Persimmon.Materials
     StandardIcons/persimmon.ico (1a99f5e2f177b3108a9b8633010db8269b6a6d9d)
