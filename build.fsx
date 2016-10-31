@@ -12,6 +12,10 @@ open System.IO
 open SourceLink
 #endif
 
+let isDotnetInstalled = DotNetCli.isInstalled()
+
+let outDir = "bin"
+
 let project = "Persimmon"
 
 // File system information
@@ -55,19 +59,19 @@ Target "AssemblyInfo" (fun _ ->
         Attribute.InformationalVersion release.NugetVersion
     ]
 
-    [
+    for suffix in [""; ".NET40"; ".Portable259"] do
+      [
         Attribute.Title "Persimmon"
         Attribute.Description ""
-        Attribute.Guid "F5EB6EEA-FA93-4F0D-9C23-60A91DB012DB"
-    ] @ common
-    |> CreateFSharpAssemblyInfo "./src/Persimmon/AssemblyInfo.fs"
+      ] @ common
+      |> CreateFSharpAssemblyInfo (sprintf "./src/Persimmon%s/AssemblyInfo.fs" suffix)
 
-    [
-        Attribute.Title "Persimmon.Runner"
-        Attribute.Description ""
-        Attribute.Guid "EB676E7D-9D9D-47C2-A6DC-173B536641B1"
-    ] @ common
-    |> CreateFSharpAssemblyInfo "./src/Persimmon.Runner/AssemblyInfo.fs"
+    for suffix in [""; ".NET40"] do
+      [
+          Attribute.Title "Persimmon.Runner"
+          Attribute.Description ""
+      ] @ common
+      |> CreateFSharpAssemblyInfo (sprintf "./src/Persimmon.Runner%s/AssemblyInfo.fs" suffix)
 
     [
         Attribute.Title "Persimmon.Script"
@@ -77,12 +81,17 @@ Target "AssemblyInfo" (fun _ ->
     |> CreateFSharpAssemblyInfo "./src/Persimmon.Script/AssemblyInfo.fs"
 )
 
+Target "SetVersionInProjectJSON" (fun _ ->
+  !! "./**/project.json"
+  |> Seq.iter (DotNetCli.SetVersionInProjectJson release.NugetVersion)
+)
+
 // Copies binaries from default VS location to exepcted bin folder
 // But keeps a subdirectory structure for each project in the
 // src folder to support multiple project outputs
 Target "CopyBinaries" (fun _ ->
     !! "src/**/*.??proj"
-    |>  Seq.map (fun f -> ((System.IO.Path.GetDirectoryName f) @@ "bin/Release", "bin" @@ (System.IO.Path.GetFileNameWithoutExtension f)))
+    |>  Seq.map (fun f -> ((System.IO.Path.GetDirectoryName f) @@ "bin/Release", outDir @@ (System.IO.Path.GetFileNameWithoutExtension f)))
     |>  Seq.iter (fun (fromDir, toDir) -> CopyDir toDir fromDir (fun _ -> true))
 )
 
@@ -90,7 +99,7 @@ Target "CopyBinaries" (fun _ ->
 // Clean build results
 
 Target "Clean" (fun _ ->
-    CleanDirs ["bin"; "temp"]
+    CleanDirs [outDir; "temp"]
 )
 
 Target "CleanDocs" (fun _ ->
@@ -100,10 +109,19 @@ Target "CleanDocs" (fun _ ->
 // --------------------------------------------------------------------------------------
 // Build library & test project
 
+let isTravisCI = (environVarOrDefault "TRAVIS" "") = "true"
+
 Target "Build" (fun _ ->
-    !! solutionFile
-    |> MSBuildReleaseExt "" [ "Platform", "Any CPU" ] "Rebuild"
-    |> ignore
+  !! solutionFile
+  |> MSBuildReleaseExt "" [ "Platform", "Any CPU" ] "Rebuild"
+  |> ignore
+)
+
+Target "Build.NETCore" (fun _ ->
+  DotNetCli.Restore id
+
+  !! "src/**/project.json"
+  |> DotNetCli.Build id
 )
 
 // --------------------------------------------------------------------------------------
@@ -117,6 +135,11 @@ Target "RunTests" (fun _ ->
           Output = OutputDestination.XmlFile "TestResult.xml"
       }
     )
+)
+
+Target "RunTests.NETCore" (fun _ ->
+  !! "tests/**/project.json"
+  |> DotNetCli.Test id
 )
 
 let isAppVeyor = buildServer = AppVeyor
@@ -155,12 +178,122 @@ Target "SourceLink" (fun _ ->
 // --------------------------------------------------------------------------------------
 // Build a NuGet package
 
-Target "NuGet" (fun _ ->
-    Paket.Pack(fun p ->
-        { p with
-            OutputPath = "bin"
-            Version = release.NugetVersion
-            ReleaseNotes = toLines release.Notes})
+Target "NuGet.Pack" (fun _ ->
+  Paket.Pack(fun p ->
+    { p with
+        OutputPath = "bin"
+        Version = release.NugetVersion
+        ReleaseNotes = toLines release.Notes})
+
+
+  let packagingDir = outDir @@ "nuget" @@ "Persimmon"
+  [
+    "bin/Persimmon/Persimmon.dll"
+    "bin/Persimmon/Persimmon.XML"
+  ]
+  |> CopyFiles (packagingDir @@ "lib" @@ "net20")
+  [
+    "bin/Persimmon.NET40/Persimmon.dll"
+    "bin/Persimmon.NET40/Persimmon.XML"
+  ]
+  |> CopyFiles (packagingDir @@ "lib" @@ "net40")
+  [
+    "bin/Persimmon.Portable259/Persimmon.dll"
+    "bin/Persimmon.Portable259/Persimmon.XML"
+  ]
+  |> CopyFiles (packagingDir @@ "lib" @@ "portable-net45+win8+wp8+wpa81+Xamarin.Mac+MonoAndroid10+MonoTouch10+Xamarin.iOS10")
+
+  NuGet (fun p ->
+    {
+      p with
+        OutputPath = outDir
+        WorkingDir = packagingDir
+        Version = release.NugetVersion
+        ReleaseNotes = toLines release.Notes
+        DependenciesByFramework =
+          [
+            {
+              FrameworkVersion = "net20"
+              Dependencies = []
+            }
+            {
+              FrameworkVersion = "net40"
+              Dependencies = []
+            }
+          ]
+    }
+  ) "src/Persimmon/Persimmon.nuspec"
+
+  let packagingDir = outDir @@ "nuget" @@ "Persimmon.Runner"
+  [
+    "bin/Persimmon.Runner/Persimmon.Runner.dll"
+    "bin/Persimmon.Runner/Persimmon.Runner.XML"
+  ]
+  |> CopyFiles (packagingDir @@ "lib" @@ "net35")
+  [
+    "bin/Persimmon.Runner.NET40/Persimmon.Runner.dll"
+    "bin/Persimmon.Runner.NET40/Persimmon.Runner.XML"
+  ]
+  |> CopyFiles (packagingDir @@ "lib" @@ "net40")
+
+  let dependencies = [
+    ("Persimmon", release.NugetVersion)
+  ]
+
+  NuGet (fun p ->
+    {
+      p with
+        OutputPath = outDir
+        WorkingDir = packagingDir
+        Version = release.NugetVersion
+        ReleaseNotes = toLines release.Notes
+        DependenciesByFramework =
+          [
+            {
+              FrameworkVersion = "net35"
+              Dependencies = dependencies
+            }
+            {
+              FrameworkVersion = "net40"
+              Dependencies = dependencies
+            }
+          ]
+        FrameworkAssemblies =
+          [
+            {
+              FrameworkVersions = ["net35"]
+              AssemblyName = "System.Xml"
+            }
+            {
+              FrameworkVersions = ["net35"]
+              AssemblyName = "System.Xml.Linq"
+            }
+            {
+              FrameworkVersions = ["net40"]
+              AssemblyName = "System.Xml"
+            }
+            {
+              FrameworkVersions = ["net40"]
+              AssemblyName = "System.Xml.Linq"
+            }
+          ]
+    }
+  ) "src/Persimmon.Runner/Persimmon.Runner.nuspec"
+)
+
+Target "NuGet.AddNetCore" (fun _ ->
+  if not isDotnetInstalled then failwith "You need to install .NET core to publish NuGet packages"
+
+  !! "src/**/project.json"
+  |> DotNetCli.Pack id
+
+  for proj in ["Persimmon"; "Persimmon.Runner"] do
+
+    let nupkg = sprintf "../../bin/%s.%s.nupkg" proj (release.NugetVersion)
+    let netcoreNupkg = sprintf "bin/Release/%s.%s.nupkg" proj (release.NugetVersion)
+
+    let exitCode = Shell.Exec("dotnet", sprintf """mergenupkg --source "%s" --other "%s" --framework netstandard1.6 """ nupkg netcoreNupkg, (sprintf "src/%s/" proj))
+    if exitCode <> 0 then failwithf "Command failed with exit code %i" exitCode
 )
 
 Target "PublishNuget" (fun _ ->
@@ -299,28 +432,37 @@ Target "Release" (fun _ ->
     |> Async.RunSynchronously
 )
 
-Target "BuildPackage" DoNothing
+Target "NETCore" DoNothing
+
+Target "NuGet" DoNothing
 
 Target "All" DoNothing
 
 "Clean"
   ==> "AssemblyInfo"
-  ==> "Build"
-  ==> "CopyBinaries"
-  ==> "RunTests"
+  ==> "SetVersionInProjectJSON"
+  =?> ("Build", not isTravisCI)
+  =?> ("CopyBinaries", not isTravisCI)
+  =?> ("RunTests", not isTravisCI)
+  =?> ("NETCore", isDotnetInstalled)
   =?> ("UploadTestResults",isAppVeyor)
   =?> ("GenerateReferenceDocs",isLocalBuild)
   =?> ("GenerateDocs",isLocalBuild)
   ==> "All"
   =?> ("ReleaseDocs",isLocalBuild)
 
+"Build.NETCore"
+  ==> "RunTests.NETCore"
+  ==> "NETCore"
+
 "All"
 #if MONO
 #else
   =?> ("SourceLink", Pdbstr.tryFind().IsSome )
 #endif
+  ==> "NuGet.Pack"
+  ==> "NuGet.AddNetCore"
   ==> "NuGet"
-  ==> "BuildPackage"
 
 "CleanDocs"
   ==> "GenerateHelp"
@@ -336,7 +478,7 @@ Target "All" DoNothing
 "ReleaseDocs"
   ==> "Release"
 
-"BuildPackage"
+"NuGet"
   ==> "PublishNuget"
   ==> "Release"
 

@@ -5,13 +5,14 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>f1d851fd-a776-4204-b287-5c14c3aa198c</ProjectGuid>
+    <ProjectGuid>{F5EB6EEA-FA93-4F0D-9C23-60A91DB012DB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Persimmon</RootNamespace>
     <AssemblyName>Persimmon</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <TargetFSharpCoreVersion>2.3.0.0</TargetFSharpCoreVersion>
     <Name>Persimmon</Name>
+    <ResolveNuGetPackages>false</ResolveNuGetPackages>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
   </PropertyGroup>

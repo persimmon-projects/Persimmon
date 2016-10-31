@@ -4,7 +4,19 @@ open System
 open System.Collections
 open Microsoft.FSharp.Reflection
 
+#if PCL || CORE_CLR
+open System.Reflection
+#endif
+
 module internal PrettyPrinter =
+
+  let private isGenericType (typ: Type) =
+    typ
+#if PCL || CORE_CLR
+      .GetTypeInfo().IsGenericType
+#else
+      .IsGenericType
+#endif
 
   let rec private printCollections printer (t: Type) (o: IEnumerable) =
     let tmp = ResizeArray()
@@ -45,7 +57,7 @@ module internal PrettyPrinter =
         let t = t.GetElementType()
         for x in o :?> Array do tmp.Add(print (t, x))
         tmp |> String.concat "; " |> sprintf "[|%s|]"
-      elif t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<_ list> then
+      elif isGenericType t && t.GetGenericTypeDefinition() = typedefof<_ list> then
         o :?> IEnumerable
         |> printCollections (sprintf "[%s]") t
       elif FSharpType.IsUnion t then

@@ -75,14 +75,18 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Persimmon.Runner\Persimmon.Runner.fsproj">
       <Name>Persimmon.Runner</Name>
-      <Project>{585b95fd-6b0c-4b45-a4cf-f44098a8ba49}</Project>
+      <Project>{eb676e7d-9d9d-47c2-a6dc-173b536641b1}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\src\Persimmon\Persimmon.fsproj">
       <Name>Persimmon</Name>
-      <Project>{f1d851fd-a776-4204-b287-5c14c3aa198c}</Project>
+      <Project>{f5eb6eea-fa93-4f0d-9c23-60a91db012db}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

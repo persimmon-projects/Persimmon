@@ -68,9 +68,11 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Persimmon\Persimmon.fsproj">
       <Name>Persimmon</Name>
-      <Project>{f1d851fd-a776-4204-b287-5c14c3aa198c}</Project>
+      <Project>{f5eb6eea-fa93-4f0d-9c23-60a91db012db}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
