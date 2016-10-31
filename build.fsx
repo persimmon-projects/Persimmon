@@ -109,10 +109,12 @@ Target "CleanDocs" (fun _ ->
 // --------------------------------------------------------------------------------------
 // Build library & test project
 
+let isTravisCI = (environVarOrDefault "TRAVIS" "") = "true"
+
 Target "Build" (fun _ ->
-    !! solutionFile
-    |> MSBuildReleaseExt "" [ "Platform", "Any CPU" ] "Rebuild"
-    |> ignore
+  !! solutionFile
+  |> MSBuildReleaseExt "" [ "Platform", "Any CPU" ] "Rebuild"
+  |> ignore
 )
 
 Target "Build.NETCore" (fun _ ->
@@ -120,11 +122,6 @@ Target "Build.NETCore" (fun _ ->
 
   !! "src/**/project.json"
   |> DotNetCli.Build id
-)
-
-Target "RunTests.NETCore" (fun _ ->
-  !! "tests/**/project.json"
-  |> DotNetCli.Test id
 )
 
 // --------------------------------------------------------------------------------------
@@ -138,6 +135,11 @@ Target "RunTests" (fun _ ->
           Output = OutputDestination.XmlFile "TestResult.xml"
       }
     )
+)
+
+Target "RunTests.NETCore" (fun _ ->
+  !! "tests/**/project.json"
+  |> DotNetCli.Test id
 )
 
 let isAppVeyor = buildServer = AppVeyor
@@ -439,9 +441,9 @@ Target "All" DoNothing
 "Clean"
   ==> "AssemblyInfo"
   ==> "SetVersionInProjectJSON"
-  ==> "Build"
-  ==> "CopyBinaries"
-  ==> "RunTests"
+  =?> ("Build", not isTravisCI)
+  =?> ("CopyBinaries", not isTravisCI)
+  =?> ("RunTests", not isTravisCI)
   =?> ("NETCore", isDotnetInstalled)
   =?> ("UploadTestResults",isAppVeyor)
   =?> ("GenerateReferenceDocs",isLocalBuild)
