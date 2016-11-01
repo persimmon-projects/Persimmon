@@ -7,7 +7,7 @@ open System.Reflection
 [<assembly: AssemblyProductAttribute("Persimmon")>]
 [<assembly: AssemblyVersionAttribute("2.0.0")>]
 [<assembly: AssemblyFileVersionAttribute("2.0.0")>]
-[<assembly: AssemblyInformationalVersionAttribute("2.0.0")>]
+[<assembly: AssemblyInformationalVersionAttribute("2.0.0-alpha2")>]
 do ()
 
 module internal AssemblyVersionInformation =
@@ -16,4 +16,4 @@ module internal AssemblyVersionInformation =
     let [<Literal>] AssemblyProduct = "Persimmon"
     let [<Literal>] AssemblyVersion = "2.0.0"
     let [<Literal>] AssemblyFileVersion = "2.0.0"
-    let [<Literal>] AssemblyInformationalVersion = "2.0.0"
+    let [<Literal>] AssemblyInformationalVersion = "2.0.0-alpha2"

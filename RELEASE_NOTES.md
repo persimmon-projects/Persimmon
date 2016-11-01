@@ -1,8 +1,10 @@
-### 2.0.0 - Unreleased
+### 2.0.0-alpha2 - November 1 2016
 * support Visual Studio test explorer [#111](https://github.com/persimmon-projects/Persimmon/pull/111)
+* support Core clr [#114](https://github.com/persimmon-projects/Persimmon/pull/114)
+* drop support Persimmon.Script [#115](https://github.com/persimmon-projects/Persimmon/pull/115)
 
 ### 1.2.0 - September 4 2016
-* fix copy exceptions
+* fix copy exceptions [#113](https://github.com/persimmon-projects/Persimmon/pull/113)
 
 ### 1.1.0 - April 25 2016
 * add test suite summary for XML output [#102](https://github.com/persimmon-projects/Persimmon/pull/102)
