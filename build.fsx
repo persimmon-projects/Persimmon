@@ -72,13 +72,6 @@ Target "AssemblyInfo" (fun _ ->
           Attribute.Description ""
       ] @ common
       |> CreateFSharpAssemblyInfo (sprintf "./src/Persimmon.Runner%s/AssemblyInfo.fs" suffix)
-
-    [
-        Attribute.Title "Persimmon.Script"
-        Attribute.Description ""
-        Attribute.Guid "8B733755-9708-4F9C-A356-AE0C2EF1680D"
-    ] @ common
-    |> CreateFSharpAssemblyInfo "./src/Persimmon.Script/AssemblyInfo.fs"
 )
 
 Target "SetVersionInProjectJSON" (fun _ ->

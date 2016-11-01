@@ -52,7 +52,6 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="Sample.fs" />
-    <None Include="sample.fsx" />
     <Content Include="App.config" />
   </ItemGroup>
   <ItemGroup>
