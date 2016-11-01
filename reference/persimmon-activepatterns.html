@@ -49,18 +49,20 @@
         <td class="member-name">
 
           <code onmouseout="hideTip(event, '1', 1)" onmouseover="showTip(event, '1', 1)">
-            ( |Context|TestCase| ) test
+            ( |Context|TestCase| ) testMetadata
           </code>
           <div class="tip" id="1">
-            <strong>Signature:</strong> test:TestObject -&gt; Choice&lt;Context,TestCase&lt;obj&gt;&gt;<br />
+            <strong>Signature:</strong> testMetadata:TestMetadata -&gt; Choice&lt;Context,TestCase&gt;<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ActivePatterns.fs#L3-3" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ActivePatterns.fs#L6-6" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
+          <p>Retreive Context/TestCase from TestMetadata.</p>
+
+
               <p>CompiledName: <code>|Context|TestCase|</code></p>
         </td>
       </tr>
@@ -71,16 +73,60 @@
             ( |ContextResult|TestResult|EndMarker| ) (...)
           </code>
           <div class="tip" id="2">
-            <strong>Signature:</strong> res:ITestResult -&gt; Choice&lt;ContextResult,TestResult&lt;obj&gt;,unit&gt;<br />
+            <strong>Signature:</strong> result:ResultNode -&gt; Choice&lt;ContextResult,TestResult,unit&gt;<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ActivePatterns.fs#L8-8" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ActivePatterns.fs#L13-13" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
+          <p>Retreive ContextResult/TestResult/EndMarker from test result.</p>
+
+
               <p>CompiledName: <code>|ContextResult|TestResult|EndMarker|</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '3', 3)" onmouseover="showTip(event, '3', 3)">
+            ( |Done|Error| ) result
+          </code>
+          <div class="tip" id="3">
+            <strong>Signature:</strong> result:TestResult -&gt; Choice&lt;(TestCase * AssertionResult [] * TimeSpan),(TestCase * exn [] * NotPassedCause [] * TimeSpan)&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ActivePatterns.fs#L29-29" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Retreive information from non generic TestResult.</p>
+
+
+              <p>CompiledName: <code>|Done|Error|</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '4', 4)" onmouseover="showTip(event, '4', 4)">
+            ( |Passed|NotPassed| ) ar
+          </code>
+          <div class="tip" id="4">
+            <strong>Signature:</strong> ar:AssertionResult -&gt; Choice&lt;unit,NotPassedCause&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ActivePatterns.fs#L23-23" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Retreive information from non generic AssertionResult.</p>
+
+
+              <p>CompiledName: <code>|Passed|NotPassed|</code></p>
         </td>
       </tr>
     </tbody>
@@ -111,10 +157,6 @@
                     <tr>
                       <td>Persimmon.Runner</td>
                       <td><a href="https://www.nuget.org/packages/Persimmon.Runner/"><img src="http://img.shields.io/nuget/v/Persimmon.Runner.svg?style=flat" /></a></td>
-                    </tr>
-                    <tr>
-                      <td>Persimmon.Script</td>
-                      <td><a href="https://www.nuget.org/packages/Persimmon.Script/"><img src="http://img.shields.io/nuget/v/Persimmon.Script.svg?style=flat" /></a></td>
                     </tr>
                   </tbody>
                 </table>

@@ -35,107 +35,133 @@
   <span>Namespace: Persimmon</span><br />
 </p>
 <div class="xmldoc">
+<p>Non generic view for test result. (fake base type)
+Inherited from ResultNode.</p>
+
 </div>
-
-<!-- Render nested types and modules, if there are any -->
-
-  <h3>Functions and values</h3>
+  <h3>Instance members</h3>
   <table class="table table-bordered member-list">
     <thead>
-      <tr><td>Function or value</td><td>Description</td></tr>
+      <tr><td>Instance member</td><td>Description</td></tr>
     </thead>
     <tbody>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '27', 27)" onmouseover="showTip(event, '27', 27)">
-            addAssertionResult x _arg1
+          <code onmouseout="hideTip(event, '139', 139)" onmouseover="showTip(event, '139', 139)">
+            AssertionResults
           </code>
-          <div class="tip" id="27">
-            <strong>Signature:</strong> x:AssertionResult&lt;&#39;?7364&gt; -&gt; _arg1:TestResult&lt;&#39;?7364&gt; -&gt; TestResult&lt;&#39;?7364&gt;<br />
-                          <strong>Type parameters:</strong> '?7364          </div>
-        </td>
-        <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L193-193" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          
-        </td>
-      </tr>
-      <tr>
-        <td class="member-name">
-
-          <code onmouseout="hideTip(event, '28', 28)" onmouseover="showTip(event, '28', 28)">
-            addAssertionResults (arg1, arg2) _arg1
-          </code>
-          <div class="tip" id="28">
-            <strong>Signature:</strong> (AssertionResult&lt;&#39;?7366&gt; * AssertionResult&lt;&#39;?7366&gt; list) -&gt; _arg1:TestResult&lt;&#39;?7367&gt; -&gt; TestResult&lt;&#39;?7366&gt;<br />
-                          <strong>Type parameters:</strong> '?7366, '?7367          </div>
-        </td>
-        <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L198-198" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          
-        </td>
-      </tr>
-      <tr>
-        <td class="member-name">
-
-          <code onmouseout="hideTip(event, '29', 29)" onmouseover="showTip(event, '29', 29)">
-            addDuration x _arg1
-          </code>
-          <div class="tip" id="29">
-            <strong>Signature:</strong> x:TimeSpan -&gt; _arg1:TestResult&lt;&#39;?7369&gt; -&gt; TestResult&lt;&#39;?7369&gt;<br />
-                          <strong>Type parameters:</strong> '?7369          </div>
-        </td>
-        <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L205-205" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          
-        </td>
-      </tr>
-      <tr>
-        <td class="member-name">
-
-          <code onmouseout="hideTip(event, '30', 30)" onmouseover="showTip(event, '30', 30)">
-            addExceptions es _arg1
-          </code>
-          <div class="tip" id="30">
-            <strong>Signature:</strong> es:exn list -&gt; _arg1:TestResult&lt;&#39;?7371&gt; -&gt; TestResult&lt;&#39;?7372&gt;<br />
-                          <strong>Type parameters:</strong> '?7371, '?7372          </div>
-        </td>
-        <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L209-209" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          
-        </td>
-      </tr>
-      <tr>
-        <td class="member-name">
-
-          <code onmouseout="hideTip(event, '31', 31)" onmouseover="showTip(event, '31', 31)">
-            endMarker 
-          </code>
-          <div class="tip" id="31">
-            <strong>Signature:</strong> ITestResult<br />
+          <div class="tip" id="139">
+            <strong>Signature:</strong> AssertionResult []<br />
+              <strong>Modifiers:</strong> abstract<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L191-191" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L249-249" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          <p>The marker represents the end of tests.
-The progress reporter needs the end marker in order to print new line at the end.</p>
+          
+              <p>CompiledName: <code>get_AssertionResults</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
 
+          <code onmouseout="hideTip(event, '140', 140)" onmouseover="showTip(event, '140', 140)">
+            Box()
+          </code>
+          <div class="tip" id="140">
+            <strong>Signature:</strong> unit -&gt; TestResult&lt;obj&gt;<br />
+              <strong>Modifiers:</strong> abstract<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L250-250" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
 
+          <code onmouseout="hideTip(event, '141', 141)" onmouseover="showTip(event, '141', 141)">
+            Duration
+          </code>
+          <div class="tip" id="141">
+            <strong>Signature:</strong> TimeSpan<br />
+              <strong>Modifiers:</strong> abstract<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L248-248" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>get_Duration</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '142', 142)" onmouseover="showTip(event, '142', 142)">
+            Exceptions
+          </code>
+          <div class="tip" id="142">
+            <strong>Signature:</strong> exn []<br />
+              <strong>Modifiers:</strong> abstract<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L247-247" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>get_Exceptions</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '143', 143)" onmouseover="showTip(event, '143', 143)">
+            IsFailed
+          </code>
+          <div class="tip" id="143">
+            <strong>Signature:</strong> bool<br />
+              <strong>Modifiers:</strong> abstract<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L246-246" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>get_IsFailed</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '144', 144)" onmouseover="showTip(event, '144', 144)">
+            TestCase
+          </code>
+          <div class="tip" id="144">
+            <strong>Signature:</strong> TestCase<br />
+              <strong>Modifiers:</strong> abstract<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L245-245" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>get_TestCase</code></p>
         </td>
       </tr>
     </tbody>
@@ -166,10 +192,6 @@ The progress reporter needs the end marker in order to print new line at the end
                     <tr>
                       <td>Persimmon.Runner</td>
                       <td><a href="https://www.nuget.org/packages/Persimmon.Runner/"><img src="http://img.shields.io/nuget/v/Persimmon.Runner.svg?style=flat" /></a></td>
-                    </tr>
-                    <tr>
-                      <td>Persimmon.Script</td>
-                      <td><a href="https://www.nuget.org/packages/Persimmon.Script/"><img src="http://img.shields.io/nuget/v/Persimmon.Script.svg?style=flat" /></a></td>
                     </tr>
                   </tbody>
                 </table>

@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>AsyncRunBuilder - Persimmon</title>
+    <title>IReporter - Persimmon</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="persimmon-projects">
@@ -30,39 +30,14 @@
 
 
 
-<h1>AsyncRunBuilder</h1>
+<h1>IReporter</h1>
 <p>
-  <span>Namespace: Persimmon</span><br />
+  <span>Namespace: Persimmon.Output</span><br />
 </p>
 <div class="xmldoc">
-</div>
-  <h3>Constructors</h3>
-  <table class="table table-bordered member-list">
-    <thead>
-      <tr><td>Constructor</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="member-name">
+<p>This interface abstraction how output results running on tests.</p>
 
-          <code onmouseout="hideTip(event, '72', 72)" onmouseover="showTip(event, '72', 72)">
-            new()
-          </code>
-          <div class="tip" id="72">
-            <strong>Signature:</strong> unit -&gt; AsyncRunBuilder<br />
-                      </div>
-        </td>
-        <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ComputationExpressions.fs#L112-112" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          
-              <p>CompiledName: <code>.ctor</code></p>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+</div>
   <h3>Instance members</h3>
   <table class="table table-bordered member-list">
     <thead>
@@ -72,51 +47,54 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '73', 73)" onmouseover="showTip(event, '73', 73)">
-            It((), a)
+          <code onmouseout="hideTip(event, '168', 168)" onmouseover="showTip(event, '168', 168)">
+            ReportError(arg1)
           </code>
-          <div class="tip" id="73">
-            <strong>Signature:</strong> (unit * a:Async&lt;&#39;T&gt;) -&gt; Async&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
-        </td>
-        <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ComputationExpressions.fs#L115-115" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          
-        </td>
-      </tr>
-      <tr>
-        <td class="member-name">
-
-          <code onmouseout="hideTip(event, '74', 74)" onmouseover="showTip(event, '74', 74)">
-            Run(a)
-          </code>
-          <div class="tip" id="74">
-            <strong>Signature:</strong> a:Async&lt;&#39;?7239&gt; -&gt; TestCase&lt;&#39;?7239&gt;<br />
-                          <strong>Type parameters:</strong> '?7239          </div>
-        </td>
-        <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ComputationExpressions.fs#L116-116" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          
-        </td>
-      </tr>
-      <tr>
-        <td class="member-name">
-
-          <code onmouseout="hideTip(event, '75', 75)" onmouseover="showTip(event, '75', 75)">
-            Yield()
-          </code>
-          <div class="tip" id="75">
-            <strong>Signature:</strong> unit -&gt; unit<br />
+          <div class="tip" id="168">
+            <strong>Signature:</strong> string -&gt; unit<br />
+              <strong>Modifiers:</strong> abstract<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ComputationExpressions.fs#L113-113" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon.Runner/Reporter.fs#L12-12" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '169', 169)" onmouseover="showTip(event, '169', 169)">
+            ReportProgress(arg1)
+          </code>
+          <div class="tip" id="169">
+            <strong>Signature:</strong> ResultNode -&gt; unit<br />
+              <strong>Modifiers:</strong> abstract<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon.Runner/Reporter.fs#L10-10" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '170', 170)" onmouseover="showTip(event, '170', 170)">
+            ReportSummary(arg1)
+          </code>
+          <div class="tip" id="170">
+            <strong>Signature:</strong> seq&lt;ResultNode&gt; -&gt; unit<br />
+              <strong>Modifiers:</strong> abstract<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon.Runner/Reporter.fs#L11-11" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>

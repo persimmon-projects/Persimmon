@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>AsyncRunBuilder - Persimmon</title>
+    <title>TestRunner - Persimmon</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="persimmon-projects">
@@ -30,9 +30,9 @@
 
 
 
-<h1>AsyncRunBuilder</h1>
+<h1>TestRunner</h1>
 <p>
-  <span>Namespace: Persimmon</span><br />
+  <span>Namespace: Persimmon.Internals</span><br />
 </p>
 <div class="xmldoc">
 </div>
@@ -45,15 +45,15 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '72', 72)" onmouseover="showTip(event, '72', 72)">
+          <code onmouseout="hideTip(event, '157', 157)" onmouseover="showTip(event, '157', 157)">
             new()
           </code>
-          <div class="tip" id="72">
-            <strong>Signature:</strong> unit -&gt; AsyncRunBuilder<br />
+          <div class="tip" id="157">
+            <strong>Signature:</strong> unit -&gt; TestRunner<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ComputationExpressions.fs#L112-112" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Internals/TestRunner.fs#L69-69" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -72,55 +72,83 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '73', 73)" onmouseover="showTip(event, '73', 73)">
-            It((), a)
+          <code onmouseout="hideTip(event, '158', 158)" onmouseover="showTip(event, '158', 158)">
+            AsyncRunAllTests(progress tests)
           </code>
-          <div class="tip" id="73">
-            <strong>Signature:</strong> (unit * a:Async&lt;&#39;T&gt;) -&gt; Async&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+          <div class="tip" id="158">
+            <strong>Signature:</strong> (progress:(TestResult -&gt; unit)) -&gt; tests:seq&lt;&#39;?7526&gt; -&gt; Async&lt;RunResult&lt;TestResult&gt;&gt;<br />
+                          <strong>Type parameters:</strong> '?7526          </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ComputationExpressions.fs#L115-115" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Internals/TestRunner.fs#L72-72" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
+          <p>Collect test objects and run tests.</p>
+
+
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '74', 74)" onmouseover="showTip(event, '74', 74)">
-            Run(a)
+          <code onmouseout="hideTip(event, '159', 159)" onmouseover="showTip(event, '159', 159)">
+            AsyncRunSynchronouslyAllTests(...)
           </code>
-          <div class="tip" id="74">
-            <strong>Signature:</strong> a:Async&lt;&#39;?7239&gt; -&gt; TestCase&lt;&#39;?7239&gt;<br />
-                          <strong>Type parameters:</strong> '?7239          </div>
+          <div class="tip" id="159">
+            <strong>Signature:</strong> (progress:(TestResult -&gt; unit)) -&gt; tests:seq&lt;&#39;?7528&gt; -&gt; Async&lt;RunResult&lt;ResultNode&gt;&gt;<br />
+                          <strong>Type parameters:</strong> '?7528          </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ComputationExpressions.fs#L116-116" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Internals/TestRunner.fs#L80-80" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
+          <p>Collect test objects and run tests.</p>
+
+
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '75', 75)" onmouseover="showTip(event, '75', 75)">
-            Yield()
+          <code onmouseout="hideTip(event, '160', 160)" onmouseover="showTip(event, '160', 160)">
+            RunSynchronouslyAllTests(progress tests)
           </code>
-          <div class="tip" id="75">
-            <strong>Signature:</strong> unit -&gt; unit<br />
+          <div class="tip" id="160">
+            <strong>Signature:</strong> (progress:(TestResult -&gt; unit)) -&gt; tests:seq&lt;&#39;?7530&gt; -&gt; RunResult&lt;ResultNode&gt;<br />
+                          <strong>Type parameters:</strong> '?7530          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Internals/TestRunner.fs#L90-90" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Collect test objects and run tests.
+TODO: Omit all synch caller.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '161', 161)" onmouseover="showTip(event, '161', 161)">
+            RunTestsAndCallback(...)
+          </code>
+          <div class="tip" id="161">
+            <strong>Signature:</strong> (target:Assembly * fullyQualifiedTestNames:string [] * callback:Action&lt;obj&gt;) -&gt; unit<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ComputationExpressions.fs#L113-113" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Internals/TestRunner.fs#L99-99" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
+          <p>RunTestsAndCallback run test cases and callback. (Internal use only)
+If fullyQualifiedTestNames is empty, try all tests.</p>
+
+
         </td>
       </tr>
     </tbody>

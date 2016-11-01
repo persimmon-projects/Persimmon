@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>AsyncRunBuilder - Persimmon</title>
+    <title>TestCollector - Persimmon</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="persimmon-projects">
@@ -30,9 +30,9 @@
 
 
 
-<h1>AsyncRunBuilder</h1>
+<h1>TestCollector</h1>
 <p>
-  <span>Namespace: Persimmon</span><br />
+  <span>Namespace: Persimmon.Internals</span><br />
 </p>
 <div class="xmldoc">
 </div>
@@ -45,15 +45,15 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '72', 72)" onmouseover="showTip(event, '72', 72)">
+          <code onmouseout="hideTip(event, '153', 153)" onmouseover="showTip(event, '153', 153)">
             new()
           </code>
-          <div class="tip" id="72">
-            <strong>Signature:</strong> unit -&gt; AsyncRunBuilder<br />
+          <div class="tip" id="153">
+            <strong>Signature:</strong> unit -&gt; TestCollector<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ComputationExpressions.fs#L112-112" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Internals/TestCollector.fs#L133-133" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -72,55 +72,61 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '73', 73)" onmouseover="showTip(event, '73', 73)">
-            It((), a)
+          <code onmouseout="hideTip(event, '154', 154)" onmouseover="showTip(event, '154', 154)">
+            Collect(targetAssembly)
           </code>
-          <div class="tip" id="73">
-            <strong>Signature:</strong> (unit * a:Async&lt;&#39;T&gt;) -&gt; Async&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
-        </td>
-        <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ComputationExpressions.fs#L115-115" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          
-        </td>
-      </tr>
-      <tr>
-        <td class="member-name">
-
-          <code onmouseout="hideTip(event, '74', 74)" onmouseover="showTip(event, '74', 74)">
-            Run(a)
-          </code>
-          <div class="tip" id="74">
-            <strong>Signature:</strong> a:Async&lt;&#39;?7239&gt; -&gt; TestCase&lt;&#39;?7239&gt;<br />
-                          <strong>Type parameters:</strong> '?7239          </div>
-        </td>
-        <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ComputationExpressions.fs#L116-116" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          
-        </td>
-      </tr>
-      <tr>
-        <td class="member-name">
-
-          <code onmouseout="hideTip(event, '75', 75)" onmouseover="showTip(event, '75', 75)">
-            Yield()
-          </code>
-          <div class="tip" id="75">
-            <strong>Signature:</strong> unit -&gt; unit<br />
+          <div class="tip" id="154">
+            <strong>Signature:</strong> targetAssembly:Assembly -&gt; Context []<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ComputationExpressions.fs#L113-113" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Internals/TestCollector.fs#L152-152" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
+          <p>Collect tests with basic procedure.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '155', 155)" onmouseover="showTip(event, '155', 155)">
+            CollectAndCallback(...)
+          </code>
+          <div class="tip" id="155">
+            <strong>Signature:</strong> (targetAssembly:Assembly * callback:Action&lt;obj&gt;) -&gt; unit<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Internals/TestCollector.fs#L162-162" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>CollectAndCallback collect test cases and callback. (Internal use only)</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '156', 156)" onmouseover="showTip(event, '156', 156)">
+            CollectOnlyTestCases(targetAssembly)
+          </code>
+          <div class="tip" id="156">
+            <strong>Signature:</strong> targetAssembly:Assembly -&gt; TestCase []<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Internals/TestCollector.fs#L156-156" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Collect test cases.</p>
+
+
         </td>
       </tr>
     </tbody>

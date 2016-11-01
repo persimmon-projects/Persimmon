@@ -35,50 +35,56 @@
   <span>Namespace: Persimmon</span><br />
 </p>
 <div class="xmldoc">
-<p>This class represents a nested test result.
-After running tests, the Context objects become the ContextReults objects.</p>
+<p>Test context and hold tested results class. (structuring nested test result node)
+Inherited from ResultNode</p>
 
 </div>
-  <h3>Record Fields</h3>
+  <h3>Instance members</h3>
   <table class="table table-bordered member-list">
     <thead>
-      <tr><td>Record Field</td><td>Description</td></tr>
+      <tr><td>Instance member</td><td>Description</td></tr>
     </thead>
     <tbody>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '80', 80)" onmouseover="showTip(event, '80', 80)">
-            Children
+          <code onmouseout="hideTip(event, '83', 83)" onmouseover="showTip(event, '83', 83)">
+            Context
           </code>
-          <div class="tip" id="80">
-            <strong>Signature:</strong> ITestResult list<br />
+          <div class="tip" id="83">
+            <strong>Signature:</strong> Context<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L115-115" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L408-408" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
+          <p>Target context.</p>
+
+
+              <p>CompiledName: <code>get_Context</code></p>
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '81', 81)" onmouseover="showTip(event, '81', 81)">
-            Name
+          <code onmouseout="hideTip(event, '84', 84)" onmouseover="showTip(event, '84', 84)">
+            Results
           </code>
-          <div class="tip" id="81">
-            <strong>Signature:</strong> string<br />
+          <div class="tip" id="84">
+            <strong>Signature:</strong> ResultNode []<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L114-114" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L411-411" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
+          <p>Child results.</p>
+
+
+              <p>CompiledName: <code>get_Results</code></p>
         </td>
       </tr>
     </tbody>
@@ -109,10 +115,6 @@ After running tests, the Context objects become the ContextReults objects.</p>
                     <tr>
                       <td>Persimmon.Runner</td>
                       <td><a href="https://www.nuget.org/packages/Persimmon.Runner/"><img src="http://img.shields.io/nuget/v/Persimmon.Runner.svg?style=flat" /></a></td>
-                    </tr>
-                    <tr>
-                      <td>Persimmon.Script</td>
-                      <td><a href="https://www.nuget.org/packages/Persimmon.Script/"><img src="http://img.shields.io/nuget/v/Persimmon.Script.svg?style=flat" /></a></td>
                     </tr>
                   </tbody>
                 </table>

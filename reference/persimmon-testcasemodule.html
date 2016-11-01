@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>AsyncRunBuilder - Persimmon</title>
+    <title>TestCase - Persimmon</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="persimmon-projects">
@@ -30,97 +30,142 @@
 
 
 
-<h1>AsyncRunBuilder</h1>
+<h1>TestCase</h1>
 <p>
   <span>Namespace: Persimmon</span><br />
 </p>
 <div class="xmldoc">
+<p>Test case manipulators.</p>
+
 </div>
-  <h3>Constructors</h3>
+
+<!-- Render nested types and modules, if there are any -->
+
+  <h3>Functions and values</h3>
   <table class="table table-bordered member-list">
     <thead>
-      <tr><td>Constructor</td><td>Description</td></tr>
+      <tr><td>Function or value</td><td>Description</td></tr>
     </thead>
     <tbody>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '72', 72)" onmouseover="showTip(event, '72', 72)">
-            new()
+          <code onmouseout="hideTip(event, '26', 26)" onmouseover="showTip(event, '26', 26)">
+            addNotPassed notPassedCause x
           </code>
-          <div class="tip" id="72">
-            <strong>Signature:</strong> unit -&gt; AsyncRunBuilder<br />
-                      </div>
+          <div class="tip" id="26">
+            <strong>Signature:</strong> notPassedCause:NotPassedCause -&gt; x:TestCase&lt;&#39;a&gt; -&gt; TestCase&lt;&#39;a&gt;<br />
+                          <strong>Type parameters:</strong> 'a          </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ComputationExpressions.fs#L112-112" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/TestCase.fs#L50-50" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
-              <p>CompiledName: <code>.ctor</code></p>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <h3>Instance members</h3>
-  <table class="table table-bordered member-list">
-    <thead>
-      <tr><td>Instance member</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="member-name">
+          <p>Add not passed test after test.</p>
 
-          <code onmouseout="hideTip(event, '73', 73)" onmouseover="showTip(event, '73', 73)">
-            It((), a)
-          </code>
-          <div class="tip" id="73">
-            <strong>Signature:</strong> (unit * a:Async&lt;&#39;T&gt;) -&gt; Async&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
-        </td>
-        <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ComputationExpressions.fs#L115-115" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          
+
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '74', 74)" onmouseover="showTip(event, '74', 74)">
-            Run(a)
+          <code onmouseout="hideTip(event, '27', 27)" onmouseover="showTip(event, '27', 27)">
+            combine x rest
           </code>
-          <div class="tip" id="74">
-            <strong>Signature:</strong> a:Async&lt;&#39;?7239&gt; -&gt; TestCase&lt;&#39;?7239&gt;<br />
-                          <strong>Type parameters:</strong> '?7239          </div>
+          <div class="tip" id="27">
+            <strong>Signature:</strong> x:TestCaseType&lt;&#39;T&gt; -&gt; rest:(&#39;T -&gt; TestCase&lt;&#39;U&gt;) -&gt; TestCase&lt;&#39;U&gt;<br />
+                          <strong>Type parameters:</strong> 'T, 'U          </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ComputationExpressions.fs#L116-116" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/TestCase.fs#L134-134" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
+          <p>Combine tests.</p>
+
+
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '75', 75)" onmouseover="showTip(event, '75', 75)">
-            Yield()
+          <code onmouseout="hideTip(event, '28', 28)" onmouseover="showTip(event, '28', 28)">
+            init name parameters asyncBody
           </code>
-          <div class="tip" id="75">
-            <strong>Signature:</strong> unit -&gt; unit<br />
-                      </div>
+          <div class="tip" id="28">
+            <strong>Signature:</strong> name:string option -&gt; parameters:seq&lt;Type * obj&gt; -&gt; asyncBody:(TestCase&lt;&#39;?7437&gt; -&gt; Async&lt;TestResult&lt;&#39;?7437&gt;&gt;) -&gt; TestCase&lt;&#39;?7437&gt;<br />
+                          <strong>Type parameters:</strong> '?7437          </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ComputationExpressions.fs#L113-113" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/TestCase.fs#L22-22" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
+          <p>Create test case manually.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '29', 29)" onmouseover="showTip(event, '29', 29)">
+            initForSynch name parameters body
+          </code>
+          <div class="tip" id="29">
+            <strong>Signature:</strong> name:string option -&gt; parameters:seq&lt;Type * obj&gt; -&gt; body:(TestCase&lt;&#39;?7439&gt; -&gt; TestResult&lt;&#39;?7439&gt;) -&gt; TestCase&lt;&#39;?7439&gt;<br />
+                          <strong>Type parameters:</strong> '?7439          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/TestCase.fs#L28-28" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Create test case manually.
+TODO: Omit all synch caller.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '30', 30)" onmouseover="showTip(event, '30', 30)">
+            makeDone name parameters x
+          </code>
+          <div class="tip" id="30">
+            <strong>Signature:</strong> name:string option -&gt; parameters:seq&lt;Type * obj&gt; -&gt; x:AssertionResult&lt;&#39;a&gt; -&gt; TestCase&lt;&#39;a&gt;<br />
+                          <strong>Type parameters:</strong> 'a          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/TestCase.fs#L32-32" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Create always completion test case.</p>
+
+
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '31', 31)" onmouseover="showTip(event, '31', 31)">
+            makeError name parameters exn
+          </code>
+          <div class="tip" id="31">
+            <strong>Signature:</strong> name:string option -&gt; parameters:seq&lt;Type * obj&gt; -&gt; exn:exn -&gt; TestCase&lt;&#39;b&gt;<br />
+                          <strong>Type parameters:</strong> 'b          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/TestCase.fs#L36-36" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Create always error test case.</p>
+
+
         </td>
       </tr>
     </tbody>

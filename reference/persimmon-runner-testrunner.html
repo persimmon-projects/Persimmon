@@ -38,23 +38,6 @@
 </div>
 
 <!-- Render nested types and modules, if there are any -->
-  <h2>Nested types and modules</h2>
-  <div>
-      <table class="table table-bordered type-list">
-    <thead>
-      <tr><td>Type</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td class="type-name">
-            <a href="persimmon-runner-testrunner-runresult.html">RunResult</a>
-          </td>
-          <td class="xmldoc"></td>
-        </tr>
-    </tbody>
-  </table>
-
-  </div>
 
   <h3>Functions and values</h3>
   <table class="table table-bordered member-list">
@@ -66,72 +49,41 @@
         <td class="member-name">
 
           <code onmouseout="hideTip(event, '51', 51)" onmouseover="showTip(event, '51', 51)">
-            asyncRunAllTests reporter tests
+            asyncRunAllTests progress tests
           </code>
           <div class="tip" id="51">
-            <strong>Signature:</strong> reporter:Reporter -&gt; tests:TestObject list -&gt; Async&lt;RunResult&gt;<br />
-                      </div>
+            <strong>Signature:</strong> progress:(TestResult -&gt; unit) -&gt; tests:seq&lt;&#39;?7721&gt; -&gt; Async&lt;RunResult&lt;ResultNode&gt;&gt;<br />
+                          <strong>Type parameters:</strong> '?7721          </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon.Runner/TestRunner.fs#L39-39" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon.Runner/TestRunner.fs#L14-14" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
+          <p>Run all tests.</p>
+
+
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
           <code onmouseout="hideTip(event, '52', 52)" onmouseover="showTip(event, '52', 52)">
-            countErrors _arg1
+            runAllTests progress tests
           </code>
           <div class="tip" id="52">
-            <strong>Signature:</strong> _arg1:ITestResult -&gt; int<br />
-                      </div>
+            <strong>Signature:</strong> progress:(TestResult -&gt; unit) -&gt; tests:seq&lt;&#39;?7719&gt; -&gt; RunResult&lt;ResultNode&gt;<br />
+                          <strong>Type parameters:</strong> '?7719          </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon.Runner/TestRunner.fs#L20-20" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon.Runner/TestRunner.fs#L9-9" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
-        </td>
-      </tr>
-      <tr>
-        <td class="member-name">
+          <p>Run all tests synchronously.
+TODO: Omit all synch caller.</p>
 
-          <code onmouseout="hideTip(event, '53', 53)" onmouseover="showTip(event, '53', 53)">
-            runAllTests reporter tests
-          </code>
-          <div class="tip" id="53">
-            <strong>Signature:</strong> reporter:Reporter -&gt; tests:TestObject list -&gt; RunResult<br />
-                      </div>
-        </td>
-        <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon.Runner/TestRunner.fs#L34-34" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          
-        </td>
-      </tr>
-      <tr>
-        <td class="member-name">
 
-          <code onmouseout="hideTip(event, '54', 54)" onmouseover="showTip(event, '54', 54)">
-            runTests reporter test
-          </code>
-          <div class="tip" id="54">
-            <strong>Signature:</strong> reporter:Reporter -&gt; test:TestObject -&gt; ITestResult<br />
-                      </div>
-        </td>
-        <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon.Runner/TestRunner.fs#L12-12" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          
         </td>
       </tr>
     </tbody>
@@ -162,10 +114,6 @@
                     <tr>
                       <td>Persimmon.Runner</td>
                       <td><a href="https://www.nuget.org/packages/Persimmon.Runner/"><img src="http://img.shields.io/nuget/v/Persimmon.Runner.svg?style=flat" /></a></td>
-                    </tr>
-                    <tr>
-                      <td>Persimmon.Script</td>
-                      <td><a href="https://www.nuget.org/packages/Persimmon.Script/"><img src="http://img.shields.io/nuget/v/Persimmon.Script.svg?style=flat" /></a></td>
                     </tr>
                   </tbody>
                 </table>

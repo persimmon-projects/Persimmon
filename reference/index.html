@@ -48,6 +48,15 @@
         </tr>
         <tr>
           <td class="type-name">
+            <a href="persimmon-assertionresult.html">AssertionResult</a>
+          </td>
+          <td class="xmldoc"><p>The result of each assertion. (fake base type)
+Can use active recognizers: Passed / NotPassed cause</p>
+
+</td>
+        </tr>
+        <tr>
+          <td class="type-name">
             <a href="persimmon-asyncrunbuilder.html">AsyncRunBuilder</a>
           </td>
           <td class="xmldoc"></td>
@@ -64,8 +73,7 @@
           <td class="type-name">
             <a href="persimmon-context.html">Context</a>
           </td>
-          <td class="xmldoc"><p>This class represents a nested test.
-We can use this class for grouping of the tests.</p>
+          <td class="xmldoc"><p>Test context class. (structuring nested test node)</p>
 
 </td>
         </tr>
@@ -73,18 +81,8 @@ We can use this class for grouping of the tests.</p>
           <td class="type-name">
             <a href="persimmon-contextresult.html">ContextResult</a>
           </td>
-          <td class="xmldoc"><p>This class represents a nested test result.
-After running tests, the Context objects become the ContextReults objects.</p>
-
-</td>
-        </tr>
-        <tr>
-          <td class="type-name">
-            <a href="persimmon-itestresult.html">ITestResult</a>
-          </td>
-          <td class="xmldoc"><p>This marker interface represents a test result.
-You should use the ActivePatterns
-if you want to process derived objects through this interface.</p>
+          <td class="xmldoc"><p>Test context and hold tested results class. (structuring nested test result node)
+Inherited from ResultNode</p>
 
 </td>
         </tr>
@@ -104,6 +102,15 @@ if you want to process derived objects through this interface.</p>
         </tr>
         <tr>
           <td class="type-name">
+            <a href="persimmon-resultnode.html">ResultNode</a>
+          </td>
+          <td class="xmldoc"><p>Non generic view for test result. (fake base type)
+Can use active recognizers: ContextResult cr / TestResult tr / EndMarker</p>
+
+</td>
+        </tr>
+        <tr>
+          <td class="type-name">
             <a href="persimmon-testbuilder.html">TestBuilder</a>
           </td>
           <td class="xmldoc"></td>
@@ -112,8 +119,15 @@ if you want to process derived objects through this interface.</p>
           <td class="type-name">
             <a href="persimmon-testcase-1.html">TestCase<'T></a>
           </td>
-          <td class="xmldoc"><p>This class represents a test that has not been run yet.
-In order to run the test represented this class, use the "Run" method.</p>
+          <td class="xmldoc"><p>Test case class.</p>
+
+</td>
+        </tr>
+        <tr>
+          <td class="type-name">
+            <a href="persimmon-testcase.html">TestCase</a>
+          </td>
+          <td class="xmldoc"><p>Test case base class.</p>
 
 </td>
         </tr>
@@ -131,20 +145,7 @@ If not, then it is NoValueTest.</p>
           <td class="type-name">
             <a href="persimmon-testmetadata.html">TestMetadata</a>
           </td>
-          <td class="xmldoc"><p>The metadata that is common to each test case and test result.</p>
-
-</td>
-        </tr>
-        <tr>
-          <td class="type-name">
-            <a href="persimmon-testobject.html">TestObject</a>
-          </td>
-          <td class="xmldoc"><p>The type that is treated as tests by Persimmon.
-Derived class of this class are only two classes,
-they are Context and TestCase<'T>.
-When the TestObject is executed becomes TestResult.
-You should use the ActivePatterns
-if you want to process derived objects through this class.</p>
+          <td class="xmldoc"><p>Test metadata base class.</p>
 
 </td>
         </tr>
@@ -152,32 +153,23 @@ if you want to process derived objects through this class.</p>
           <td class="type-name">
             <a href="persimmon-testresult-1.html">TestResult<'T></a>
           </td>
-          <td class="xmldoc"><p>The result of each test.
-After running tests, the TestCase objects become the TestResult objects.</p>
+          <td class="xmldoc"><p>Test result union type.
+Inherited from ResultNode</p>
+
+</td>
+        </tr>
+        <tr>
+          <td class="type-name">
+            <a href="persimmon-testresult.html">TestResult</a>
+          </td>
+          <td class="xmldoc"><p>Non generic view for test result. (fake base type)
+Inherited from ResultNode.</p>
 
 </td>
         </tr>
         <tr>
           <td class="type-name">
             <a href="persimmon-trapbuilder.html">TrapBuilder</a>
-          </td>
-          <td class="xmldoc"></td>
-        </tr>
-        <tr>
-          <td class="type-name">
-            <a href="persimmon-scriptcontext.html">ScriptContext</a>
-          </td>
-          <td class="xmldoc"></td>
-        </tr>
-        <tr>
-          <td class="type-name">
-            <a href="persimmon-scriptparameterizebuilder.html">ScriptParameterizeBuilder</a>
-          </td>
-          <td class="xmldoc"></td>
-        </tr>
-        <tr>
-          <td class="type-name">
-            <a href="persimmon-scripttestbuilder.html">ScriptTestBuilder</a>
           </td>
           <td class="xmldoc"></td>
         </tr>
@@ -196,9 +188,11 @@ After running tests, the TestCase objects become the TestResult objects.</p>
         </tr>
         <tr>
           <td class="module-name">
-            <a href="persimmon-assertionresult.html">AssertionResult</a>
+            <a href="persimmon-assertionresultmodule.html">AssertionResult</a>
           </td>
-          <td class="xmldoc"></td>
+          <td class="xmldoc"><p>AssertionResult manipulators.</p>
+
+</td>
         </tr>
         <tr>
           <td class="module-name">
@@ -210,7 +204,9 @@ After running tests, the TestCase objects become the TestResult objects.</p>
           <td class="module-name">
             <a href="persimmon-notpassedcausemodule.html">NotPassedCause</a>
           </td>
-          <td class="xmldoc"></td>
+          <td class="xmldoc"><p>NotPassedCause manipulators.</p>
+
+</td>
         </tr>
         <tr>
           <td class="module-name">
@@ -220,31 +216,46 @@ After running tests, the TestCase objects become the TestResult objects.</p>
         </tr>
         <tr>
           <td class="module-name">
-            <a href="persimmon-testcase.html">TestCase</a>
+            <a href="persimmon-testcasemodule.html">TestCase</a>
+          </td>
+          <td class="xmldoc"><p>Test case manipulators.</p>
+
+</td>
+        </tr>
+        <tr>
+          <td class="module-name">
+            <a href="persimmon-testresultmodule.html">TestResult</a>
+          </td>
+          <td class="xmldoc"></td>
+        </tr>
+    </tbody>
+  </table>
+
+    </div>
+  <h2>Persimmon.Internals Namespace</h2>
+    <div>
+      <table class="table table-bordered type-list">
+    <thead>
+      <tr><td>Type</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td class="type-name">
+            <a href="persimmon-internals-runresult-1.html">RunResult<'T></a>
+          </td>
+          <td class="xmldoc"><p>Test results.</p>
+
+</td>
+        </tr>
+        <tr>
+          <td class="type-name">
+            <a href="persimmon-internals-testcollector.html">TestCollector</a>
           </td>
           <td class="xmldoc"></td>
         </tr>
         <tr>
-          <td class="module-name">
-            <a href="persimmon-testresult.html">TestResult</a>
-          </td>
-          <td class="xmldoc"></td>
-        </tr>
-        <tr>
-          <td class="module-name">
-            <a href="persimmon-helper.html">Helper</a>
-          </td>
-          <td class="xmldoc"></td>
-        </tr>
-        <tr>
-          <td class="module-name">
-            <a href="persimmon-scriptrunner.html">ScriptRunner</a>
-          </td>
-          <td class="xmldoc"></td>
-        </tr>
-        <tr>
-          <td class="module-name">
-            <a href="persimmon-scriptsyntax.html">ScriptSyntax</a>
+          <td class="type-name">
+            <a href="persimmon-internals-testrunner.html">TestRunner</a>
           </td>
           <td class="xmldoc"></td>
         </tr>
@@ -264,6 +275,14 @@ After running tests, the TestCase objects become the TestResult objects.</p>
             <a href="persimmon-output-iformatter-1.html">IFormatter<'T></a>
           </td>
           <td class="xmldoc"></td>
+        </tr>
+        <tr>
+          <td class="type-name">
+            <a href="persimmon-output-ireporter.html">IReporter</a>
+          </td>
+          <td class="xmldoc"><p>This interface abstraction how output results running on tests.</p>
+
+</td>
         </tr>
         <tr>
           <td class="type-name">
@@ -323,12 +342,6 @@ After running tests, the TestCase objects become the TestResult objects.</p>
       <tr><td>Module</td><td>Description</td></tr>
     </thead>
     <tbody>
-        <tr>
-          <td class="module-name">
-            <a href="persimmon-runner-runtimeutil.html">RuntimeUtil</a>
-          </td>
-          <td class="xmldoc"></td>
-        </tr>
         <tr>
           <td class="module-name">
             <a href="persimmon-runner-testcollector.html">TestCollector</a>
@@ -401,10 +414,6 @@ After running tests, the TestCase objects become the TestResult objects.</p>
                     <tr>
                       <td>Persimmon.Runner</td>
                       <td><a href="https://www.nuget.org/packages/Persimmon.Runner/"><img src="http://img.shields.io/nuget/v/Persimmon.Runner.svg?style=flat" /></a></td>
-                    </tr>
-                    <tr>
-                      <td>Persimmon.Script</td>
-                      <td><a href="https://www.nuget.org/packages/Persimmon.Script/"><img src="http://img.shields.io/nuget/v/Persimmon.Script.svg?style=flat" /></a></td>
                     </tr>
                   </tbody>
                 </table>
