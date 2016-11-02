@@ -63,6 +63,7 @@
     <Compile Include="AsyncTest.fs" />
     <Compile Include="PrettyPrinterTest.fs" />
     <Compile Include="TrapTest.fs" />
+    <Compile Include="RunnerTest.fs" />
     <None Include="..\..\Persimmon.snk">
       <Link>Persimmon.snk</Link>
     </None>

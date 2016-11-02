@@ -9,7 +9,7 @@ open Microsoft.FSharp.Collections
 open Persimmon
 open Persimmon.ActivePatterns
 
-module private TestRunnerImpl =
+module internal TestRunnerImpl =
 
   let rec traverseAsyncRunner test = seq {
     match test with
@@ -53,10 +53,13 @@ module private TestRunnerImpl =
     | ContextResult contextResult ->
       contextResult.Results |> Seq.sumBy countErrors
     | TestResult testResult ->
-      let ar = AssertionResult.Seq.typicalResult testResult.AssertionResults
-      match ar with
-      | NotPassed (Violated _) -> 1
-      | _ -> 0
+      match testResult.Box() with
+      | Error _ -> 1
+      | Done _ -> 
+        let ar = AssertionResult.Seq.typicalResult testResult.AssertionResults
+        match ar with
+        | NotPassed (Violated _) -> 1
+        | _ -> 0
     | EndMarker -> 0
 
 /// Test results.
