@@ -59,9 +59,13 @@ type TestBuilder private (name: string option) =
     finally match box x with null -> () | _ -> x.Dispose()
   member __.TryFinally(f, g) = try f () finally g ()
   member __.Delay(f) = f
-  member __.Run(f) =
-    try f ()
-    with e -> TestCase.makeError name [] e
+  member __.Run(f: unit -> TestCase<_>) =
+    TestCase.init name [] (fun _ ->
+      let case =
+        try f ()
+        with e -> TestCase.makeError name [] e
+      case.AsyncRun()
+    )
 
 [<AutoOpen>]
 module private Util =
