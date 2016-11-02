@@ -92,7 +92,9 @@ Target "CopyBinaries" (fun _ ->
 // Clean build results
 
 Target "Clean" (fun _ ->
-    CleanDirs [outDir; "temp"]
+ CleanDirs [outDir; "temp"]
+ !! "./src/**/bin/Release"
+ |> CleanDirs
 )
 
 Target "CleanDocs" (fun _ ->
