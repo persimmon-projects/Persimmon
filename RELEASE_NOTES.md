@@ -1,3 +1,7 @@
+### 2.0.1-alpha3 - November 3 2016
+* fix count errors
+* fix lazy evaluation
+
 ### 2.0.1-alpha2 - November 1 2016
 * support Visual Studio test explorer [#111](https://github.com/persimmon-projects/Persimmon/pull/111)
 * support Core clr [#114](https://github.com/persimmon-projects/Persimmon/pull/114)
