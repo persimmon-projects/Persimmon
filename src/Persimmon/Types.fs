@@ -244,6 +244,8 @@ and TestResult =
   inherit ResultNode
   abstract TestCase: TestCase
   abstract IsError: bool
+  abstract FailureMessages: string[]
+  abstract SkipMessages: string[]
   abstract Exceptions: exn[]
   abstract Duration: TimeSpan
   abstract AssertionResults: AssertionResult[]
@@ -330,6 +332,30 @@ and TestResult<'T> =
       match this with
       | Error (testCase, _, _, _) -> testCase
       | Done (testCase, _, _) -> testCase
+    member this.FailureMessages =
+      match this with
+      | Done (_, rs, _) ->
+        rs
+        |> NonEmptyList.toSeq
+        |> AssertionResult.Seq.onlyNotPassed
+      | Error (_, _, ps, _) -> Seq.ofList ps
+      |> Seq.choose (function
+      | Violated msg -> Some msg
+      | Skipped _ -> None
+      )
+      |> Seq.toArray
+    member this.SkipMessages =
+      match this with
+      | Done (_, rs, _) ->
+        rs
+        |> NonEmptyList.toSeq
+        |> AssertionResult.Seq.onlyNotPassed
+      | Error (_, _, ps, _) -> Seq.ofList ps
+      |> Seq.choose (function
+      | Violated _ -> None
+      | Skipped msg -> Some msg
+      )
+      |> Seq.toArray
     member this.Exceptions =
       match this with
       | Error (_, exns, _, _) -> exns |> Seq.toArray
@@ -357,6 +383,8 @@ and TestResult<'T> =
         match this with
         | Error _ -> true
         | Done _ -> false
+      member this.FailureMessages = this.FailureMessages
+      member this.SkipMessages = this.SkipMessages
       member this.Exceptions = this.Exceptions
       member this.Duration = this.Duration
       member this.AssertionResults = this.AssertionResults
