@@ -27,7 +27,7 @@ let (|Passed|NotPassed|) (ar: AssertionResult) =
 
 /// Retreive information from non generic TestResult.
 let (|Done|Error|) (result: TestResult) =
-  match result.IsFailed with
+  match result.IsError with
   | true ->
     Error (
       result.TestCase,

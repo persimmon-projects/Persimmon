@@ -243,7 +243,7 @@ and ResultNode =
 and TestResult =
   inherit ResultNode
   abstract TestCase: TestCase
-  abstract IsFailed: bool
+  abstract IsError: bool
   abstract Exceptions: exn[]
   abstract Duration: TimeSpan
   abstract AssertionResults: AssertionResult[]
@@ -330,10 +330,6 @@ and TestResult<'T> =
       match this with
       | Error (testCase, _, _, _) -> testCase
       | Done (testCase, _, _) -> testCase
-    member this.IsFailed =
-      match this with
-      | Error _ -> true
-      | Done _ -> false
     member this.Exceptions =
       match this with
       | Error (_, exns, _, _) -> exns |> Seq.toArray
@@ -357,7 +353,10 @@ and TestResult<'T> =
 
     interface TestResult with
       member this.TestCase = this.TestCase
-      member this.IsFailed = this.IsFailed
+      member this.IsError =
+        match this with
+        | Error _ -> true
+        | Done _ -> false
       member this.Exceptions = this.Exceptions
       member this.Duration = this.Duration
       member this.AssertionResults = this.AssertionResults
