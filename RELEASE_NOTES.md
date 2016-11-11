@@ -1,3 +1,8 @@
+### 2.0.1-alpha4 - November 12 2016
+* add TestResult#FailureMessages, TestResult#SkipMessages
+* fix junit xml report
+* improve API(Persimmon.TestResult, Persimmon.Internals.TestRunner)
+
 ### 2.0.1-alpha3 - November 3 2016
 * fix count errors
 * fix lazy evaluation
