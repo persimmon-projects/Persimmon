@@ -8,9 +8,9 @@ open Persimmon.Internals
 //[<Obsolete>]
 let runAllTests progress (tests: #TestMetadata seq) =
   let runner = new TestRunner()
-  runner.RunSynchronouslyAllTests progress tests
+  runner.RunSynchronouslyAllTests(progress, tests)
 
 /// Run all tests.
 let asyncRunAllTests progress (tests: #TestMetadata seq) =
   let runner = new TestRunner()
-  runner.AsyncRunSynchronouslyAllTests progress tests
+  runner.AsyncRunSynchronouslyAllTests(progress, tests)

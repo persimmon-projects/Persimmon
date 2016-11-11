@@ -72,7 +72,7 @@ type RunResult<'T> = {
 type TestRunner() =
 
   /// Collect test objects and run tests.
-  member __.AsyncRunAllTests progress tests = async {
+  member __.AsyncRunAllTests(progress, tests) = async {
     let! testResultsList = tests |> Seq.map (TestRunnerImpl.asyncRunTest progress) |> TestRunnerImpl.asyncSequential
     let testResults = testResultsList |> Array.collect id
     let errors = testResults |> Seq.sumBy TestRunnerImpl.countErrors
@@ -80,7 +80,7 @@ type TestRunner() =
   }
 
   /// Collect test objects and run tests.
-  member __.AsyncRunSynchronouslyAllTests progress tests = async {
+  member __.AsyncRunSynchronouslyAllTests(progress, tests) = async {
     let! testResultsList = tests |> Seq.map (TestRunnerImpl.asyncRunSynchronouslyTest progress) |> TestRunnerImpl.asyncSequential
     let testResults = testResultsList |> Array.collect id
     let errors = testResults |> Seq.sumBy TestRunnerImpl.countErrors
@@ -90,7 +90,7 @@ type TestRunner() =
   /// Collect test objects and run tests.
   /// TODO: Omit all synch caller.
   //[<Obsolete>]
-  member __.RunSynchronouslyAllTests progress tests =
+  member __.RunSynchronouslyAllTests(progress, tests) =
     // Keep forward sequence.
     let testResultsList = tests |> Seq.map (TestRunnerImpl.asyncRunSynchronouslyTest progress >> Async.RunSynchronously)
     let testResults = testResultsList |> Seq.collect id |> Seq.toArray
@@ -99,7 +99,7 @@ type TestRunner() =
       
   /// RunTestsAndCallback run test cases and callback. (Internal use only)
   /// If fullyQualifiedTestNames is empty, try all tests.
-  member __.RunTestsAndCallback (target: Assembly, fullyQualifiedTestNames: string[], callback: Action<obj>) =
+  member __.RunTestsAndCallback(target: Assembly, fullyQualifiedTestNames: string[], before: Action<obj>, callback: Action<obj>) =
 
     // Make fqtn dicts.
     let targetNames = Dictionary<string, string>()
@@ -120,6 +120,7 @@ type TestRunner() =
       |> Seq.choose (fun testCase ->
         // Include only fqtn
         if containsKey testCase.UniqueName then
+          before.Invoke(testCase)
           // Map test case to async runner (with callback side effect)
           Some (TestRunnerImpl.asyncRunTest callback.Invoke testCase)
         else None
@@ -128,3 +129,6 @@ type TestRunner() =
       |> Async.Parallel
       // Synchronous execution
       |> Async.RunSynchronously |> ignore
+
+  member this.RunTestsAndCallback(target: Assembly, fullyQualifiedTestNames: string[], callback: Action<obj>) =
+    this.RunTestsAndCallback(target, fullyQualifiedTestNames, Action(ignore), callback)
