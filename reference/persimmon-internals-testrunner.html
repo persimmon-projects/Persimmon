@@ -45,10 +45,10 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '157', 157)" onmouseover="showTip(event, '157', 157)">
+          <code onmouseout="hideTip(event, '161', 161)" onmouseover="showTip(event, '161', 161)">
             new()
           </code>
-          <div class="tip" id="157">
+          <div class="tip" id="161">
             <strong>Signature:</strong> unit -&gt; TestRunner<br />
                       </div>
         </td>
@@ -72,12 +72,12 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '158', 158)" onmouseover="showTip(event, '158', 158)">
-            AsyncRunAllTests(progress tests)
+          <code onmouseout="hideTip(event, '162', 162)" onmouseover="showTip(event, '162', 162)">
+            AsyncRunAllTests(progress, tests)
           </code>
-          <div class="tip" id="158">
-            <strong>Signature:</strong> (progress:(TestResult -&gt; unit)) -&gt; tests:seq&lt;&#39;?7526&gt; -&gt; Async&lt;RunResult&lt;TestResult&gt;&gt;<br />
-                          <strong>Type parameters:</strong> '?7526          </div>
+          <div class="tip" id="162">
+            <strong>Signature:</strong> (progress:(TestResult -&gt; unit) * tests:seq&lt;&#39;?7535&gt;) -&gt; Async&lt;RunResult&lt;TestResult&gt;&gt;<br />
+                          <strong>Type parameters:</strong> '?7535          </div>
         </td>
         <td class="xmldoc">
             <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Internals/TestRunner.fs#L75-75" class="github-link">
@@ -92,12 +92,12 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '159', 159)" onmouseover="showTip(event, '159', 159)">
+          <code onmouseout="hideTip(event, '163', 163)" onmouseover="showTip(event, '163', 163)">
             AsyncRunSynchronouslyAllTests(...)
           </code>
-          <div class="tip" id="159">
-            <strong>Signature:</strong> (progress:(TestResult -&gt; unit)) -&gt; tests:seq&lt;&#39;?7528&gt; -&gt; Async&lt;RunResult&lt;ResultNode&gt;&gt;<br />
-                          <strong>Type parameters:</strong> '?7528          </div>
+          <div class="tip" id="163">
+            <strong>Signature:</strong> (progress:(TestResult -&gt; unit) * tests:seq&lt;&#39;?7537&gt;) -&gt; Async&lt;RunResult&lt;ResultNode&gt;&gt;<br />
+                          <strong>Type parameters:</strong> '?7537          </div>
         </td>
         <td class="xmldoc">
             <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Internals/TestRunner.fs#L83-83" class="github-link">
@@ -112,12 +112,12 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '160', 160)" onmouseover="showTip(event, '160', 160)">
-            RunSynchronouslyAllTests(progress tests)
+          <code onmouseout="hideTip(event, '164', 164)" onmouseover="showTip(event, '164', 164)">
+            RunSynchronouslyAllTests(...)
           </code>
-          <div class="tip" id="160">
-            <strong>Signature:</strong> (progress:(TestResult -&gt; unit)) -&gt; tests:seq&lt;&#39;?7530&gt; -&gt; RunResult&lt;ResultNode&gt;<br />
-                          <strong>Type parameters:</strong> '?7530          </div>
+          <div class="tip" id="164">
+            <strong>Signature:</strong> (progress:(TestResult -&gt; unit) * tests:seq&lt;&#39;?7539&gt;) -&gt; RunResult&lt;ResultNode&gt;<br />
+                          <strong>Type parameters:</strong> '?7539          </div>
         </td>
         <td class="xmldoc">
             <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Internals/TestRunner.fs#L93-93" class="github-link">
@@ -133,11 +133,29 @@ TODO: Omit all synch caller.</p>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '161', 161)" onmouseover="showTip(event, '161', 161)">
+          <code onmouseout="hideTip(event, '165', 165)" onmouseover="showTip(event, '165', 165)">
             RunTestsAndCallback(...)
           </code>
-          <div class="tip" id="161">
+          <div class="tip" id="165">
             <strong>Signature:</strong> (target:Assembly * fullyQualifiedTestNames:string [] * callback:Action&lt;obj&gt;) -&gt; unit<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Internals/TestRunner.fs#L133-133" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '166', 166)" onmouseover="showTip(event, '166', 166)">
+            RunTestsAndCallback(...)
+          </code>
+          <div class="tip" id="166">
+            <strong>Signature:</strong> (target:Assembly * fullyQualifiedTestNames:string [] * before:Action&lt;obj&gt; * callback:Action&lt;obj&gt;) -&gt; unit<br />
                       </div>
         </td>
         <td class="xmldoc">
