@@ -18,7 +18,7 @@ let (|ContextResult|TestResult|EndMarker|) (result: ResultNode) =
     | _ -> TestResult testResult
   | :? ContextResult as contextResult -> ContextResult contextResult
   | _ -> new ArgumentException() |> raise
-  
+
 /// Retreive information from non generic AssertionResult.
 let (|Passed|NotPassed|) (ar: AssertionResult) =
   match ar.Status with

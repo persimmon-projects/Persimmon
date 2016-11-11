@@ -120,7 +120,7 @@ type TestMetadata =
 
   /// Metadata display name.
   abstract DisplayName : string
-  
+
   /// Index if metadata place into sequence.
   member this.Index = this._index
 
@@ -143,7 +143,7 @@ type TestMetadata =
   override this.ToString() = this.UniqueName
 
   /// For internal use only.
-  static member internal safeName (name: string option, unresolved: string) = 
+  static member internal safeName (name: string option, unresolved: string) =
     match name with
     | Some name -> name
     | None -> unresolved
@@ -165,7 +165,7 @@ type TestMetadata =
     match this._parent with
     | None -> this._parent <- Some parent
     | _ -> ()
-    
+
 ///////////////////////////////////////////////////////////////////////////
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
@@ -196,21 +196,21 @@ type TestCase internal (name: string option, parameters: (Type * obj) seq) =
   /// The test parameters.
   /// If the test has no parameters then the value is empty list.
   member __.Parameters = parameters |> Seq.toArray
-    
+
   /// For internal use only.
   abstract member OnAsyncRun: unit -> Async<TestResult>
-    
+
   /// For internal use only.
   abstract member Box: unit -> TestCase<obj>
 
   /// Execute this test case.
   member this.AsyncRun() = this.OnAsyncRun()
-  
+
   /// Execute this test case.
   /// TODO: Omit all synch caller.
   //[<Obsolete>]
   member this.Run() = this.OnAsyncRun() |> Async.RunSynchronously
-  
+
   /// Create unique name.
   member private this.createUniqueName baseName =
     let parameters = this.Parameters |> PrettyPrinter.printAll
@@ -231,7 +231,6 @@ type TestCase internal (name: string option, parameters: (Type * obj) seq) =
   /// Metadata display name.
   override this.DisplayName =
     TestMetadata.traverseDisplayName this |> this.createUniqueName
-
 
 /// Non generic view for test result. (fake base type)
 /// Can use active recognizers: ContextResult cr / TestResult tr / EndMarker
@@ -291,7 +290,7 @@ and
 
   /// Execute this test case.
   member this.AsyncRun() = this.InternalAsyncRun()
-    
+
   /// Execute this test case.
   /// TODO: Omit all synch caller.
   //[<Obsolete>]

@@ -120,4 +120,4 @@ type AsyncRunBuilder() =
   member __.Run(a) =
     match a |> Async.Catch |> Async.RunSynchronously with
     | Choice1Of2 r -> TestCase.makeDone None [] (Passed r)
-    | Choice2Of2 e -> TestCase.makeError None [] e 
+    | Choice2Of2 e -> TestCase.makeError None [] e

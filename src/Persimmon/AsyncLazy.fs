@@ -13,7 +13,7 @@ open System.Threading
 /// <description>
 /// Simulate TaskCompletionSource&lt;'T&gt; for F#'s Async&lt;'T&gt;.
 /// </description>
-/// <typeparam name="'T">Computation result type</typeparam> 
+/// <typeparam name="'T">Computation result type</typeparam>
 [<Sealed; NoEquality; NoComparison; AutoSerializable(false)>]
 type private AsyncCompletionSource<'T> =
 
@@ -127,7 +127,7 @@ type private AsyncLock () =
 /// Asynchronos lazy instance generator.
 /// (From FSharp.Control.FusionTasks https://github.com/kekyo/FSharp.Control.FusionTasks)
 /// </summary>
-/// <typeparam name="'T">Computation result type</typeparam> 
+/// <typeparam name="'T">Computation result type</typeparam>
 [<Sealed; NoEquality; NoComparison; AutoSerializable(false)>]
 type internal AsyncLazy<'T> =
 
