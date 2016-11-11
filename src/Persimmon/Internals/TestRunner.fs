@@ -131,4 +131,5 @@ type TestRunner() =
       |> Async.RunSynchronously |> ignore
 
   member this.RunTestsAndCallback(target: Assembly, fullyQualifiedTestNames: string[], callback: Action<obj>) =
-    this.RunTestsAndCallback(target, fullyQualifiedTestNames, Action(ignore), callback)
+    let before: Action<obj> = Action(ignore)
+    this.RunTestsAndCallback(target, fullyQualifiedTestNames, before, callback)
