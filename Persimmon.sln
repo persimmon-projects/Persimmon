@@ -44,6 +44,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.Runner.NET40", "s
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.NET40.Tests", "tests\Persimmon.NET40.Tests\Persimmon.NET40.Tests.fsproj", "{91C934FC-05E8-4B42-854D-6F2AC3EA770E}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Persimmon.Runner.Tests", "tests\Persimmon.Runner.Tests\Persimmon.Runner.Tests.fsproj", "{5C25D182-1B29-446B-8536-2E24559312BE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -86,6 +88,10 @@ Global
 		{91C934FC-05E8-4B42-854D-6F2AC3EA770E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91C934FC-05E8-4B42-854D-6F2AC3EA770E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91C934FC-05E8-4B42-854D-6F2AC3EA770E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C25D182-1B29-446B-8536-2E24559312BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C25D182-1B29-446B-8536-2E24559312BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C25D182-1B29-446B-8536-2E24559312BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C25D182-1B29-446B-8536-2E24559312BE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

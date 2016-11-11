@@ -161,6 +161,8 @@ module Formatter =
 
     let private xname name = XName.Get(name)
 
+    let timeSpanToStr (span: TimeSpan) = sprintf "%.3f" span.TotalSeconds
+
     let private toXDocument result =
       let rec inner (acc: XElement) = function
       | EndMarker -> acc
@@ -175,7 +177,11 @@ module Formatter =
         acc.Add(nameAttr)
         contextResult.Results |> Seq.fold inner acc
       | TestResult tr ->
-        let testCase = XElement(xname "testcase", XAttribute(xname "name", tr.TestCase.DisplayName))
+        let testCase =
+          XElement(
+            xname "testcase",
+            XAttribute(xname "name", tr.TestCase.DisplayName)
+          )
         match tr with
         | Error (_, es, res, duration) as e ->
           testCase.Add(
@@ -183,32 +189,34 @@ module Formatter =
               XAttribute(xname "type", e.GetType().FullName),
               // TODO: fix message
               XAttribute(xname "message", res.ToString() + es.ToString())),
-            XAttribute(xname "time", duration.ToString()))
+            XAttribute(xname "time", timeSpanToStr duration))
         | Done (_, res, duration) ->
           match res |> AssertionResult.Seq.typicalResult with
           | Passed _ ->
             testCase.Add(
-              XAttribute(xname "time", duration.ToString()))
+              XAttribute(xname "time", timeSpanToStr duration))
           | NotPassed (Skipped message) ->
             testCase.Add(
               XElement(xname "skipped", message),
-              XAttribute(xname "time", duration.ToString()))
+              XAttribute(xname "time", timeSpanToStr duration))
           | NotPassed (Violated message as v) ->
             testCase.Add(
               XElement(xname "failure",
                 XAttribute(xname "type", v.GetType().FullName),
                 // TODO: fix message
                 XAttribute(xname "message", message)),
-              XAttribute(xname "time", duration.ToString()))
+              XAttribute(xname "time", timeSpanToStr duration))
         acc.Add(testCase)
         acc
       let suite = inner (XElement(xname "testsuite")) result
       let summary = result |> Summary.collectSummary Summary.empty
       suite.Add(
+        XAttribute(xname "timestamp", DateTime.Now.ToString()),
         XAttribute(xname "tests", summary.Run),
         XAttribute(xname "failures", summary.Violated),
         XAttribute(xname "errors", summary.Error),
-        XAttribute(xname "skipped", summary.Skipped))
+        XAttribute(xname "skipped", summary.Skipped)
+      )
       suite
 
     let addSummary (watch: Stopwatch) results (suites: XElement) =
@@ -217,7 +225,7 @@ module Formatter =
         XAttribute(xname "tests", summary.Run),
         XAttribute(xname "failures", summary.Violated),
         XAttribute(xname "errors", summary.Error),
-        XAttribute(xname "time", summary.Duration.ToString()))
+        XAttribute(xname "time", timeSpanToStr summary.Duration))
       suites
 
     let junitStyle watch =
