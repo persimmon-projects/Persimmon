@@ -70,7 +70,7 @@ module private TestCollectorImpl =
       // "parentNamed[0]", "parentNamed[0][0]", ...
       let children =
         tests
-        |> Seq.mapi (fun index -> fun child -> child, index)
+        |> Seq.mapi (fun index child -> (child, index))
         |> Seq.collect (fun entry -> fixupAndCollectTests(fst entry, symbolName, Some (snd entry)))
       yield new Context(symbolName, children) :> TestMetadata
 
