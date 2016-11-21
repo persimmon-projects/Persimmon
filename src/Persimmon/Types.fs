@@ -221,7 +221,8 @@ type TestCase internal (name: string option, parameters: (Type * obj) seq) =
     // Print with index:
     | Some index, 0, _ -> sprintf "%s[%d]" baseName index
     // Others, print with parameter strings.
-    | _, _, _ -> sprintf "%s(%s)" baseName parameters
+    | Some index, _, _ -> sprintf "%s(%s)[%d]" baseName parameters index
+    | None, _, _ -> sprintf "%s(%s)" baseName parameters
 
   /// Metadata unique name.
   /// If the test has parameters then the value contains them.
