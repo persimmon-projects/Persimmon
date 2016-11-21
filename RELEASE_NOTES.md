@@ -1,3 +1,6 @@
+### 2.0.1-alpha5 - November 21 2016
+* fix unique name
+
 ### 2.0.1-alpha4 - November 12 2016
 * add TestResult#FailureMessages, TestResult#SkipMessages
 * fix junit xml report
