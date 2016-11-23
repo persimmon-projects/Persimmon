@@ -78,7 +78,7 @@ let entryPoint (args: Args) =
 
 type FailedCounter () =
   inherit MarshalByRefObject()
-  
+
   member val Failed = 0 with get, set
 
 [<Serializable>]
@@ -95,7 +95,7 @@ let run act =
     AppDomain.Unload(appDomain)
 
 [<EntryPoint>]
-let main argv = 
+let main argv =
   let args = Args.parse Args.empty (argv |> Array.toList)
   let failed = FailedCounter()
   let callback = Callback(args, entryPoint, failed)

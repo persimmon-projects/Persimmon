@@ -29,10 +29,10 @@ module Writable =
           writer.WriteLine()
         }
 
-  /// Create IWritable that writes lines to TextWriter. 
+  /// Create IWritable that writes lines to TextWriter.
   let stringSeq (strs: string seq) =
     { new IWritable with
-        member __.WriteTo(writer: TextWriter) = 
+        member __.WriteTo(writer: TextWriter) =
           strs |> Seq.iter (writer.WriteLine)
         }
 

@@ -28,10 +28,10 @@ type Reporter
     errorPrinter.Print(message)
 
   interface IDisposable with
-    member __.Dispose() = 
+    member __.Dispose() =
       [ progressPrinter.Dispose; summaryPrinter.Dispose; errorPrinter.Dispose ]
       |> List.iter (fun d -> try d () with _ -> ())
-    
+
   interface IReporter with
     member this.ReportProgress test = this.ReportProgress test
     member this.ReportSummary tests = this.ReportSummary tests

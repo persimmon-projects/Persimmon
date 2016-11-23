@@ -14,5 +14,5 @@ type Printer<'T> (infos: PrinterInfo<'T> list) =
 
   member this.Dispose() = (this :> IDisposable).Dispose()
   interface IDisposable with
-    member __.Dispose() = 
+    member __.Dispose() =
       infos |> List.iter (fun info -> info.Writer.Dispose())

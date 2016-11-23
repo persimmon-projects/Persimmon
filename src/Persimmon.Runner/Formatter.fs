@@ -12,7 +12,7 @@ module Formatter =
   module ProgressFormatter =
     let dot =
       { new IFormatter<ResultNode> with
-          member x.Format(test: ResultNode): IWritable = 
+          member x.Format(test: ResultNode): IWritable =
             match test with
             | ContextResult _ -> Writable.doNothing
             | EndMarker -> Writable.newline
@@ -135,7 +135,7 @@ module Formatter =
 
     let normal (watch: Stopwatch) =
       { new IFormatter<ResultNode seq> with
-          member x.Format(results: ResultNode seq): IWritable = 
+          member x.Format(results: ResultNode seq): IWritable =
             Writable.stringSeq begin
               seq {
                 yield! results |> Seq.collect (toStrs 0)
@@ -149,7 +149,7 @@ module Formatter =
   module ErrorFormatter =
     let normal =
       { new IFormatter<string> with
-          member __.Format(message: string) = 
+          member __.Format(message: string) =
             Writable.stringSeq (Seq.singleton message)
           }
 
