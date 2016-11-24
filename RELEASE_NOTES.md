@@ -1,3 +1,7 @@
+### 2.0.1-alpha6 - November 24 2016
+* check type in collect test phase
+* dump uncaught error
+
 ### 2.0.1-alpha5 - November 21 2016
 * fix unique name
 

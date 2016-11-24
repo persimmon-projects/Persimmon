@@ -1,5 +1,5 @@
 {
-  "version": "2.0.1-alpha5",
+  "version": "2.0.1-alpha6",
   "name": "Persimmon.Runner",
   "buildOptions": {
     "debugType": "portable",
