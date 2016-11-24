@@ -79,13 +79,55 @@ module private TestCollectorImpl =
     | _ -> ()
   }
 
+  let typedefis<'T>(typ: Type) =
+#if PCL || CORE_CLR
+    typ.GetTypeInfo().IsGenericType
+#else
+    typ.IsGenericType
+#endif
+    && typ.GetGenericTypeDefinition() = typedefof<'T>
+
+  let (|SubTypeOf|_|) (matching: Type) (typ: Type) =
+#if PCL || CORE_CLR
+    if matching.GetTypeInfo().IsAssignableFrom(typ.GetTypeInfo()) then Some typ else None
+#else
+    if matching.IsAssignableFrom(typ) then Some typ else None
+#endif
+  let (|ArrayType|_|) (typ: Type) = if typ.IsArray then Some (typ.GetElementType()) else None
+  let (|GenericType|_|) (typ: Type) =
+#if PCL || CORE_CLR
+    let info = typ.GetTypeInfo()
+    if info.IsGenericType then
+      Some (typ.GetGenericTypeDefinition(), info.GetGenericParameterConstraints())
+#else
+    if typ.IsGenericType then
+      Some (typ.GetGenericTypeDefinition(), typ.GetGenericArguments())
+#endif
+    else
+      None
+
+  let collectPersimmonTests (f: unit -> obj) (typ: Type) name =
+    let testMetadataType = typeof<TestMetadata>
+    match typ with
+    | SubTypeOf testMetadataType _ ->
+      fixupAndCollectTests (f (), name, None)
+    | ArrayType elemType when typedefis<TestCase<_>>(elemType) || elemType = testMetadataType ->
+      fixupAndCollectTests (f (), name, None)
+    | GenericType (genTypeDef, _) when genTypeDef = typedefof<TestCase<_>> ->
+      fixupAndCollectTests (f (), name, None)
+    | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ seq> && (typedefis<TestCase<_>>(elemType) || elemType = testMetadataType) ->
+      fixupAndCollectTests (f (), name, None)
+    | GenericType (genTypeDef, [| elemType |]) when genTypeDef = typedefof<_ list> && (typedefis<TestCase<_>>(elemType) || elemType = testMetadataType) ->
+      fixupAndCollectTests (f (), name, None)
+    | _ -> Seq.empty
+
   /// Retreive test object via target property, and traverse.
   let private collectTestsFromProperty (p: PropertyInfo) =
-    fixupAndCollectTests (p.GetValue(null, null), p.Name, None)
+    collectPersimmonTests (fun () -> p.GetValue(null, null)) p.PropertyType p.Name
 
   /// Retreive test object via target method, and traverse.
   let private collectTestsFromMethod (m: MethodInfo) =
-    fixupAndCollectTests (m.Invoke(null, [||]), m.Name, None)
+    collectPersimmonTests (fun () -> m.Invoke(null, [||])) m.ReturnType m.Name
 
   /// Retreive test object via target type, and traverse.
   let rec collectTests (typ: Type) = seq {
