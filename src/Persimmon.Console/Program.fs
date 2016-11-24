@@ -66,12 +66,20 @@ let entryPoint (args: Args) =
     reporter.ReportError("xml format option require 'output' option.")
     -2
   elif notFounds |> List.isEmpty then
-    let asms = founds |> List.map (fun f ->
-      let assemblyRef = AssemblyName.GetAssemblyName(f.FullName)
-      Assembly.Load(assemblyRef))
-    // collect and run
-    let tests = TestCollector.collectRootTestObjects asms
-    runAndReport args.Parallel watch reporter tests
+    try
+      let asms = founds |> List.map (fun f ->
+        let assemblyRef = AssemblyName.GetAssemblyName(f.FullName)
+        Assembly.Load(assemblyRef))
+      // collect and run
+      let tests = TestCollector.collectRootTestObjects asms
+      runAndReport args.Parallel watch reporter tests
+    with e ->
+      reporter.ReportError("!!! FATAL Error !!!")
+      reporter.ReportError(e.ToString())
+      if e.InnerException <> null then
+        reporter.ReportError("InnerException:")
+        reporter.ReportError(e.InnerException.ToString())
+      -100
   else
     reporter.ReportError("file not found: " + (String.Join(", ", notFounds)))
     -2
