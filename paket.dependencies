@@ -1,6 +1,5 @@
 group Build
   source https://api.nuget.org/v3/index.json
-  source https://www.nuget.org/api/v2
 
   nuget FAKE
   nuget FAKE.Persimmon

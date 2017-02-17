@@ -9,7 +9,7 @@ open Persimmon
 module private TestCollectorImpl =
 
   let publicTypes (asm: Assembly) =
-#if PCL || CORE_CLR
+#if PCL || NETSTANDARD
     asm.ExportedTypes
     |> Seq.filter (fun typ ->
       let typ = typ.GetTypeInfo()
@@ -21,7 +21,7 @@ module private TestCollectorImpl =
 #endif
 
   let private publicNestedTypes (typ: Type) =
-#if PCL || CORE_CLR
+#if PCL || NETSTANDARD
     typ.GetTypeInfo().DeclaredNestedTypes
     |> Seq.choose (fun typ ->
       if typ.IsNestedPublic && typ.IsClass && not typ.IsGenericTypeDefinition then
@@ -80,7 +80,7 @@ module private TestCollectorImpl =
   }
 
   let typedefis<'T>(typ: Type) =
-#if PCL || CORE_CLR
+#if PCL || NETSTANDARD
     typ.GetTypeInfo().IsGenericType
 #else
     typ.IsGenericType
@@ -88,14 +88,14 @@ module private TestCollectorImpl =
     && typ.GetGenericTypeDefinition() = typedefof<'T>
 
   let (|SubTypeOf|_|) (matching: Type) (typ: Type) =
-#if PCL || CORE_CLR
+#if PCL || NETSTANDARD
     if matching.GetTypeInfo().IsAssignableFrom(typ.GetTypeInfo()) then Some typ else None
 #else
     if matching.IsAssignableFrom(typ) then Some typ else None
 #endif
   let (|ArrayType|_|) (typ: Type) = if typ.IsArray then Some (typ.GetElementType()) else None
   let (|GenericType|_|) (typ: Type) =
-#if PCL || CORE_CLR
+#if PCL || NETSTANDARD
     let info = typ.GetTypeInfo()
     if info.IsGenericType then
       Some (typ.GetGenericTypeDefinition(), info.GetGenericParameterConstraints())
@@ -134,7 +134,7 @@ module private TestCollectorImpl =
     // For properties (value binding):
     yield!
       typ
-#if PCL || CORE_CLR
+#if PCL || NETSTANDARD
         .GetTypeInfo().DeclaredProperties
       |> Seq.filter (fun x ->
         let m = x.GetMethod
@@ -151,7 +151,7 @@ module private TestCollectorImpl =
     // For methods (function binding):
     yield!
       typ
-#if PCL || CORE_CLR
+#if PCL || NETSTANDARD
         .GetTypeInfo().DeclaredMethods
       // Ignore getter methods / open generic methods / method has parameters
       |> Seq.filter (fun m ->

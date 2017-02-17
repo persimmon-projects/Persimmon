@@ -12,11 +12,14 @@ open System.IO
 open SourceLink
 #endif
 
-let isDotnetInstalled = DotNetCli.isInstalled()
+let isDotnetInstalled = DotNetCli.isInstalled() && isLocalBuild
 
 let outDir = "bin"
 
 let project = "Persimmon"
+
+let persimmonNETCoreProject = "src/Persimmon.NETCore/Persimmon.NETCore.fsproj"
+let persimmonRunnerNETCoreProject = "src/Persimmon.Runner.NETCore/Persimmon.Runner.NETCore.fsproj"
 
 // File system information
 let solutionFile  = "Persimmon.sln"
@@ -74,16 +77,15 @@ Target "AssemblyInfo" (fun _ ->
       |> CreateFSharpAssemblyInfo (sprintf "./src/Persimmon.Runner%s/AssemblyInfo.fs" suffix)
 )
 
-Target "SetVersionInProjectJSON" (fun _ ->
-  !! "./**/project.json"
-  |> Seq.iter (DotNetCli.SetVersionInProjectJson release.NugetVersion)
-)
-
 // Copies binaries from default VS location to exepcted bin folder
 // But keeps a subdirectory structure for each project in the
 // src folder to support multiple project outputs
 Target "CopyBinaries" (fun _ ->
     !! "src/**/*.??proj"
+    |> Seq.filter (fun p ->
+      isDotnetInstalled
+        || (not <| System.IO.Path.GetFileNameWithoutExtension(p).EndsWith("NETCore"))
+    )
     |>  Seq.map (fun f -> ((System.IO.Path.GetDirectoryName f) @@ "bin/Release", outDir @@ (System.IO.Path.GetFileNameWithoutExtension f)))
     |>  Seq.iter (fun (fromDir, toDir) -> CopyDir toDir fromDir (fun _ -> true))
 )
@@ -113,10 +115,27 @@ Target "Build" (fun _ ->
 )
 
 Target "Build.NETCore" (fun _ ->
-  DotNetCli.Restore id
+  DotNetCli.Restore (fun p ->
+    { p with
+        Project = persimmonNETCoreProject
+    }
+  )
+  DotNetCli.Build (fun p ->
+    { p with
+        Project = persimmonNETCoreProject
+    }
+  )
 
-  !! "src/**/project.json"
-  |> DotNetCli.Build id
+  DotNetCli.Restore (fun p ->
+    { p with
+        Project = persimmonRunnerNETCoreProject
+    }
+  )
+  DotNetCli.Build (fun p ->
+    { p with
+        Project = persimmonRunnerNETCoreProject
+    }
+  )
 )
 
 // --------------------------------------------------------------------------------------
@@ -133,8 +152,7 @@ Target "RunTests" (fun _ ->
 )
 
 Target "RunTests.NETCore" (fun _ ->
-  !! "tests/**/project.json"
-  |> DotNetCli.Test id
+  ()
 )
 
 let isAppVeyor = buildServer = AppVeyor
@@ -279,15 +297,23 @@ Target "NuGet.Pack" (fun _ ->
 Target "NuGet.AddNetCore" (fun _ ->
   if not isDotnetInstalled then failwith "You need to install .NET core to publish NuGet packages"
 
-  !! "src/**/project.json"
-  |> DotNetCli.Pack id
+  DotNetCli.Pack (fun p ->
+    { p with
+        Project = persimmonNETCoreProject
+    }
+  )
+  DotNetCli.Pack (fun p ->
+    { p with
+        Project = persimmonRunnerNETCoreProject
+    }
+  )
 
   for proj in ["Persimmon"; "Persimmon.Runner"] do
 
     let nupkg = sprintf "../../bin/%s.%s.nupkg" proj (release.NugetVersion)
     let netcoreNupkg = sprintf "bin/Release/%s.%s.nupkg" proj (release.NugetVersion)
 
-    let exitCode = Shell.Exec("dotnet", sprintf """mergenupkg --source "%s" --other "%s" --framework netstandard1.6 """ nupkg netcoreNupkg, (sprintf "src/%s/" proj))
+    let exitCode = Shell.Exec("dotnet", sprintf """mergenupkg --source "%s" --other "%s" --framework netstandard1.6 """ nupkg netcoreNupkg, (sprintf "src/%s.NETCore/" proj))
     if exitCode <> 0 then failwithf "Command failed with exit code %i" exitCode
 )
 
@@ -435,11 +461,10 @@ Target "All" DoNothing
 
 "Clean"
   ==> "AssemblyInfo"
-  ==> "SetVersionInProjectJSON"
   =?> ("Build", not isTravisCI)
+  =?> ("NETCore", isDotnetInstalled)
   =?> ("CopyBinaries", not isTravisCI)
   =?> ("RunTests", not isTravisCI)
-  =?> ("NETCore", isDotnetInstalled)
   =?> ("UploadTestResults",isAppVeyor)
   =?> ("GenerateReferenceDocs",isLocalBuild)
   =?> ("GenerateDocs",isLocalBuild)

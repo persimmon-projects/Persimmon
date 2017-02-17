@@ -7,7 +7,7 @@ open Microsoft.FSharp.Reflection
 module internal Runtime =
   let getModule<'TSameAssemblyType>(name: string) =
     (typeof<'TSameAssemblyType>)
-#if PCL || CORE_CLR
+#if PCL || NETSTANDARD
       .GetTypeInfo().Assembly.GetType(name)
 #else
       .Assembly.GetType(name)
@@ -28,7 +28,7 @@ module internal Runtime =
 
     let getMethod name (typ: Type) =
       typ
-#if PCL || CORE_CLR
+#if PCL || NETSTANDARD
         .GetTypeInfo().GetDeclaredMethod(name)
 #else
         .GetMethod(name)

@@ -4,7 +4,7 @@ open System
 open System.Collections
 open Microsoft.FSharp.Reflection
 
-#if PCL || CORE_CLR
+#if PCL || NETSTANDARD
 open System.Reflection
 #endif
 
@@ -12,7 +12,7 @@ module internal PrettyPrinter =
 
   let private isGenericType (typ: Type) =
     typ
-#if PCL || CORE_CLR
+#if PCL || NETSTANDARD
       .GetTypeInfo().IsGenericType
 #else
       .IsGenericType
