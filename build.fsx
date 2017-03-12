@@ -300,11 +300,19 @@ Target "NuGet.AddNetCore" (fun _ ->
   DotNetCli.Pack (fun p ->
     { p with
         Project = persimmonNETCoreProject
+        AdditionalArgs =
+          [
+            sprintf "/p:Version=%s" release.NugetVersion
+          ]
     }
   )
   DotNetCli.Pack (fun p ->
     { p with
         Project = persimmonRunnerNETCoreProject
+        AdditionalArgs =
+          [
+            sprintf "/p:Version=%s" release.NugetVersion
+          ]
     }
   )
 
