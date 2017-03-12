@@ -11,7 +11,7 @@ module TestResult =
     new InvalidOperationException() |> raise
   let private endMarkerTestCase =
     new TestCase<unit>(Some "endMarker", [], endMarkerTestBody) :> TestCase
-  let private endMarkerResult : AssertionResult<unit> = NotPassed (Skipped "endMarker")
+  let private endMarkerResult : AssertionResult<unit> = NotPassed (None, Skipped "endMarker")
   let private endMarkerResults = [endMarkerResult] |> NonEmptyList.ofSeq
 
   /// The marker represents the end of tests.
@@ -21,7 +21,7 @@ module TestResult =
   let addAssertionResult x = function
     | Done (testCase, (Passed _, []), d) -> Done (testCase, NonEmptyList.singleton x, d)
     | Done (testCase, results, d) -> Done (testCase, NonEmptyList.cons x results, d)
-    | Error (testCase, es, results, d) -> Error (testCase, es, (match x with Passed _ -> results | NotPassed x -> x::results), d)
+    | Error (testCase, es, results, d) -> Error (testCase, es, (match x with Passed _ -> results | NotPassed(_, x) -> x::results), d)
 
   let addAssertionResults (xs: NonEmptyList<AssertionResult<_>>) = function
     | Done (testCase, (Passed _, []), d) -> Done (testCase, xs, d)

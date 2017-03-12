@@ -46,10 +46,10 @@ module Xml =
         Context("FormatterTest", [TestCase.makeDone (Some "testcase0") [] (Passed ())])
       ]
       [
-        Context("FormatterTest", [TestCase.makeDone (Some "testcase0") [] (NotPassed (Skipped "skip test"))])
+        Context("FormatterTest", [TestCase.makeDone (Some "testcase0") [] (NotPassed(None, Skipped "skip test"))])
       ]
       [
-        Context("FormatterTest", [TestCase.makeDone (Some "testcase0") [] (NotPassed (Violated "fail test"))])
+        Context("FormatterTest", [TestCase.makeDone (Some "testcase0") [] (NotPassed(None, Violated "fail test"))])
       ]
       [
         Context("FormatterTest", [TestCase.makeError (Some "testcase0") [] (exn("test"))])

@@ -64,7 +64,7 @@ Target "AssemblyInfo" (fun _ ->
         Attribute.InformationalVersion release.NugetVersion
     ]
 
-    for suffix in [""; ".NET40"; ".Portable259"] do
+    for suffix in [""; ".NET40"; ".NET45"; ".Portable259"] do
       [
         Attribute.Title "Persimmon"
         Attribute.Description ""
@@ -210,6 +210,11 @@ Target "NuGet.Pack" (fun _ ->
     "bin/Persimmon.NET40/Persimmon.XML"
   ]
   |> CopyFiles (packagingDir @@ "lib" @@ "net40")
+  [
+    "bin/Persimmon.NET45/Persimmon.dll"
+    "bin/Persimmon.NET45/Persimmon.XML"
+  ]
+  |> CopyFiles (packagingDir @@ "lib" @@ "net45")
   [
     "bin/Persimmon.Portable259/Persimmon.dll"
     "bin/Persimmon.Portable259/Persimmon.XML"
