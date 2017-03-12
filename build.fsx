@@ -216,6 +216,10 @@ Target "NuGet.Pack" (fun _ ->
   ]
   |> CopyFiles (packagingDir @@ "lib" @@ "portable-net45+win8+wp8+wpa81+Xamarin.Mac+MonoAndroid10+MonoTouch10+Xamarin.iOS10")
 
+  let dependencies = [
+    ("FSharp.Core", "3.1.2.5")
+  ]
+
   NuGet (fun p ->
     {
       p with
@@ -227,11 +231,11 @@ Target "NuGet.Pack" (fun _ ->
           [
             {
               FrameworkVersion = "net20"
-              Dependencies = []
+              Dependencies = dependencies
             }
             {
               FrameworkVersion = "net40"
-              Dependencies = []
+              Dependencies = dependencies
             }
           ]
     }

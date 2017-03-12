@@ -1,3 +1,12 @@
+source https://api.nuget.org/v3/index.json
+
+nuget FSharp.Core <= 3.1.2.5
+
+group Console
+  source https://api.nuget.org/v3/index.json
+
+  nuget FSharp.Core
+
 group Build
   source https://api.nuget.org/v3/index.json
 
