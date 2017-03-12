@@ -12,7 +12,9 @@ open System.IO
 open SourceLink
 #endif
 
-let isDotnetInstalled = DotNetCli.isInstalled() && isLocalBuild
+let isAppVeyor = buildServer = AppVeyor
+
+let isDotnetInstalled = DotNetCli.isInstalled() && not isAppVeyor
 
 let outDir = "bin"
 
@@ -154,8 +156,6 @@ Target "RunTests" (fun _ ->
 Target "RunTests.NETCore" (fun _ ->
   ()
 )
-
-let isAppVeyor = buildServer = AppVeyor
 
 Target "UploadTestResults" (fun _ ->
     let url = sprintf "https://ci.appveyor.com/api/testresults/junit/%s" AppVeyor.AppVeyorEnvironment.JobId
