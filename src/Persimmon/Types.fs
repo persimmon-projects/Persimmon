@@ -143,25 +143,25 @@ type TestMetadata =
   override this.ToString() = this.UniqueName
 
   /// For internal use only.
-  static member internal safeName (name: string option, unresolved: string) =
+  static member internal SafeName (name: string option, unresolved: string) =
     match name with
     | Some name -> name
     | None -> unresolved
 
   /// For internal use only.
-  member internal this.trySetIndex(index: int) =
+  member internal this.TrySetIndex(index: int) =
     match this._index with
     | None -> this._index <- Some index
     | _ -> ()
 
   /// For internal use only.
-  member internal this.trySetSymbolName(symbolName: string) =
+  member internal this.TrySetSymbolName(symbolName: string) =
     match this._symbolName with
     | None -> this._symbolName <- Some symbolName
     | _ -> ()
 
   /// For internal use only.
-  member internal this.trySetParent(parent: TestMetadata) =
+  member internal this.TrySetParent(parent: TestMetadata) =
     match this._parent with
     | None -> this._parent <- Some parent
     | _ -> ()
@@ -212,7 +212,7 @@ type TestCase internal (name: string option, parameters: (Type * obj) seq) =
   member this.Run() = this.OnAsyncRun() |> Async.RunSynchronously
 
   /// Create unique name.
-  member private this.createUniqueName baseName =
+  member private this.CreateUniqueName baseName =
     let parameters = this.Parameters |> PrettyPrinter.printAll
     match this.Index, parameters.Length, this.Parameters.Length with
     // Not assigned index and parameters.
@@ -227,11 +227,11 @@ type TestCase internal (name: string option, parameters: (Type * obj) seq) =
   /// Metadata unique name.
   /// If the test has parameters then the value contains them.
   override this.UniqueName =
-    this.SymbolName |> this.createUniqueName
+    this.SymbolName |> this.CreateUniqueName
 
   /// Metadata display name.
   override this.DisplayName =
-    TestMetadata.traverseDisplayName this |> this.createUniqueName
+    TestMetadata.traverseDisplayName this |> this.CreateUniqueName
 
 /// Non generic view for test result. (fake base type)
 /// Can use active recognizers: ContextResult cr / TestResult tr / EndMarker
@@ -404,10 +404,10 @@ type Context =
   new (name: string, children: TestMetadata seq) as this =
     { inherit TestMetadata(Some name) } then
       this._children <- children |> Seq.toArray
-      for child in this._children do child.trySetParent(this :> TestMetadata)
+      for child in this._children do child.TrySetParent(this :> TestMetadata)
 
   /// Construct unique name.
-  member private this.createUniqueName baseName =
+  member private this.CreateUniqueName baseName =
     match this.Index with
     // If index not assigned.
     | None -> baseName
@@ -417,11 +417,11 @@ type Context =
   /// Metadata unique name.
   /// If the test has parameters then the value contains them.
   override this.UniqueName =
-    this.SymbolName |> this.createUniqueName
+    this.SymbolName |> this.CreateUniqueName
 
   /// Metadata display name.
   override this.DisplayName =
-    TestMetadata.traverseDisplayName this |> this.createUniqueName
+    TestMetadata.traverseDisplayName this |> this.CreateUniqueName
 
   /// Child tests.
   member this.Children = this._children

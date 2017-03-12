@@ -42,8 +42,8 @@ module private TestCollectorImpl =
     | :? TestCase as testCase ->
       // Set symbol name.
       match index with
-      | Some i -> testCase.trySetIndex i
-      | None -> testCase.trySetSymbolName symbolName
+      | Some i -> testCase.TrySetIndex i
+      | None -> testCase.TrySetSymbolName symbolName
       yield testCase :> TestMetadata
 
     /////////////////////////////////////////////////////
@@ -51,8 +51,8 @@ module private TestCollectorImpl =
     | :? Context as context ->
       // Set symbol name.
       match index with
-      | Some i -> context.trySetIndex i
-      | None -> context.trySetSymbolName symbolName
+      | Some i -> context.TrySetIndex i
+      | None -> context.TrySetSymbolName symbolName
       yield context :> TestMetadata
 
     /////////////////////////////////////////////////////
