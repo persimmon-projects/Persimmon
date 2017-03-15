@@ -20,3 +20,8 @@ group Build
   github persimmon-projects/Persimmon.Materials StandardIcons/persimmon.ico
   github persimmon-projects/Persimmon.Materials StandardIcons/persimmon_128.png
   github bluebird75/luaunit junitxml/junit-jenkins.xsd
+
+group Test
+  source https://api.nuget.org/v3/index.json
+
+  nuget FSharp.Core = 4.0.0.1
