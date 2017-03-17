@@ -25,6 +25,6 @@ module AsyncTest =
     let! e =
       match asyncRun { it asyncRaiseMyException } |> run with
       | Error(m, es, _, _) -> TestCase.makeDone m.Name m.Parameters (Passed (List.head es))
-      | Done(m, xs, _) -> TestCase.makeDone m.Name m.Parameters (NotPassed (Violated "expected throw exception, but was success"))
+      | Done(m, xs, _) -> TestCase.makeDone m.Name m.Parameters (NotPassed(None, Violated "expected throw exception, but was success"))
     do! assertEquals (typeof<MyException>) (e.GetType())
   }

@@ -39,15 +39,19 @@ module Formatter =
       let right = width - res.Length
       res + (String.replicate right (string barChar))
 
-    let private causesToStrs indent (causes: NotPassedCause seq) =
+    let private causesToStrs indent (causes: (int option * NotPassedCause) seq) =
       causes
-      |> Seq.mapi (fun i (Skipped c | Violated c) -> (i + 1, c))
-      |> Seq.collect (fun (i, c) ->
+      |> Seq.mapi (fun i (l, (Skipped c | Violated c)) -> (i + 1, l,  c))
+      |> Seq.collect (fun (i, l, c) ->
           seq {
             match c.Split([|"\r\n";"\r";"\n"|], StringSplitOptions.None) |> Array.toList with
             | [] -> yield ""
             | x::xs ->
                 let no = (string i) + ". "
+                let x, xs =
+                  match l with
+                  | Some l -> (sprintf "Line Number: %d" l, x::xs)
+                  | None -> (x, xs)
                 yield indent + no + x
                 yield! xs |> Seq.map (fun x -> indent + (String.replicate no.Length " ") + x)
           })
@@ -85,8 +89,11 @@ module Formatter =
             if testResult.AssertionResults.Length >= 1 then
               yield (bar (70 - indent.Length) '-' "finished assertions")
               yield! testResult.AssertionResults
-                |> Seq.filter (fun ar -> ar.Status <> None)
-                |> Seq.map (fun ar -> ar.Status.Value)
+                |> Seq.choose (fun ar ->
+                  match ar.Status with
+                  | None -> None
+                  | Some cause -> Some (ar.LineNumber, cause)
+                )
                 |> causesToStrs indent
             yield indent + (bar (70 - indent.Length) '-' "exceptions")
             yield! exns |> Seq.toList |> List.rev |> exnsToStrs indent
@@ -101,8 +108,11 @@ module Formatter =
             | Some (Violated _) ->
                 yield indent + "Assertion Violated: " + testResult.TestCase.DisplayName
             yield! testResult.AssertionResults
-              |> Seq.filter (fun ar -> ar.Status <> None)
-              |> Seq.map (fun ar -> ar.Status.Value)
+              |> Seq.choose (fun ar ->
+                match ar.Status with
+                | None -> None
+                | Some cause -> Some (ar.LineNumber, cause)
+              )
               |> causesToStrs indent
           }
 

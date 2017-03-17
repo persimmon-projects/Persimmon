@@ -13,7 +13,7 @@ let parameterize = ParameterizeBuilder()
 
 /// Skip the test case.
 let skip message (target: TestCase<'T>) : TestCase<'T> =
-  TestCase.makeDone target.Name target.Parameters (NotPassed (Skipped message))
+  TestCase.makeDone target.Name target.Parameters (NotPassed(None, Skipped message))
 
 let timeout time (target: TestCase<'T>): TestCase<'T> =
   let body _ =

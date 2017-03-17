@@ -47,8 +47,8 @@ module TestCase =
 //    new TestCase<obj>(testCase.Name, testCase.Parameters, asyncBody)
 
   /// Add not passed test after test.
-  let addNotPassed notPassedCause (x: TestCase<_>) =
-    new TestCase<_>(x.Name, x.Parameters, fun _ -> x.Run() |> TestResult.addAssertionResult (NotPassed notPassedCause))
+  let addNotPassed line notPassedCause (x: TestCase<_>) =
+    new TestCase<_>(x.Name, x.Parameters, fun _ -> x.Run() |> TestResult.addAssertionResult (NotPassed(line, notPassedCause)))
 
   let private runNoValueTest (x: TestCase<'T>) (rest: 'T -> TestCase<'U>) =
     match x.Run() with
@@ -78,7 +78,7 @@ module TestCase =
           let testRes = (rest Unchecked.defaultof<'T>).Run()
           watch.Stop()
           testRes
-          |> TestResult.addAssertionResults (NonEmptyList.make (NotPassed head) (tail |> List.map NotPassed))
+          |> TestResult.addAssertionResults (NonEmptyList.make (NotPassed(None, head)) (tail |> List.map (fun x -> NotPassed(None, x))))
           |> TestResult.addDuration duration
       with e ->
         watch.Stop()
@@ -98,7 +98,7 @@ module TestCase =
         | [] -> testRes |> TestResult.addExceptions es
         | head::tail ->
           testRes
-          |> TestResult.addAssertionResults (NonEmptyList.make (NotPassed head) (tail |> List.map NotPassed))
+          |> TestResult.addAssertionResults (NonEmptyList.make (NotPassed(None, head)) (tail |> List.map (fun x -> NotPassed(None, x))))
           |> TestResult.addDuration duration
           |> TestResult.addExceptions es
       with e ->
@@ -124,7 +124,7 @@ module TestCase =
         |> NonEmptyList.toSeq |> AssertionResult.Seq.onlyNotPassed |> Seq.toList
       match notPassed with
       | [] -> failwith "oops!"
-      | head::tail -> Done (testCase, NonEmptyList.make (NotPassed head) (tail |> List.map NotPassed), duration)
+      | head::tail -> Done (testCase, NonEmptyList.make (NotPassed(None, head)) (tail |> List.map (fun x -> NotPassed(None, x))), duration)
     | Error (testCase, es, results, duration) ->
       // If the TestCase has some values,
       // the test is not continuable.

@@ -20,6 +20,7 @@ type NotPassedCause =
 /// Can use active recognizers: Passed / NotPassed cause
 type AssertionResult =
   abstract Value : obj option
+  abstract LineNumber: int option
   abstract Status : NotPassedCause option
   abstract Box : unit -> AssertionResult<obj>
 
@@ -28,23 +29,30 @@ and AssertionResult<'T> =
     /// The assertion is passed.
   | Passed of 'T
     /// The assertion is not passed.
-  | NotPassed of NotPassedCause
+  | NotPassed of int option * NotPassedCause
 
   /// For internal use only.
   member this.Box() =
     match this with
     | Passed value -> Passed (value :> obj)
-    | NotPassed cause -> NotPassed cause
+    | NotPassed(line, cause) -> NotPassed(line, cause)
 
   interface AssertionResult with
     member this.Value =
       match this with
       | Passed value -> Some (value :> obj)
       | NotPassed _ -> None
+
     member this.Status =
       match this with
       | Passed _ -> None
-      | NotPassed cause -> Some cause
+      | NotPassed(_, cause) -> Some cause
+
+    member this.LineNumber =
+      match this with
+      | Passed _ -> None
+      | NotPassed(line, _) -> line
+
     member this.Box() = this.Box()
 
 /// NotPassedCause manipulators.
@@ -54,7 +62,7 @@ module NotPassedCause =
   /// NotPassedCause via sequence manipulators.
   module Seq =
 
-    let toAssertionResultList xs = xs |> Seq.map NotPassed
+    let toAssertionResultList xs = xs |> Seq.map (fun x -> NotPassed(None, x))
 
 /// AssertionResult manipulators.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
@@ -73,7 +81,7 @@ module AssertionResult =
   module Seq =
 
     let onlyNotPassed xs =
-      xs |> Seq.choose (function NotPassed x -> Some x | _ -> None)
+      xs |> Seq.choose (function NotPassed(_, x) -> Some x | _ -> None)
 
     /// Calculate the typical assertion result.
     /// It returns most important result.

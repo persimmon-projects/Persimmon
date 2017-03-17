@@ -45,11 +45,12 @@ type TestBuilder private (name: string option) =
           | Error _ as e -> e
         )
       | _ -> c
-    | UnitAssertionResult (NotPassed cause) ->
+    | UnitAssertionResult (NotPassed(line, cause)) ->
         assert (typeof<'T> = typeof<unit>)
         let res = f Unchecked.defaultof<'T> // TODO : try-with
-        res |> TestCase.addNotPassed cause
-    | NonUnitAssertionResult (NotPassed cause) -> TestCase.makeDone name [] (NotPassed cause)
+        res |> TestCase.addNotPassed line cause
+    | NonUnitAssertionResult (NotPassed(line, cause)) ->
+      TestCase.makeDone name [] (NotPassed(line, cause))
     | UnitTestCase case ->
         TestCase.combine (NoValueTest case) f
     | NonUnitTestCase case ->

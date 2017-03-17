@@ -17,7 +17,7 @@ module Helper =
       | Done (m, (Persimmon.Passed (actual: 'T), []), d) -> Done (m, (assertEquals expected actual, []), d)
       | Done (m, results, d) -> Done (m, results |> NonEmptyList.map (function
         | Passed _ -> Passed ()
-        | NotPassed x -> NotPassed x), d)
+        | NotPassed(l, x) -> NotPassed(l, x)), d)
       | Error (m, es, results, d) -> Error (m, es, results, d)
     TestCase.initForSynch x.Name x.Parameters (fun _ -> inner (run x))
 
@@ -27,7 +27,7 @@ module Helper =
         Done (m, (fail (sprintf "Expect: Failure\nActual: %A" actual), []), d)
       | Done (m, results, d) ->
         results
-        |> NonEmptyList.map (function NotPassed (Skipped x | Violated x) -> x | Persimmon.Passed x -> sprintf "Expected is NotPased but Passed(%A)" x)
+        |> NonEmptyList.map (function NotPassed(_, (Skipped x | Violated x)) -> x | Persimmon.Passed x -> sprintf "Expected is NotPased but Passed(%A)" x)
         |> fun actual -> Done (m, (assertEquals expectedMessages actual, []), d)
       | Error (m, es, results, d) -> Error (m, es, results, d)
     TestCase.initForSynch x.Name x.Parameters (fun _ -> inner (run x))
@@ -43,7 +43,7 @@ module Helper =
         Done (m, (fail (sprintf "Expect: raise %s\nActual: %A" (typeof<'T>.Name) actual), []), d)
       | Done (m, results, d) -> Done (m, results |> NonEmptyList.map (function
         | Passed _ -> Passed ()
-        | NotPassed x -> NotPassed x), d)
+        | NotPassed(l, x) -> NotPassed(l, x)), d)
       | Error (m, [], results, d) ->
         Done (m, (fail (sprintf "Expect: raise %s\nActual: not raise exception" (typeof<'T>.Name)), []), d)
       | Error (m, x::_, results, d) -> Done (m, (assertEquals typeof<'T> (x.GetType()), []), d)
