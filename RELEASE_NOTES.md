@@ -1,3 +1,10 @@
+### 2.0.1-beta1 - April 3 2017
+* support F# 4.1
+* add line number information [#116](https://github.com/persimmon-projects/Persimmon/pull/116)
+* explicit dependency on FSharp.Core nuget package
+* fix `use` scope in TestBuilder [#117](https://github.com/persimmon-projects/Persimmon/pull/117), [#118](https://github.com/persimmon-projects/Persimmon/pull/118)
+* fix `try-finally` scope in TestBuilder [#119](https://github.com/persimmon-projects/Persimmon/pull/119)
+
 ### 2.0.1-alpha6 - November 24 2016
 * check type in collect test phase
 * dump uncaught error
