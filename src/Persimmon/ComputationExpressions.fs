@@ -65,7 +65,16 @@ type TestBuilder private (name: string option) =
           case.Run()
         finally match box x with null -> () | _ -> x.Dispose()
     })
-  member __.TryFinally(f, g) = try f () finally g ()
+  member __.TryFinally(f, g) =
+    TestCase.init None [] (fun _ -> async {
+      return
+        try
+          let case =
+            try f ()
+            with e -> TestCase.makeError None [] e
+          case.Run()
+        finally g ()
+    })
   member __.Delay(f) = f
   member __.Run(f: unit -> TestCase<_>) =
     TestCase.init name [] (fun _ ->
