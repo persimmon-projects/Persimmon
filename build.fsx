@@ -242,6 +242,10 @@ Target "NuGet.Pack" (fun _ ->
               FrameworkVersion = "net40"
               Dependencies = dependencies
             }
+            {
+              FrameworkVersion = "net45"
+              Dependencies = dependencies
+            }
           ]
     }
   ) "src/Persimmon/Persimmon.nuspec"

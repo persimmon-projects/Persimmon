@@ -1,5 +1,4 @@
 <Project Sdk="FSharp.NET.Sdk;Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <AssemblyName>Persimmon.Runner</AssemblyName>
     <TargetFramework>netstandard1.6</TargetFramework>
@@ -9,7 +8,6 @@
     <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
     <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="..\Persimmon.Runner\Writable.fs" />
     <Compile Include="..\Persimmon.Runner\Formatter.fs" />
@@ -18,13 +16,10 @@
     <Compile Include="..\Persimmon.Runner\TestCollector.fs" />
     <Compile Include="..\Persimmon.Runner\TestRunner.fs" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="FSharp.NET.Sdk" Version="1.0.*" PrivateAssets="All" />
-    <PackageReference Include="FSharp.Core" Version="4.1.2" />
     <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
     <DotNetCliToolReference Include="dotnet-mergenupkg" Version="1.0.1" />
     <ProjectReference Include="..\Persimmon.NETCore\Persimmon.NETCore.fsproj" />
   </ItemGroup>
-
 </Project>
