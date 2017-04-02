@@ -193,6 +193,19 @@ module PersimmonTest =
       do! assertPred value.Disposed
     }
 
+  let ``should not dispose until the end of test(issue #117)`` =
+    test "should not dispose until the end of test(issue #117)" {
+      use disposable = new DisposableValue()
+      let subtest =
+        test "subtest" {
+          return
+            if disposable.Disposed then
+              raise TestException
+        }
+      do! subtest
+      do! disposable.Disposed |> assertEquals false
+    }
+
   let ``check try finally`` =
     let count = ref 0
     let test1 () = test "use and exception" {
