@@ -51,10 +51,10 @@
         <td class="member-name">
 
           <code onmouseout="hideTip(event, '26', 26)" onmouseover="showTip(event, '26', 26)">
-            addNotPassed notPassedCause x
+            addNotPassed line notPassedCause x
           </code>
           <div class="tip" id="26">
-            <strong>Signature:</strong> notPassedCause:NotPassedCause -&gt; x:TestCase&lt;&#39;a&gt; -&gt; TestCase&lt;&#39;a&gt;<br />
+            <strong>Signature:</strong> line:int option -&gt; notPassedCause:NotPassedCause -&gt; x:TestCase&lt;&#39;a&gt; -&gt; TestCase&lt;&#39;a&gt;<br />
                           <strong>Type parameters:</strong> 'a          </div>
         </td>
         <td class="xmldoc">
@@ -94,8 +94,8 @@
             init name parameters asyncBody
           </code>
           <div class="tip" id="28">
-            <strong>Signature:</strong> name:string option -&gt; parameters:seq&lt;Type * obj&gt; -&gt; asyncBody:(TestCase&lt;&#39;b&gt; -&gt; Async&lt;TestResult&lt;&#39;b&gt;&gt;) -&gt; TestCase&lt;&#39;b&gt;<br />
-                          <strong>Type parameters:</strong> 'b          </div>
+            <strong>Signature:</strong> name:string option -&gt; parameters:seq&lt;Type * obj&gt; -&gt; asyncBody:(TestCase&lt;&#39;a&gt; -&gt; Async&lt;TestResult&lt;&#39;a&gt;&gt;) -&gt; TestCase&lt;&#39;a&gt;<br />
+                          <strong>Type parameters:</strong> 'a          </div>
         </td>
         <td class="xmldoc">
             <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/TestCase.fs#L22-22" class="github-link">
@@ -114,8 +114,8 @@
             initForSynch name parameters body
           </code>
           <div class="tip" id="29">
-            <strong>Signature:</strong> name:string option -&gt; parameters:seq&lt;Type * obj&gt; -&gt; body:(TestCase&lt;&#39;?7448&gt; -&gt; TestResult&lt;&#39;?7448&gt;) -&gt; TestCase&lt;&#39;?7448&gt;<br />
-                          <strong>Type parameters:</strong> '?7448          </div>
+            <strong>Signature:</strong> name:string option -&gt; parameters:seq&lt;Type * obj&gt; -&gt; body:(TestCase&lt;&#39;?7753&gt; -&gt; TestResult&lt;&#39;?7753&gt;) -&gt; TestCase&lt;&#39;?7753&gt;<br />
+                          <strong>Type parameters:</strong> '?7753          </div>
         </td>
         <td class="xmldoc">
             <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/TestCase.fs#L28-28" class="github-link">
@@ -155,8 +155,8 @@ TODO: Omit all synch caller.</p>
             makeError name parameters exn
           </code>
           <div class="tip" id="31">
-            <strong>Signature:</strong> name:string option -&gt; parameters:seq&lt;Type * obj&gt; -&gt; exn:exn -&gt; TestCase&lt;&#39;b&gt;<br />
-                          <strong>Type parameters:</strong> 'b          </div>
+            <strong>Signature:</strong> name:string option -&gt; parameters:seq&lt;Type * obj&gt; -&gt; exn:exn -&gt; TestCase&lt;&#39;a&gt;<br />
+                          <strong>Type parameters:</strong> 'a          </div>
         </td>
         <td class="xmldoc">
             <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/TestCase.fs#L36-36" class="github-link">

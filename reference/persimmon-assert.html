@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>TestCollector - Persimmon</title>
+    <title>Assert - Persimmon</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="persimmon-projects">
@@ -30,103 +30,124 @@
 
 
 
-<h1>TestCollector</h1>
+<h1>Assert</h1>
 <p>
-  <span>Namespace: Persimmon.Internals</span><br />
+  <span>Namespace: Persimmon</span><br />
 </p>
 <div class="xmldoc">
 </div>
-  <h3>Constructors</h3>
+  <h3>Static members</h3>
   <table class="table table-bordered member-list">
     <thead>
-      <tr><td>Constructor</td><td>Description</td></tr>
+      <tr><td>Static member</td><td>Description</td></tr>
     </thead>
     <tbody>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '165', 165)" onmouseover="showTip(event, '165', 165)">
-            new()
+          <code onmouseout="hideTip(event, '67', 67)" onmouseover="showTip(event, '67', 67)">
+            Equal(expected, actual, line)
           </code>
-          <div class="tip" id="165">
-            <strong>Signature:</strong> unit -&gt; TestCollector<br />
-                      </div>
+          <div class="tip" id="67">
+            <strong>Signature:</strong> (expected:&#39;?7422 * actual:&#39;?7422 * line:int option) -&gt; AssertionResult&lt;unit&gt;<br />
+                          <strong>Type parameters:</strong> '?7422          </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Internals/TestCollector.fs#L175-175" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Assertions.fs#L23-23" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           
-              <p>CompiledName: <code>.ctor</code></p>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <h3>Instance members</h3>
-  <table class="table table-bordered member-list">
-    <thead>
-      <tr><td>Instance member</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="member-name">
-
-          <code onmouseout="hideTip(event, '166', 166)" onmouseover="showTip(event, '166', 166)">
-            Collect(targetAssembly)
-          </code>
-          <div class="tip" id="166">
-            <strong>Signature:</strong> targetAssembly:Assembly -&gt; Context []<br />
-                      </div>
-        </td>
-        <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Internals/TestCollector.fs#L194-194" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          <p>Collect tests with basic procedure.</p>
-
-
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '167', 167)" onmouseover="showTip(event, '167', 167)">
-            CollectAndCallback(...)
+          <code onmouseout="hideTip(event, '68', 68)" onmouseover="showTip(event, '68', 68)">
+            Fail(message, line)
           </code>
-          <div class="tip" id="167">
-            <strong>Signature:</strong> (targetAssembly:Assembly * callback:Action&lt;obj&gt;) -&gt; unit<br />
-                      </div>
+          <div class="tip" id="68">
+            <strong>Signature:</strong> (message:string * line:int option) -&gt; AssertionResult&lt;&#39;?7420&gt;<br />
+                          <strong>Type parameters:</strong> '?7420          </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Internals/TestCollector.fs#L204-204" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Assertions.fs#L20-20" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          <p>CollectAndCallback collect test cases and callback. (Internal use only)</p>
-
-
+          
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '168', 168)" onmouseover="showTip(event, '168', 168)">
-            CollectOnlyTestCases(targetAssembly)
+          <code onmouseout="hideTip(event, '69', 69)" onmouseover="showTip(event, '69', 69)">
+            Ignore(message, line)
           </code>
-          <div class="tip" id="168">
-            <strong>Signature:</strong> targetAssembly:Assembly -&gt; TestCase []<br />
-                      </div>
+          <div class="tip" id="69">
+            <strong>Signature:</strong> (message:string * line:int option) -&gt; AssertionResult&lt;&#39;?7418&gt;<br />
+                          <strong>Type parameters:</strong> '?7418          </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Internals/TestCollector.fs#L198-198" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Assertions.fs#L17-17" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          <p>Collect test cases.</p>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
 
+          <code onmouseout="hideTip(event, '70', 70)" onmouseover="showTip(event, '70', 70)">
+            NotEqual(expected, actual, line)
+          </code>
+          <div class="tip" id="70">
+            <strong>Signature:</strong> (expected:&#39;?7424 * actual:&#39;?7424 * line:int option) -&gt; AssertionResult&lt;unit&gt;<br />
+                          <strong>Type parameters:</strong> '?7424          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Assertions.fs#L29-29" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
 
+          <code onmouseout="hideTip(event, '71', 71)" onmouseover="showTip(event, '71', 71)">
+            Pass(value)
+          </code>
+          <div class="tip" id="71">
+            <strong>Signature:</strong> value:&#39;?7416 -&gt; AssertionResult&lt;&#39;?7416&gt;<br />
+                          <strong>Type parameters:</strong> '?7416          </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Assertions.fs#L15-15" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '72', 72)" onmouseover="showTip(event, '72', 72)">
+            Pred(pred, line)
+          </code>
+          <div class="tip" id="72">
+            <strong>Signature:</strong> (pred:bool * line:int option) -&gt; AssertionResult&lt;unit&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Assertions.fs#L35-35" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
         </td>
       </tr>
     </tbody>
