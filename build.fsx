@@ -14,7 +14,7 @@ open SourceLink
 
 let isAppVeyor = buildServer = AppVeyor
 
-let isDotnetInstalled = DotNetCli.isInstalled() && not isAppVeyor
+let isDotnetInstalled = DotNetCli.isInstalled()
 
 let outDir = "bin"
 
