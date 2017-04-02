@@ -220,6 +220,16 @@ module PersimmonTest =
       do! assertEquals 1 !count
     }
 
+  let ``should not run finally expression until the end of test`` =
+    test "should not run finally expression until the end of test" {
+      let disposable = new DisposableValue()
+      try
+        do! test "empty" { return () }
+        do! disposable.Disposed |> assertEquals false
+      finally
+        (disposable :> System.IDisposable).Dispose()
+    }
+
   let ``first binding exception`` =
     let raiseTest = test "raise exception" {
       return raise TestException

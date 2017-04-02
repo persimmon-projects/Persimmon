@@ -55,17 +55,19 @@ type TestBuilder private (name: string option) =
         TestCase.combine (NoValueTest case) f
     | NonUnitTestCase case ->
         TestCase.combine (HasValueTest case) f
-  member inline __.Using(x: #IDisposable, f: #IDisposable -> TestCase<_>) =
+  member inline this.Using(x: #IDisposable, f: #IDisposable -> TestCase<_>) =
+    let dispose () = match box x with null -> () | _ -> x.Dispose()
+    this.TryFinally((fun () -> f x), dispose)
+  member __.TryFinally(f, g) =
     TestCase.init None [] (fun _ -> async {
       return
         try
           let case =
-            try f x
+            try f ()
             with e -> TestCase.makeError None [] e
           case.Run()
-        finally match box x with null -> () | _ -> x.Dispose()
+        finally g ()
     })
-  member __.TryFinally(f, g) = try f () finally g ()
   member __.Delay(f) = f
   member __.Run(f: unit -> TestCase<_>) =
     TestCase.init name [] (fun _ ->
