@@ -18,6 +18,8 @@ let isDotnetInstalled = DotNetCli.isInstalled()
 
 let outDir = "bin"
 
+let configuration = getBuildParamOrDefault "configuration" "Release"
+
 let project = "Persimmon"
 
 let persimmonNETCoreProject = "src/Persimmon.NETCore/Persimmon.NETCore.fsproj"
@@ -84,7 +86,7 @@ Target "CopyBinaries" (fun _ ->
     isDotnetInstalled
       || (not <| System.IO.Path.GetFileNameWithoutExtension(p).EndsWith("NETCore"))
   )
-  |>  Seq.map (fun f -> ((System.IO.Path.GetDirectoryName f) @@ "bin/Release", outDir @@ (System.IO.Path.GetFileNameWithoutExtension f)))
+  |>  Seq.map (fun f -> ((System.IO.Path.GetDirectoryName f) @@ "bin" @@ configuration, outDir @@ (System.IO.Path.GetFileNameWithoutExtension f)))
   |>  Seq.iter (fun (fromDir, toDir) -> CopyDir toDir fromDir (fun _ -> true))
 )
 
@@ -93,7 +95,7 @@ Target "CopyBinaries" (fun _ ->
 
 Target "Clean" (fun _ ->
   CleanDirs [outDir; "temp"]
-  !! "./src/**/bin/Release"
+  !! ("./src/**/bin" @@ configuration)
   |> CleanDirs
 )
 
@@ -108,7 +110,7 @@ let isTravisCI = (environVarOrDefault "TRAVIS" "") = "true"
 
 Target "Build" (fun _ ->
   !! solutionFile
-  |> MSBuildReleaseExt "" [ "Platform", "Any CPU" ] "Rebuild"
+  |> MSBuild "" "Rebuild" [ ("Platform", "Any CPU"); ("Configuration", configuration) ]
   |> ignore
 )
 
@@ -121,6 +123,7 @@ Target "Build.NETCore" (fun _ ->
   DotNetCli.Build (fun p ->
     { p with
         Project = persimmonNETCoreProject
+        Configuration = configuration
     }
   )
 
@@ -132,6 +135,7 @@ Target "Build.NETCore" (fun _ ->
   DotNetCli.Build (fun p ->
     { p with
         Project = persimmonRunnerNETCoreProject
+        Configuration = configuration
     }
   )
 )
@@ -187,154 +191,36 @@ Target "SourceLink" (fun _ ->
 // --------------------------------------------------------------------------------------
 // Build a NuGet package
 
-Target "NuGet.Pack" (fun _ ->
+Target "NuGet" (fun _ ->
   Paket.Pack(fun p ->
     { p with
-        OutputPath = "bin"
+        OutputPath = outDir
         Version = release.NugetVersion
         ReleaseNotes = toLines release.Notes})
 
-  let packagingDir = outDir @@ "nuget" @@ "Persimmon"
-  [
-    "bin/Persimmon/Persimmon.dll"
-    "bin/Persimmon/Persimmon.XML"
-  ]
-  |> CopyFiles (packagingDir @@ "lib" @@ "net20")
-  [
-    "bin/Persimmon.NET40/Persimmon.dll"
-    "bin/Persimmon.NET40/Persimmon.XML"
-  ]
-  |> CopyFiles (packagingDir @@ "lib" @@ "net40")
-  [
-    "bin/Persimmon.NET45/Persimmon.dll"
-    "bin/Persimmon.NET45/Persimmon.XML"
-  ]
-  |> CopyFiles (packagingDir @@ "lib" @@ "net45")
-  [
-    "bin/Persimmon.Portable259/Persimmon.dll"
-    "bin/Persimmon.Portable259/Persimmon.XML"
-  ]
-  |> CopyFiles (packagingDir @@ "lib" @@ "portable-net45+win8+wp8+wpa81+Xamarin.Mac+MonoAndroid10+MonoTouch10+Xamarin.iOS10")
-
-  let dependencies = [
-    ("FSharp.Core", "3.1.2.5")
-  ]
+  NuGet (fun p ->
+    {
+      p with
+        OutputPath = outDir
+        WorkingDir = outDir
+        Version = release.NugetVersion
+        ReleaseNotes = toLines release.Notes
+    }
+  ) "src/Persimmon.nuspec"
 
   NuGet (fun p ->
     {
       p with
         OutputPath = outDir
-        WorkingDir = packagingDir
+        WorkingDir = outDir
         Version = release.NugetVersion
         ReleaseNotes = toLines release.Notes
-        DependenciesByFramework =
-          [
-            {
-              FrameworkVersion = "net20"
-              Dependencies = dependencies
-            }
-            {
-              FrameworkVersion = "net40"
-              Dependencies = dependencies
-            }
-            {
-              FrameworkVersion = "net45"
-              Dependencies = dependencies
-            }
-          ]
     }
-  ) "src/Persimmon/Persimmon.nuspec"
-
-  let packagingDir = outDir @@ "nuget" @@ "Persimmon.Runner"
-  [
-    "bin/Persimmon.Runner/Persimmon.Runner.dll"
-    "bin/Persimmon.Runner/Persimmon.Runner.XML"
-  ]
-  |> CopyFiles (packagingDir @@ "lib" @@ "net35")
-  [
-    "bin/Persimmon.Runner.NET40/Persimmon.Runner.dll"
-    "bin/Persimmon.Runner.NET40/Persimmon.Runner.XML"
-  ]
-  |> CopyFiles (packagingDir @@ "lib" @@ "net40")
-
-  let dependencies = [
-    ("Persimmon", release.NugetVersion)
-  ]
-
-  NuGet (fun p ->
-    {
-      p with
-        OutputPath = outDir
-        WorkingDir = packagingDir
-        Version = release.NugetVersion
-        ReleaseNotes = toLines release.Notes
-        DependenciesByFramework =
-          [
-            {
-              FrameworkVersion = "net35"
-              Dependencies = dependencies
-            }
-            {
-              FrameworkVersion = "net40"
-              Dependencies = dependencies
-            }
-          ]
-        FrameworkAssemblies =
-          [
-            {
-              FrameworkVersions = ["net35"]
-              AssemblyName = "System.Xml"
-            }
-            {
-              FrameworkVersions = ["net35"]
-              AssemblyName = "System.Xml.Linq"
-            }
-            {
-              FrameworkVersions = ["net40"]
-              AssemblyName = "System.Xml"
-            }
-            {
-              FrameworkVersions = ["net40"]
-              AssemblyName = "System.Xml.Linq"
-            }
-          ]
-    }
-  ) "src/Persimmon.Runner/Persimmon.Runner.nuspec"
-)
-
-Target "NuGet.AddNetCore" (fun _ ->
-  if not isDotnetInstalled then failwith "You need to install .NET core to publish NuGet packages"
-
-  DotNetCli.Pack (fun p ->
-    { p with
-        Project = persimmonNETCoreProject
-        AdditionalArgs =
-          [
-            sprintf "/p:Version=%s" release.NugetVersion
-          ]
-    }
-  )
-  DotNetCli.Pack (fun p ->
-    { p with
-        Project = persimmonRunnerNETCoreProject
-        AdditionalArgs =
-          [
-            sprintf "/p:Version=%s" release.NugetVersion
-          ]
-    }
-  )
-
-  for proj in ["Persimmon"; "Persimmon.Runner"] do
-
-    let nupkg = sprintf "../../bin/%s.%s.nupkg" proj (release.NugetVersion)
-    let netcoreNupkg = sprintf "bin/Release/%s.%s.nupkg" proj (release.NugetVersion)
-
-    let exitCode = Shell.Exec("dotnet", sprintf """mergenupkg --source "%s" --other "%s" --framework netstandard1.6 """ nupkg netcoreNupkg, (sprintf "src/%s.NETCore/" proj))
-    if exitCode <> 0 then failwithf "Command failed with exit code %i" exitCode
+  ) "src/Persimmon.Runner.nuspec"
 )
 
 Target "PublishNuget" (fun _ ->
-  Paket.Push(fun p -> { p with WorkingDir = "bin" })
+  Paket.Push(fun p -> { p with WorkingDir = outDir })
 )
 
 // --------------------------------------------------------------------------------------
@@ -469,8 +355,6 @@ Target "Release" (fun _ ->
 
 Target "NETCore" DoNothing
 
-Target "NuGet" DoNothing
-
 Target "All" DoNothing
 
 "Clean"
@@ -494,8 +378,6 @@ Target "All" DoNothing
 #else
   =?> ("SourceLink", Pdbstr.tryFind().IsSome )
 #endif
-  ==> "NuGet.Pack"
-  ==> "NuGet.AddNetCore"
   ==> "NuGet"
 
 "CleanDocs"

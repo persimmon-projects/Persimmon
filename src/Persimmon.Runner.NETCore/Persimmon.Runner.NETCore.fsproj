@@ -19,7 +19,6 @@
   <ItemGroup>
     <PackageReference Include="FSharp.NET.Sdk" Version="1.0.*" PrivateAssets="All" />
     <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
-    <DotNetCliToolReference Include="dotnet-mergenupkg" Version="1.0.1" />
     <ProjectReference Include="..\Persimmon.NETCore\Persimmon.NETCore.fsproj" />
   </ItemGroup>
 </Project>

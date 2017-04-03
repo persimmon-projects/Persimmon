@@ -28,6 +28,5 @@
   <ItemGroup>
     <PackageReference Include="FSharp.NET.Sdk" Version="1.0.*" PrivateAssets="All" />
     <PackageReference Include="FSharp.Core" Version="4.1.2" />
-    <DotNetCliToolReference Include="dotnet-mergenupkg" Version="1.0.1" />
   </ItemGroup>
 </Project>
