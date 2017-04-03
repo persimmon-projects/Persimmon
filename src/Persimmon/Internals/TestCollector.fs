@@ -165,10 +165,13 @@ module private TestCollectorImpl =
 #endif
       |> Seq.collect collectTestsFromMethod
     // For nested modules:
+#if PCL || NETSTANDARD
+#else
     for nestedType in publicNestedTypes typ do
       let testCases = collectTests nestedType |> Seq.toArray
       if Array.isEmpty testCases then ()
       else yield Context(nestedType.Name, testCases) :> TestMetadata
+#endif
   }
 
 [<Sealed>]
