@@ -136,12 +136,12 @@ module private TestCollectorImpl =
       typ
 #if PCL || NETSTANDARD
         .GetTypeInfo().DeclaredProperties
-      |> Seq.filter (fun x ->
-        let m = x.GetMethod
-        m.IsStatic && m.IsPublic
+      |> Seq.filter (fun p ->
+        let m = p.GetMethod
+        (m <> null) && m.IsStatic && m.IsPublic
+          // Ignore setter only property / indexers
+          && p.CanRead && (p.GetIndexParameters() |> Array.isEmpty)
       )
-      // Ignore setter only property / indexers
-      |> Seq.filter (fun p -> p.CanRead && (p.GetMethod <> null) && (p.GetIndexParameters() |> Array.isEmpty))
 #else
         .GetProperties(BindingFlags.Static ||| BindingFlags.Public)
       // Ignore setter only property / indexers
