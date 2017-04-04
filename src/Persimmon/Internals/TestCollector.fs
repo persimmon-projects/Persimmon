@@ -204,4 +204,4 @@ type TestCollector() =
   member __.CollectAndCallback(targetAssembly, callback: Action<obj>) =
     collect targetAssembly
     |> Seq.collect flattenTestCase
-    |> Seq.iter (fun testCase -> callback.Invoke testCase)
+    |> Seq.iter callback.Invoke
