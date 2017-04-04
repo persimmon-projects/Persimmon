@@ -7,10 +7,6 @@ matrix:
       sudo: required
       mono: latest
       dotnet: 1.0.1
-    - os: osx
-      osx_image: xcode8.1
-      mono: latest
-      dotnet: 1.0.1
 
 before_script:
   - chmod +x ./build.sh
