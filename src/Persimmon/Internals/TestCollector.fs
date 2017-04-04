@@ -98,7 +98,7 @@ module private TestCollectorImpl =
 #if PCL || NETSTANDARD
     let info = typ.GetTypeInfo()
     if info.IsGenericType then
-      Some (typ.GetGenericTypeDefinition(), info.GetGenericArguments())
+      Some (typ.GetGenericTypeDefinition(), info.GenericTypeArguments)
 #else
     if typ.IsGenericType then
       Some (typ.GetGenericTypeDefinition(), typ.GetGenericArguments())
