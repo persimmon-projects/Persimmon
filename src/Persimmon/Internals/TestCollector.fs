@@ -72,7 +72,7 @@ module private TestCollectorImpl =
         tests
         |> Seq.mapi (fun index child -> (child, index))
         |> Seq.collect (fun entry -> fixupAndCollectTests(fst entry, symbolName, Some (snd entry)))
-      yield new Context(symbolName, children) :> TestMetadata
+      yield Context(symbolName, children) :> TestMetadata
 
     /////////////////////////////////////////////////////
     // Unknown type, ignored.
@@ -168,7 +168,7 @@ module private TestCollectorImpl =
     for nestedType in publicNestedTypes typ do
       let testCases = collectTests nestedType |> Seq.toArray
       if Array.isEmpty testCases then ()
-      else yield new Context(nestedType.Name, testCases) :> TestMetadata
+      else yield Context(nestedType.Name, testCases) :> TestMetadata
   }
 
 [<Sealed>]
@@ -178,7 +178,7 @@ type TestCollector() =
   let collect targetAssembly =
     targetAssembly
     |> TestCollectorImpl.publicTypes
-    |> Seq.map (fun typ -> new Context(typ.FullName, TestCollectorImpl.collectTests typ))
+    |> Seq.map (fun typ -> Context(typ.FullName, TestCollectorImpl.collectTests typ))
 
   /// Remove contexts and flatten structured test objects.
   let rec flattenTestCase (testMetadata: TestMetadata) = seq {
