@@ -115,6 +115,9 @@ Target "Build" (fun _ ->
 )
 
 Target "Build.NETCore" (fun _ ->
+
+  let args = [ sprintf "/p:Version=%s" release.NugetVersion ]
+
   DotNetCli.Restore (fun p ->
     { p with
         Project = persimmonNETCoreProject
@@ -124,6 +127,7 @@ Target "Build.NETCore" (fun _ ->
     { p with
         Project = persimmonNETCoreProject
         Configuration = configuration
+        AdditionalArgs = args
     }
   )
 
@@ -136,6 +140,7 @@ Target "Build.NETCore" (fun _ ->
     { p with
         Project = persimmonRunnerNETCoreProject
         Configuration = configuration
+        AdditionalArgs = args
     }
   )
 )
