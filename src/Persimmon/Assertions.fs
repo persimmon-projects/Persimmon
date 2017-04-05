@@ -27,7 +27,7 @@ type Assert =
       Assert.Fail(message, ?line = line)
 
   static member NotEqual(expected, actual, [<CallerLineNumber>]?line : int) =
-    if expected = actual then Assert.Pass()
+    if expected <> actual then Assert.Pass()
     else
       let message = sprintf "Not Expect: %A\nActual: %A" expected actual
       Assert.Fail(message, ?line = line)
