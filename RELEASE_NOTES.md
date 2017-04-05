@@ -1,27 +1,19 @@
-### 2.0.1-beta1 - April 3 2017
+### 2.0.1 - April 6 2017
+* fix duplicate collect tests in nested type
+* fix get generic arguments
 * support F# 4.1
 * add line number information [#116](https://github.com/persimmon-projects/Persimmon/pull/116)
 * explicit dependency on FSharp.Core nuget package
 * fix `use` scope in TestBuilder [#117](https://github.com/persimmon-projects/Persimmon/pull/117), [#118](https://github.com/persimmon-projects/Persimmon/pull/118)
 * fix `try-finally` scope in TestBuilder [#119](https://github.com/persimmon-projects/Persimmon/pull/119)
-
-### 2.0.1-alpha6 - November 24 2016
 * check type in collect test phase
 * dump uncaught error
-
-### 2.0.1-alpha5 - November 21 2016
 * fix unique name
-
-### 2.0.1-alpha4 - November 12 2016
 * add TestResult#FailureMessages, TestResult#SkipMessages
 * fix junit xml report
 * improve API(Persimmon.TestResult, Persimmon.Internals.TestRunner)
-
-### 2.0.1-alpha3 - November 3 2016
 * fix count errors
 * fix lazy evaluation
-
-### 2.0.1-alpha2 - November 1 2016
 * support Visual Studio test explorer [#111](https://github.com/persimmon-projects/Persimmon/pull/111)
 * support Core clr [#114](https://github.com/persimmon-projects/Persimmon/pull/114)
 * drop support Persimmon.Script [#115](https://github.com/persimmon-projects/Persimmon/pull/115)
