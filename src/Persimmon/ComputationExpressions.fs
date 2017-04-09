@@ -1,6 +1,9 @@
 ﻿namespace Persimmon
 
 open System
+#if NET45 || NETSTANDARD
+open System.Runtime.CompilerServices
+#endif
 
 /// This type is used only in the library.
 type BindingValue<'T> =
@@ -20,9 +23,21 @@ type TestBuilder private (name: string option) =
     | UnitAssertionResult x | NonUnitAssertionResult x -> TestCase.makeDone name [] x
     | UnitTestCase x | NonUnitTestCase x -> TestCase<_>(name, x.Parameters, fun _ -> x.Run())
   // let! a = (x: AssertionResult<unit>) in ...
-  member __.Source(x: AssertionResult<unit>) = UnitAssertionResult x
+  member __.Source(x: AssertionResult<unit>, [<CallerLineNumber>]?line : int) =
+    let x =
+      match x with
+      | NotPassed(None, cause) -> NotPassed(line, cause)
+      | Passed _
+      | NotPassed(Some _, _) -> x
+    UnitAssertionResult x
   // let! a = (x: AssertionResult<_>) in ...
-  member __.Source(x: AssertionResult<_>) = NonUnitAssertionResult x
+  member __.Source(x: AssertionResult<_>, [<CallerLineNumber>]?line : int) =
+    let x =
+      match x with
+      | NotPassed(None, cause) -> NotPassed(line, cause)
+      | Passed _
+      | NotPassed(Some _, _) -> x
+    NonUnitAssertionResult x
   // let! a = (x: TestCase<unit>) in ...
   member __.Source(x: TestCase<unit>) = UnitTestCase x
   // let! a = (x: TestCase<_>) in ...
