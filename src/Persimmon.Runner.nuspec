@@ -36,6 +36,6 @@
     <file src="Persimmon.Runner/Persimmon.Runner.XML" target="lib/net35" />
     <file src="Persimmon.Runner.NET40/Persimmon.Runner.dll" target="lib/net40" />
     <file src="Persimmon.Runner.NET40/Persimmon.Runner.XML" target="lib/net40" />
-    <file src="Persimmon.Runner.NETCore/netstandard1.6/Persimmon.Runner.dll" target="lib/netstandard16" />
+    <file src="Persimmon.Runner.NETCore/netstandard1.6/Persimmon.Runner.dll" target="lib/netstandard1.6" />
   </files>
 </package>
