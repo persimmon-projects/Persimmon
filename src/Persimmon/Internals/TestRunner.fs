@@ -55,7 +55,7 @@ module internal TestRunnerImpl =
     | TestResult testResult ->
       match testResult.Box() with
       | Error _ -> 1
-      | Done _ -> 
+      | Done _ ->
         let ar = AssertionResult.Seq.typicalResult testResult.AssertionResults
         match ar with
         | NotPassed (Violated _) -> 1
@@ -96,7 +96,7 @@ type TestRunner() =
     let testResults = testResultsList |> Seq.collect id |> Seq.toArray
     let errors = testResults |> Seq.sumBy TestRunnerImpl.countErrors
     { Errors = errors; Results = testResults }
-      
+
   /// RunTestsAndCallback run test cases and callback. (Internal use only)
   /// If fullyQualifiedTestNames is empty, try all tests.
   member __.RunTestsAndCallback(target: Assembly, fullyQualifiedTestNames: string[], before: Action<obj>, callback: Action<obj>) =
@@ -117,18 +117,16 @@ type TestRunner() =
 
     // Run tests with entire full parallelism.
     testCases
-      |> Seq.choose (fun testCase ->
-        // Include only fqtn
-        if containsKey testCase.UniqueName then
-          before.Invoke(testCase)
-          // Map test case to async runner (with callback side effect)
-          Some (TestRunnerImpl.asyncRunTest callback.Invoke testCase)
-        else None
-      )
-      // Full parallelism
-      |> Async.Parallel
-      // Synchronous execution
-      |> Async.RunSynchronously |> ignore
+    |> Seq.choose (fun testCase ->
+      // Include only fqtn
+      if containsKey testCase.UniqueName then
+        before.Invoke(testCase)
+        // Map test case to async runner (with callback side effect)
+        Some (TestRunnerImpl.asyncRunTest callback.Invoke testCase)
+      else None
+    )
+    |> Async.Parallel
+    |> Async.RunSynchronously |> ignore
 
   member this.RunTestsAndCallback(target: Assembly, fullyQualifiedTestNames: string[], callback: Action<obj>) =
     let before = Action<obj>(ignore)
