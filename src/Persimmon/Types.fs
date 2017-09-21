@@ -7,6 +7,10 @@ open System.Collections.Generic
 open System.Threading
 open Microsoft.FSharp.Control
 
+#if PCL || NETSTANDARD
+type MarshalByRefObject() = class end
+#endif
+
 ///////////////////////////////////////////////////////////////////////////
 
 /// The cause of not passed assertion.
@@ -26,34 +30,43 @@ type AssertionResult =
 
 /// The result of each assertion.
 and AssertionResult<'T> =
-    /// The assertion is passed.
-  | Passed of 'T
-    /// The assertion is not passed.
-  | NotPassed of int option * NotPassedCause
+  inherit AssertionResult
 
-  /// For internal use only.
-  member this.Box() =
-    match this with
-    | Passed value -> Passed (value :> obj)
-    | NotPassed(line, cause) -> NotPassed(line, cause)
+/// The assertion is passed.
+and [<Sealed>] Passed<'T>(value: 'T) =
+  inherit MarshalByRefObject()
 
-  interface AssertionResult with
-    member this.Value =
-      match this with
-      | Passed value -> Some (value :> obj)
-      | NotPassed _ -> None
+  member internal this.Value : 'T = value
 
-    member this.Status =
-      match this with
-      | Passed _ -> None
-      | NotPassed(_, cause) -> Some cause
+  interface AssertionResult<'T> with
+    member this.Value = Some (value :> obj)
+    member this.LineNumber = None
+    member this.Status = None
+    member this.Box() = Passed(value :> obj) :> AssertionResult<obj>
 
-    member this.LineNumber =
-      match this with
-      | Passed _ -> None
-      | NotPassed(line, _) -> line
+/// The assertion is not passed.
+and [<Sealed>] NotPassed<'T>(lineNumber: int option, cause: NotPassedCause) =
+  inherit MarshalByRefObject()
 
-    member this.Box() = this.Box()
+  member internal this.LineNumber : int option = lineNumber
+  member internal this.Cause : NotPassedCause = cause
+
+  interface AssertionResult<'T> with
+    member this.Value = None
+    member this.LineNumber = lineNumber
+    member this.Status = Some cause
+    member this.Box() = NotPassed(lineNumber, cause) :> AssertionResult<obj>
+
+[<AutoOpen>]
+module AssertionResultExtensions =
+  let (|Passed|NotPassed|) (result: AssertionResult<'T>) =
+    match result with
+    | :? Passed<'T> as p -> Passed (p.Value)
+    | :? NotPassed<'T> as np -> NotPassed (np.LineNumber, np.Cause)
+    | _ -> new ArgumentException() |> raise
+
+  let Passed (value: 'T) = Passed(value) :> AssertionResult<'T>
+  let NotPassed (lineNumber: int option, cause: NotPassedCause) = NotPassed(lineNumber, cause) :> AssertionResult<'T>
 
 /// NotPassedCause manipulators.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
@@ -63,6 +76,9 @@ module NotPassedCause =
   module Seq =
 
     let toAssertionResultList xs = xs |> Seq.map (fun x -> NotPassed(None, x))
+
+    let skipMessages xs = xs |> Seq.choose (function Skipped msg -> Some msg | Violated _ -> None)
+    let violatedMessages xs = xs |> Seq.choose (function Skipped _ -> None | Violated msg -> Some msg)
 
 /// AssertionResult manipulators.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
@@ -101,6 +117,7 @@ module AssertionResult =
 [<AbstractClass>]
 [<StructuredFormatDisplay("{DisplayName}")>]
 type TestMetadata =
+  inherit MarshalByRefObject
 
   val private _name : string option
   [<DefaultValue>]
@@ -112,6 +129,7 @@ type TestMetadata =
 
   /// Constructor.
   internal new (name: string option) = {
+    inherit MarshalByRefObject();
     _name = name;
   }
 
@@ -293,8 +311,9 @@ and
     watch.Stop()
     return
       match result with
-      | Error (_, errs, res, _) -> Error (this, errs, res, watch.Elapsed)
-      | Done (_, res, _) -> Done (this, res, watch.Elapsed)
+      | :? Error<'T> as e -> Error(this, e.Exceptions, e.Causes, watch.Elapsed) :> TestResult<'T>
+      | :? Done<'T> as d -> Done(this, d.Results, watch.Elapsed) :> TestResult<'T>
+      | _ -> new ArgumentException() |> raise
   }
 
   /// Execute this test case.
@@ -321,82 +340,80 @@ and
 
 ///////////////////////////////////////////////////////////////////////////
 
-/// Test result union type.
+/// Test result type.
 /// Inherited from ResultNode
 and TestResult<'T> =
-  /// This case represents the error.
-  | Error of TestCase * exn list * NotPassedCause list * TimeSpan
-  /// This case represents that all of the assertions is finished.
-  | Done of TestCase * NonEmptyList<AssertionResult<'T>> * TimeSpan
-  with
-    override this.ToString() =
-      let result =
-        match this with
-        | Error (testCase, _, _, _) -> (testCase, "Error")
-        | Done (testCase, _, _) -> (testCase, "Done")
-      sprintf "%A: Result=%s" (result |> fst) (result |> snd)
+  inherit TestResult
 
-    member this.TestCase =
-      match this with
-      | Error (testCase, _, _, _) -> testCase
-      | Done (testCase, _, _) -> testCase
+/// This case represents the error.
+and [<Sealed>] Error<'T>(testCase: TestCase, exns: exn list, causes: NotPassedCause list, duration: TimeSpan) =
+  inherit MarshalByRefObject()
+
+  member internal this.TestCase : TestCase = testCase
+  member internal this.Exceptions : exn list = exns
+  member internal this.Causes : NotPassedCause list = causes
+  member internal this.Duration : TimeSpan = duration
+
+  override this.ToString() = sprintf "%A: Result=Error" testCase
+
+  interface TestResult<'T> with
+    member this.TestCase = testCase
+    member this.IsError = true
     member this.FailureMessages =
-      match this with
-      | Done (_, rs, _) ->
-        rs
-        |> NonEmptyList.toSeq
-        |> AssertionResult.Seq.onlyNotPassed
-      | Error (_, _, ps, _) -> Seq.ofList ps
-      |> Seq.choose (function
-      | Violated msg -> Some msg
-      | Skipped _ -> None
-      )
+      causes
+      |> NotPassedCause.Seq.violatedMessages
       |> Seq.toArray
     member this.SkipMessages =
-      match this with
-      | Done (_, rs, _) ->
-        rs
-        |> NonEmptyList.toSeq
-        |> AssertionResult.Seq.onlyNotPassed
-      | Error (_, _, ps, _) -> Seq.ofList ps
-      |> Seq.choose (function
-      | Violated _ -> None
-      | Skipped msg -> Some msg
-      )
+      causes
+      |> NotPassedCause.Seq.skipMessages
       |> Seq.toArray
-    member this.Exceptions =
-      match this with
-      | Error (_, exns, _, _) -> exns |> Seq.toArray
-      | Done (_, _, _) -> [||]
-    member this.Duration =
-      match this with
-      | Error (_, _, _, duration) -> duration
-      | Done (_, _, duration) -> duration
+    member this.Exceptions = exns |> Seq.toArray
+    member this.Duration = duration
+    member this.AssertionResults = [||]
+    member this.Box() = Error(testCase, exns, causes, duration) :> TestResult<obj>
+
+/// This case represents that all of the assertions is finished.
+and [<Sealed>] Done<'T>(testCase: TestCase, results: NonEmptyList<AssertionResult<'T>>, duration: TimeSpan) =
+  inherit MarshalByRefObject()
+
+  member internal this.TestCase : TestCase = testCase
+  member internal this.Results : NonEmptyList<AssertionResult<'T>> = results
+  member internal this.Duration : TimeSpan = duration
+
+  override this.ToString() = sprintf "%A: Result=Done" testCase
+
+  interface TestResult<'T> with
+    member this.TestCase = testCase
+    member this.IsError = false
+    member this.FailureMessages =
+      results
+      |> NonEmptyList.toSeq
+      |> AssertionResult.Seq.onlyNotPassed
+      |> NotPassedCause.Seq.violatedMessages
+      |> Seq.toArray
+    member this.SkipMessages =
+      results
+      |> NonEmptyList.toSeq
+      |> AssertionResult.Seq.onlyNotPassed
+      |> NotPassedCause.Seq.skipMessages
+      |> Seq.toArray
+    member this.Exceptions = [||]
+    member this.Duration = duration
     member this.AssertionResults =
-      match this with
-      | Error (_, _, _, _) -> [||]
-      | Done (_, res, _) -> res |> NonEmptyList.toList |> Seq.map (fun ar -> ar :> AssertionResult) |> Seq.toArray
+      results |> NonEmptyList.toList |> Seq.map (fun ar -> ar :> AssertionResult) |> Seq.toArray
+    member this.Box() =
+      Done (testCase, results |> NonEmptyList.toSeq |> Seq.map (fun ar -> ar.Box()) |> NonEmptyList.ofSeq, duration) :> TestResult<obj>
 
-    /// For internal use only.
-    member this.Box() : TestResult<obj> =
-      match this with
-      | Error (testCase, exns, causes, duration) ->
-        Error (testCase, exns, causes, duration)
-      | Done (testCase, res, duration) ->
-        Done (testCase, res |> NonEmptyList.toSeq |> Seq.map (fun ar -> ar.Box()) |> NonEmptyList.ofSeq, duration)
+[<AutoOpen>]
+module TestCaseExtensions =
+  let (|Error|Done|) (testResult: TestResult<'T>) =
+    match testResult with
+    | :? Error<'T> as e -> Error(e.TestCase, e.Exceptions, e.Causes, e.Duration)
+    | :? Done<'T> as d -> Done(d.TestCase, d.Results, d.Duration)
+    | _ -> new ArgumentException() |> raise
 
-    interface TestResult with
-      member this.TestCase = this.TestCase
-      member this.IsError =
-        match this with
-        | Error _ -> true
-        | Done _ -> false
-      member this.FailureMessages = this.FailureMessages
-      member this.SkipMessages = this.SkipMessages
-      member this.Exceptions = this.Exceptions
-      member this.Duration = this.Duration
-      member this.AssertionResults = this.AssertionResults
-      member this.Box() = this.Box()
+  let Error (testCase: TestCase, exns: exn list, causes: NotPassedCause list, duration: TimeSpan) = Error(testCase, exns, causes, duration) :> TestResult<'T>
+  let Done (testCase: TestCase, results: NonEmptyList<AssertionResult<'T>>, duration: TimeSpan) = Done(testCase, results, duration) :> TestResult<'T>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -438,6 +455,7 @@ type Context =
 /// Inherited from ResultNode
 [<Sealed>]
 type ContextResult internal (context: Context, results: ResultNode[]) =
+  inherit MarshalByRefObject()
 
   /// Target context.
   member __.Context = context

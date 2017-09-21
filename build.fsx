@@ -152,7 +152,7 @@ Target "RunTests" (fun _ ->
   !! testAssemblies
   |> Persimmon (fun p ->
     { p with
-        ToolPath = findToolInSubPath "Persimmon.Console.exe" (currentDirectory @@ "src" @@ "Persimmon.Console")
+        ToolPath = findToolInSubPath "Persimmon.Console.exe" (currentDirectory @@ "src" @@ "Persimmon.Console" @@ "bin" @@ configuration)
         Output = OutputDestination.XmlFile "TestResult.xml"
     }
   )

@@ -14,7 +14,7 @@ module Helper =
 
   let shouldPassed<'T when 'T : equality> (expected: 'T) (x: TestCase<'T>) =
     let inner = function
-      | Done (m, (Persimmon.Passed (actual: 'T), []), d) -> Done (m, (assertEquals expected actual, []), d)
+      | Done (m, (Passed (actual: 'T), []), d) -> Done (m, (assertEquals expected actual, []), d)
       | Done (m, results, d) -> Done (m, results |> NonEmptyList.map (function
         | Passed _ -> Passed ()
         | NotPassed(l, x) -> NotPassed(l, x)), d)
@@ -23,11 +23,11 @@ module Helper =
 
   let shouldNotPassed<'T> (expectedMessages: NonEmptyList<string>) (x: TestCase<'T>) =
     let inner = function
-      | Done (m, (Persimmon.Passed (actual: 'T), []), d) ->
+      | Done (m, (Passed (actual: 'T), []), d) ->
         Done (m, (fail (sprintf "Expect: Failure\nActual: %A" actual), []), d)
       | Done (m, results, d) ->
         results
-        |> NonEmptyList.map (function NotPassed(_, (Skipped x | Violated x)) -> x | Persimmon.Passed x -> sprintf "Expected is NotPased but Passed(%A)" x)
+        |> NonEmptyList.map (function NotPassed(_, (Skipped x | Violated x)) -> x | Passed x -> sprintf "Expected is NotPased but Passed(%A)" x)
         |> fun actual -> Done (m, (assertEquals expectedMessages actual, []), d)
       | Error (m, es, results, d) -> Error (m, es, results, d)
     TestCase.initForSynch x.Name x.Parameters (fun _ -> inner (run x))
@@ -39,7 +39,7 @@ module Helper =
 
   let shouldFirstRaise<'T, 'U when 'T :> exn> (x: TestCase<'U>) =
     let inner = function
-      | Done (m, (Persimmon.Passed (actual: 'U), []), d) ->
+      | Done (m, (Passed (actual: 'U), []), d) ->
         Done (m, (fail (sprintf "Expect: raise %s\nActual: %A" (typeof<'T>.Name) actual), []), d)
       | Done (m, results, d) -> Done (m, results |> NonEmptyList.map (function
         | Passed _ -> Passed ()
