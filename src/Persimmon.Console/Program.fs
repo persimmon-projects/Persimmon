@@ -7,56 +7,61 @@ open System.Reflection
 open Persimmon
 open Persimmon.Runner
 open Persimmon.Output
+open System.Security.Policy
 
-let runAndReport isParallel (watch: Stopwatch) (reporter: Reporter) tests =
-  watch.Start()
-  let res =
-    if isParallel then
-      TestRunner.asyncRunAllTests reporter.ReportProgress tests
-      |> Async.RunSynchronously
-    else TestRunner.runAllTests reporter.ReportProgress tests
-  watch.Stop()
-  // report
-  reporter.ReportProgress(TestResult.endMarker)
-  reporter.ReportSummary(res.Results)
-  res.Errors
+let createAppDomain (applicationBasePath: string) (assembly: FileInfo) =
+  let contextId = Guid.NewGuid()
+  let separatedAppDomainName = sprintf "persimmon console domain - %s" (contextId.ToString()) 
+  let shadowCopyTargets = String.concat ";" [ assembly.Directory.FullName ;applicationBasePath ]
+  let separatedAppDomainSetup =
+    AppDomainSetup(
+      ApplicationName = separatedAppDomainName,
+      ApplicationBase = applicationBasePath,
+      ShadowCopyFiles = "false",
+      ShadowCopyDirectories = shadowCopyTargets)
+  let configurationFilePath = assembly.FullName + ".config"
+  if File.Exists(configurationFilePath) then
+    separatedAppDomainSetup.ConfigurationFile <- configurationFilePath
 
-let entryPoint (args: Args) =
+  let separatedAppDomainEvidence = Evidence(AppDomain.CurrentDomain.Evidence)
+
+  AppDomain.CreateDomain(separatedAppDomainName, separatedAppDomainEvidence, separatedAppDomainSetup)
+
+let runAndReport (args: Args) (watch: Stopwatch) (reporter: Reporter) (founds: FileInfo list)  =
+  let appDomains = ResizeArray<_>()
+  try
+    let mutable errors = 0
+    let results = ResizeArray<_>()
+
+    watch.Start()
+
+    // collect and run
+    let currentSetUp = AppDomain.CurrentDomain.SetupInformation
+    let applicationBasePath = currentSetUp.ApplicationBase
+    for assembly in founds do
+      let appDomain = createAppDomain applicationBasePath assembly
+      appDomains.Add(appDomain)
+
+      let proxy = PersimmonProxy.Create(appDomain)
+      let testResults = proxy.CollectAndRun(assembly.FullName, args)
+      do
+        errors <- errors + testResults.Errors
+        results.AddRange(testResults.Results)
+
+    watch.Stop()
+
+    // report
+    reporter.ReportProgress(TestResult.endMarker)
+    reporter.ReportSummary(results)
+    errors
+  finally
+    appDomains |> Seq.iter AppDomain.Unload
+
+let run (args: Args) =
   let watch = Stopwatch()
-  use progress = if args.NoProgress then IO.TextWriter.Null else Console.Out
-  let requireFileName, outputs =
-    let console = {
-      Writer = Console.Out
-      Formatter = Formatter.SummaryFormatter.normal watch
-    }
-    match args.Output, args.Format with
-    | (Some file, JUnitStyleXml) ->
-      let xml = {
-        Writer = new StreamWriter(file.FullName, false, Encoding.UTF8) :> TextWriter
-        Formatter = Formatter.XmlFormatter.junitStyle watch
-      }
-      (true, [console; xml])
-    | (Some file, Normal) ->
-      let file = {
-        Writer = new StreamWriter(file.FullName, false, Encoding.UTF8) :> TextWriter
-        Formatter = console.Formatter
-      }
-      (false, [console; file])
-    | (None, Normal) -> (false, [console])
-    | (None, JUnitStyleXml) -> (true, [])
-  use error =
-    match args.Error with
-    | Some file -> new StreamWriter(file.FullName, false, Encoding.UTF8) :> TextWriter
-    | None -> Console.Error
-
-  use reporter =
-    new Reporter(
-      new Printer<_>(progress, Formatter.ProgressFormatter.dot),
-      new Printer<_>(outputs),
-      new Printer<_>(error, Formatter.ErrorFormatter.normal))
-
-  if args.Help then
-    error.WriteLine(Args.help)
+  
+  let requireFileName = Args.requireFileName args
+  use reporter = Args.reporter watch args
 
   let founds, notFounds = args.Inputs |> List.partition (fun file -> file.Exists)
   if founds |> List.isEmpty then
@@ -67,12 +72,7 @@ let entryPoint (args: Args) =
     -2
   elif notFounds |> List.isEmpty then
     try
-      let asms = founds |> List.map (fun f ->
-        let assemblyRef = AssemblyName.GetAssemblyName(f.FullName)
-        Assembly.Load(assemblyRef))
-      // collect and run
-      let tests = TestCollector.collectRootTestObjects asms
-      runAndReport args.Parallel watch reporter tests
+      runAndReport args watch reporter founds
     with e ->
       reporter.ReportError("!!! FATAL Error !!!")
       reporter.ReportError(e.ToString())
@@ -84,28 +84,7 @@ let entryPoint (args: Args) =
     reporter.ReportError("file not found: " + (String.Join(", ", notFounds)))
     -2
 
-type FailedCounter () =
-  inherit MarshalByRefObject()
-
-  member val Failed = 0 with get, set
-
-[<Serializable>]
-type Callback (args: Args, body: Args -> int, failed: FailedCounter) =
-  member __.Run() =
-    failed.Failed <- body args
-
-let run act =
-  let info = AppDomain.CurrentDomain.SetupInformation
-  let appDomain = AppDomain.CreateDomain("persimmon console domain", null, info)
-  try
-    appDomain.DoCallBack(act)
-  finally
-    AppDomain.Unload(appDomain)
-
 [<EntryPoint>]
 let main argv =
   let args = Args.parse Args.empty (argv |> Array.toList)
-  let failed = FailedCounter()
-  let callback = Callback(args, entryPoint, failed)
-  run (CrossAppDomainDelegate(callback.Run))
-  failed.Failed
+  run args

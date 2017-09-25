@@ -2,6 +2,8 @@
 
 open System
 open System.IO
+open Persimmon.Runner
+open Persimmon.Output
 
 type FormatType =
   | Normal
@@ -22,6 +24,9 @@ type Args = {
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Args =
+  open System.Text
+  open System.Diagnostics
+
   let empty = { Inputs = []; Output = None; Error = None; Format = Normal; NoProgress = false; Parallel = false; Help = false }
 
   let private (|StartsWith|_|) (prefix: string) (target: string) =
@@ -56,6 +61,47 @@ module Args =
         parse { acc with Format = format } rest
       | other -> failwithf "unknown option: %s" other
   | other::rest -> parse { acc with Inputs = (FileInfo(other))::acc.Inputs } rest
+
+  let progressPrinter (args: Args) =
+    let progress = if args.NoProgress then IO.TextWriter.Null else Console.Out
+    new Printer<_>(progress, Formatter.ProgressFormatter.dot)
+
+  let reporter (watch: Stopwatch) (args: Args) =
+    let progressPrinter = progressPrinter args
+    let summary =
+      let console = {
+        Writer = Console.Out
+        Formatter = Formatter.SummaryFormatter.normal watch
+      }
+      match args.Output, args.Format with
+      | (Some file, JUnitStyleXml) ->
+        let xml = {
+          Writer = new StreamWriter(file.FullName, false, Encoding.UTF8) :> TextWriter
+          Formatter = Formatter.XmlFormatter.junitStyle watch
+        }
+        [console; xml]
+      | (Some file, Normal) ->
+        let file = {
+          Writer = new StreamWriter(file.FullName, false, Encoding.UTF8) :> TextWriter
+          Formatter = console.Formatter
+        }
+        [console; file]
+      | (None, Normal) -> [console]
+      | (None, JUnitStyleXml) -> []
+    let error =
+      match args.Error with
+      | Some file -> new StreamWriter(file.FullName, false, Encoding.UTF8) :> TextWriter
+      | None -> Console.Error
+
+    new Reporter(
+      progressPrinter,
+      new Printer<_>(summary),
+      new Printer<_>(error, Formatter.ErrorFormatter.normal))
+
+  let requireFileName (args: Args) =
+    match args.Format with
+    | JUnitStyleXml -> true
+    | Normal -> false
 
   let help =
     """usage: Persimmon.Console.exe <options> <input>...
