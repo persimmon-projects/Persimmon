@@ -13,4 +13,4 @@ let runAllTests progress (tests: #TestMetadata seq) =
 /// Run all tests.
 let asyncRunAllTests progress (tests: #TestMetadata seq) =
   let runner = TestRunner()
-  runner.AsyncRunSynchronouslyAllTests(progress, tests)
+  runner.AsyncRunAllTests(progress, tests)

@@ -73,8 +73,8 @@ type TestRunner() =
 
   /// Collect test objects and run tests.
   member __.AsyncRunAllTests(progress, tests) = async {
-    let! testResultsList = tests |> Seq.map (TestRunnerImpl.asyncRunTest progress) |> TestRunnerImpl.asyncSequential
-    let testResults = testResultsList |> Array.collect id
+    let! testResultsList = tests |> Seq.map (TestRunnerImpl.asyncRunTest progress) |> Async.Parallel
+    let testResults = testResultsList |> Array.collect (Array.map (fun x -> x :> ResultNode))
     let errors = testResults |> Seq.sumBy TestRunnerImpl.countErrors
     return { Errors = errors; Results = testResults }
   }
