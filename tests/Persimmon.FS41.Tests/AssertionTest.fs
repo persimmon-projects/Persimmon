@@ -4,10 +4,17 @@ open Persimmon
 open UseTestNameByReflection
 
 let ``get line number`` =
-  test {
-    match Assert.Fail("test") with
-    | NotPassed(line, _) ->
-      do! line |> assertEquals (Some 8)
-    | Passed _ ->
-      do! fail "expected NotPassed, but was Passed"
+  let curryStyle = match test.Source(fail "test") with | UnitAssertionResult x -> x | _ -> failwith "expected AssertionResult<unit>"
+  parameterize {
+    source [
+      (Assert.Fail("test"), 10)
+      (curryStyle, 7)
+    ]
+    run (fun (assertion, n) -> test {
+      match assertion with
+      | NotPassed(line, _) ->
+        do! line |> assertEquals (Some n)
+      | Passed _ ->
+        do! fail "expected NotPassed, but was Passed"
+    })
   }
