@@ -36,16 +36,6 @@ module TestCase =
   let makeError name parameters exn =
     new TestCase<_>(name, parameters, fun testCase -> Error (testCase, [exn], [], TimeSpan.Zero))
 
-//  let box (testCase: #TestCase) =
-//    let asyncBody (tcobj: TestCase<obj>) = async {
-//      let! result = testCase.AsyncRun()
-//      return
-//        match result with
-//        | Error (_, errs, res, _) -> Error (this, errs, res, watch.Elapsed)
-//        | Done (_, res, _) -> Done (this, res, watch.Elapsed)
-//    }
-//    new TestCase<obj>(testCase.Name, testCase.Parameters, asyncBody)
-
   /// Add not passed test after test.
   let addNotPassed line notPassedCause (x: TestCase<_>) =
     new TestCase<_>(x.Name, x.Parameters, fun _ -> x.Run() |> TestResult.addAssertionResult (NotPassed(line, notPassedCause)))

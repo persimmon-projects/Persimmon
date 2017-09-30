@@ -11,8 +11,6 @@ open Microsoft.FSharp.Control
 type MarshalByRefObject() = class end
 #endif
 
-///////////////////////////////////////////////////////////////////////////
-
 /// The cause of not passed assertion.
 type NotPassedCause =
     /// The assertion is not passed because it is skipped.
@@ -63,7 +61,7 @@ module AssertionResultExtensions =
     match result with
     | :? Passed<'T> as p -> Passed (p.Value)
     | :? NotPassed<'T> as np -> NotPassed (np.LineNumber, np.Cause)
-    | _ -> new ArgumentException() |> raise
+    | _ -> ArgumentException() |> raise
 
   let Passed (value: 'T) = Passed(value) :> AssertionResult<'T>
   let NotPassed (lineNumber: int option, cause: NotPassedCause) = NotPassed(lineNumber, cause) :> AssertionResult<'T>
@@ -111,34 +109,25 @@ module AssertionResult =
     /// For example, "Violated" is more important than "Passed"
     let typicalResult (xs: NonEmptyList<#AssertionResult>) = xs |> NonEmptyList.reduce selector
 
-///////////////////////////////////////////////////////////////////////////
-
 /// Test metadata base class.
-[<AbstractClass>]
-[<StructuredFormatDisplay("{DisplayName}")>]
-type TestMetadata =
-  inherit MarshalByRefObject
+[<AbstractClass; StructuredFormatDisplay("{DisplayName}")>]
+type TestMetadata internal(name: string option) =
+  inherit MarshalByRefObject()
 
-  val private _name : string option
-  [<DefaultValue>]
-  val mutable private _symbolName : string option
-  [<DefaultValue>]
-  val mutable private _parent : TestMetadata option
-  [<DefaultValue>]
-  val mutable private _index : int option
 
-  /// Constructor.
-  internal new (name: string option) = {
-    inherit MarshalByRefObject();
-    _name = name;
-  }
+  [<DefaultValue>]
+  val mutable private symbolName : string option
+  [<DefaultValue>]
+  val mutable private parent : TestMetadata option
+  [<DefaultValue>]
+  val mutable private index : int option
 
   /// The test name. It doesn't contain the parameters.
   /// If not set, fallback to raw symbol name.
-  member this.Name = this._name
+  member __.Name = name
 
   /// Parent metadata. Storing by TestCollector.
-  member this.Parent = this._parent
+  member this.Parent = this.parent
 
   /// Metadata unique name.
   /// If the test has parameters then the value contains them.
@@ -148,16 +137,16 @@ type TestMetadata =
   abstract DisplayName : string
 
   /// Index if metadata place into sequence.
-  member this.Index = this._index
+  member this.Index = this.index
 
   /// For internal use only.
-  member internal this.RawSymbolName = this._symbolName
+  member internal this.RawSymbolName = this.symbolName
 
   /// Metadata symbol name.
   /// This naming contains parent context symbol names.
   member this.SymbolName =
     // Combine parent symbol name.
-    match (this._name, this._symbolName, this._parent) with
+    match (name, this.symbolName, this.parent) with
     | (_, Some rsn, Some p) -> p.SymbolName + "." + rsn
     | (_, Some rsn, _) -> rsn
     | (Some n, _, Some p) -> p.SymbolName + "." + n
@@ -176,23 +165,21 @@ type TestMetadata =
 
   /// For internal use only.
   member internal this.TrySetIndex(index: int) =
-    match this._index with
-    | None -> this._index <- Some index
+    match this.index with
+    | None -> this.index <- Some index
     | _ -> ()
 
   /// For internal use only.
   member internal this.TrySetSymbolName(symbolName: string) =
-    match this._symbolName with
-    | None -> this._symbolName <- Some symbolName
+    match this.symbolName with
+    | None -> this.symbolName <- Some symbolName
     | _ -> ()
 
   /// For internal use only.
   member internal this.TrySetParent(parent: TestMetadata) =
-    match this._parent with
-    | None -> this._parent <- Some parent
+    match this.parent with
+    | None -> this.parent <- Some parent
     | _ -> ()
-
-///////////////////////////////////////////////////////////////////////////
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module private TestMetadata =
@@ -211,8 +198,6 @@ module private TestMetadata =
       | Some p -> traverseDisplayName p
       // Root: unresolved.
       | None -> "[Unresolved]"
-
-///////////////////////////////////////////////////////////////////////////
 
 /// Test case base class.
 [<AbstractClass>]
@@ -277,37 +262,29 @@ and TestResult =
   abstract AssertionResults: AssertionResult[]
   abstract Box: unit -> TestResult<obj>
 
-///////////////////////////////////////////////////////////////////////////
-
 /// Test case class.
 and
   [<Sealed>]
-  TestCase<'T> =
-  inherit TestCase
-
-  //val private _asyncBody : TestCase<'T> -> Async<TestResult<'T>>
-  val private _asyncBody : AsyncLazy<TestResult<'T>>
+  TestCase<'T> internal (name: string option, parameters: (Type * obj) seq, asyncBody: AsyncLazy<TestResult<'T>>) =
+  inherit TestCase(name, parameters)
 
   /// Constructor.
   /// Test body is async operation.
-  new(name: string option, parameters: (Type * obj) seq, asyncBody: TestCase<'T> -> Async<TestResult<'T>>) as this = {
-    inherit TestCase(name, parameters)
-    _asyncBody = new AsyncLazy<TestResult<'T>>(fun _ -> asyncBody(this))
-  }
+  new(name: string option, parameters: (Type * obj) seq, asyncBody: TestCase<'T> -> Async<TestResult<'T>>) as this =
+    TestCase<'T>(name, parameters, AsyncLazy<TestResult<'T>>(fun _ -> asyncBody(this)))
 
   /// Constructor.
   /// Test body is synch operation.
-  new(name: string option, parameters: (Type * obj) seq, body: TestCase<'T> -> TestResult<'T>) as this = {
-    inherit TestCase(name, parameters)
-    _asyncBody = new AsyncLazy<TestResult<'T>>(fun _ -> async {
+  new(name: string option, parameters: (Type * obj) seq, body: TestCase<'T> -> TestResult<'T>) as this =
+    let asyncBody = new AsyncLazy<TestResult<'T>>(fun _ -> async {
       return body(this)
     })
-  }
+    TestCase<'T>(name, parameters, asyncBody)
 
   /// Run test implementation core.
   member private this.InternalAsyncRun() = async {
     let watch = Stopwatch.StartNew()
-    let! result = this._asyncBody.asyncGetValue()
+    let! result = asyncBody.AsyncGetValue()
     watch.Stop()
     return
       match result with
@@ -336,9 +313,7 @@ and
       let! result = this.AsyncRun()
       return result.Box()
     }
-    new TestCase<obj>(this.Name, this.Parameters, asyncBody)
-
-///////////////////////////////////////////////////////////////////////////
+    TestCase<obj>(this.Name, this.Parameters, asyncBody)
 
 /// Test result type.
 /// Inherited from ResultNode
@@ -402,7 +377,8 @@ and [<Sealed>] Done<'T>(testCase: TestCase, results: NonEmptyList<AssertionResul
     member this.AssertionResults =
       results |> NonEmptyList.toList |> Seq.map (fun ar -> ar :> AssertionResult) |> Seq.toArray
     member this.Box() =
-      Done (testCase, results |> NonEmptyList.toSeq |> Seq.map (fun ar -> ar.Box()) |> NonEmptyList.ofSeq, duration) :> TestResult<obj>
+      Done (testCase, results |> NonEmptyList.toSeq |> Seq.map (fun ar -> ar.Box()) |> NonEmptyList.ofSeq, duration)
+      :> TestResult<obj>
 
 [<AutoOpen>]
 module TestCaseExtensions =
@@ -410,12 +386,10 @@ module TestCaseExtensions =
     match testResult with
     | :? Error<'T> as e -> Error(e.TestCase, e.Exceptions, e.Causes, e.Duration)
     | :? Done<'T> as d -> Done(d.TestCase, d.Results, d.Duration)
-    | _ -> new ArgumentException() |> raise
+    | _ -> ArgumentException() |> raise
 
   let Error (testCase: TestCase, exns: exn list, causes: NotPassedCause list, duration: TimeSpan) = Error(testCase, exns, causes, duration) :> TestResult<'T>
   let Done (testCase: TestCase, results: NonEmptyList<AssertionResult<'T>>, duration: TimeSpan) = Done(testCase, results, duration) :> TestResult<'T>
-
-///////////////////////////////////////////////////////////////////////////
 
 /// Test context class. (structuring nested test node)
 [<Sealed>]
