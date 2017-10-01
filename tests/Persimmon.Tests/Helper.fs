@@ -10,7 +10,10 @@ open Persimmon.Internals
 
 module Helper =
 
-  let run (x: TestCase<_>) = x.Run()
+  let run (x: TestCase<_>) = x.AsyncRun() |> Async.RunSynchronously
+
+  let private init (x: TestCase<'T>) f =
+    TestCase.init x.Name x.Parameters (fun _ -> async { return f (run x) })
 
   let shouldPassed<'T when 'T : equality> (expected: 'T) (x: TestCase<'T>) =
     let inner = function
@@ -19,7 +22,7 @@ module Helper =
         | Passed _ -> Passed ()
         | NotPassed(l, x) -> NotPassed(l, x)), d)
       | Error (m, es, results, d) -> Error (m, es, results, d)
-    TestCase.initForSynch x.Name x.Parameters (fun _ -> inner (run x))
+    init x inner
 
   let shouldNotPassed<'T> (expectedMessages: NonEmptyList<string>) (x: TestCase<'T>) =
     let inner = function
@@ -30,7 +33,7 @@ module Helper =
         |> NonEmptyList.map (function NotPassed(_, (Skipped x | Violated x)) -> x | Passed x -> sprintf "Expected is NotPased but Passed(%A)" x)
         |> fun actual -> Done (m, (assertEquals expectedMessages actual, []), d)
       | Error (m, es, results, d) -> Error (m, es, results, d)
-    TestCase.initForSynch x.Name x.Parameters (fun _ -> inner (run x))
+    init x inner
 
   let shouldEqualErrorCount expected xs =
     use printer = new Printer<_>(new StringWriter(), Formatter.ProgressFormatter.dot)
@@ -47,4 +50,4 @@ module Helper =
       | Error (m, [], results, d) ->
         Done (m, (fail (sprintf "Expect: raise %s\nActual: not raise exception" (typeof<'T>.Name)), []), d)
       | Error (m, x::_, results, d) -> Done (m, (assertEquals typeof<'T> (x.GetType()), []), d)
-    TestCase.initForSynch x.Name x.Parameters (fun _ -> inner (run x))
+    init x inner

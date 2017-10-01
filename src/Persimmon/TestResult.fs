@@ -7,8 +7,9 @@ open System.Diagnostics
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module TestResult =
 
-  let private endMarkerTestBody (tc:TestCase<unit>) : TestResult<unit> =
-    new InvalidOperationException() |> raise
+  let private endMarkerTestBody (tc:TestCase<unit>) : Async<TestResult<unit>> = async {
+    return InvalidOperationException() |> raise
+  }
   let private endMarkerTestCase =
     new TestCase<unit>(Some "endMarker", [], endMarkerTestBody) :> TestCase
   let private endMarkerResult : AssertionResult<unit> = NotPassed (None, Skipped "endMarker")

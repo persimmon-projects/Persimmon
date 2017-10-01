@@ -217,11 +217,6 @@ type TestCase internal (name: string option, parameters: (Type * obj) seq) =
   /// Execute this test case.
   member this.AsyncRun() = this.OnAsyncRun()
 
-  /// Execute this test case.
-  /// TODO: Omit all synch caller.
-  //[<Obsolete>]
-  member this.Run() = this.OnAsyncRun() |> Async.RunSynchronously
-
   /// Create unique name.
   member private this.CreateUniqueName baseName =
     let parameters = this.Parameters |> PrettyPrinter.printAll
@@ -268,20 +263,10 @@ and
   TestCase<'T> internal (name: string option, parameters: (Type * obj) seq, asyncBody: AsyncLazy<TestResult<'T>>) =
   inherit TestCase(name, parameters)
 
-  /// Constructor.
   /// Test body is async operation.
   new(name: string option, parameters: (Type * obj) seq, asyncBody: TestCase<'T> -> Async<TestResult<'T>>) as this =
     TestCase<'T>(name, parameters, AsyncLazy<TestResult<'T>>(fun _ -> asyncBody(this)))
 
-  /// Constructor.
-  /// Test body is synch operation.
-  new(name: string option, parameters: (Type * obj) seq, body: TestCase<'T> -> TestResult<'T>) as this =
-    let asyncBody = new AsyncLazy<TestResult<'T>>(fun _ -> async {
-      return body(this)
-    })
-    TestCase<'T>(name, parameters, asyncBody)
-
-  /// Run test implementation core.
   member private this.InternalAsyncRun() = async {
     let watch = Stopwatch.StartNew()
     let! result = asyncBody.AsyncGetValue()
@@ -290,18 +275,12 @@ and
       match result with
       | :? Error<'T> as e -> Error(this, e.Exceptions, e.Causes, watch.Elapsed) :> TestResult<'T>
       | :? Done<'T> as d -> Done(this, d.Results, watch.Elapsed) :> TestResult<'T>
-      | _ -> new ArgumentException() |> raise
+      | _ -> ArgumentException() |> raise
   }
 
   /// Execute this test case.
   member this.AsyncRun() = this.InternalAsyncRun()
 
-  /// Execute this test case.
-  /// TODO: Omit all synch caller.
-  //[<Obsolete>]
-  member this.Run() = this.InternalAsyncRun() |> Async.RunSynchronously
-
-  /// For internal use only.
   override this.OnAsyncRun() = async {
     let! result = this.InternalAsyncRun()
     return result :> TestResult

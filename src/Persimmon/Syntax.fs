@@ -16,14 +16,16 @@ let skip message (target: TestCase<'T>) : TestCase<'T> =
   TestCase.makeDone target.Name target.Parameters (NotPassed(None, Skipped message))
 
 let timeout time (target: TestCase<'T>): TestCase<'T> =
-  let body _ =
+  let body _ = async {
     let watch = Stopwatch.StartNew()
-    try
-      Async.RunSynchronously(async { return target.Run() }, time)
-    with
-    | :? System.TimeoutException as e ->
-      watch.Stop()
-      Error(target, [e], [], watch.Elapsed)
+    return
+      try
+        Async.RunSynchronously(target.AsyncRun(), time)
+      with
+      | :? System.TimeoutException as e ->
+        watch.Stop()
+        Error(target, [e], [], watch.Elapsed)
+  }
   TestCase<'T>(target.Name, target.Parameters, body)
 
 /// Trap the exception and convert to AssertionResult<exn>.
