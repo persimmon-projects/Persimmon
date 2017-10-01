@@ -11,20 +11,32 @@ open Persimmon.ActivePatterns
 
 module internal TestRunnerImpl =
 
-  let rec traverseAsyncRunner test = seq {
+  let rec collectTests progress (results: ResizeArray<ResultNode>) (test: TestMetadata) : seq<Async<unit -> unit>> = seq {
     match test with
     | Context context ->
-      yield! context.Children |> Seq.collect traverseAsyncRunner
+      let childResults = ResizeArray<ResultNode>()
+      yield! Seq.collect (collectTests progress childResults) context.Children
+
+      let delayMakeResult = fun () -> results.Add(ContextResult(context, childResults.ToArray()))
+      yield async { return delayMakeResult }
     | TestCase testCase ->
-      yield testCase.AsyncRun
-   }
-  /// Entire full parallelism test execution.
-  and asyncRunTest progress test =
-    traverseAsyncRunner test |> Seq.map (fun asyncRun -> async {
-      let! result = asyncRun()
-      do progress result
-      return result
-    }) |> Async.Parallel
+      let delayMakeResult = fun testCaseResult () -> results.Add(testCaseResult)
+      yield async {
+        let! testCaseResult = testCase.AsyncRun()
+        do progress testCaseResult
+        return delayMakeResult testCaseResult
+      }
+  }
+
+  let runTests progress eval (tests: seq<#TestMetadata>) =
+    let results = ResizeArray<ResultNode>()
+
+    async {
+      let! delayMakeResults = tests |> Seq.collect (collectTests progress results) |> eval
+
+      do delayMakeResults |> Seq.iter (fun f -> f())
+      return results.ToArray()
+    }
 
   let asyncSequential xs = async {
     let list = ResizeArray<'T>()
@@ -33,20 +45,6 @@ module internal TestRunnerImpl =
       list.Add(v)
     return list.ToArray()
   }
-
-  // Oh... very hard...
-  let rec asyncRunSynchronouslyTest progress test =
-    match test with
-    | Context context ->
-      context.Children |> Seq.map (fun child -> async {
-        let! results = asyncRunSynchronouslyTest progress child
-        return new ContextResult(context, results) :> ResultNode
-      }) |> asyncSequential
-    | TestCase testCase -> async {
-        let! result = testCase.AsyncRun()
-        do progress result
-        return [| result :> ResultNode |]
-      }
 
   let rec countErrors result =
     match result with
@@ -73,16 +71,14 @@ type TestRunner() =
 
   /// Collect test objects and run tests.
   member __.AsyncRunAllTests(progress, tests) = async {
-    let! testResultsList = tests |> Seq.map (TestRunnerImpl.asyncRunTest progress) |> Async.Parallel
-    let testResults = testResultsList |> Array.collect (Array.map (fun x -> x :> ResultNode))
+    let! testResults = TestRunnerImpl.runTests progress Async.Parallel tests
     let errors = testResults |> Seq.sumBy TestRunnerImpl.countErrors
     return { Errors = errors; Results = testResults }
   }
 
   /// Collect test objects and run tests.
   member __.AsyncRunSynchronouslyAllTests(progress, tests) = async {
-    let! testResultsList = tests |> Seq.map (TestRunnerImpl.asyncRunSynchronouslyTest progress) |> TestRunnerImpl.asyncSequential
-    let testResults = testResultsList |> Array.collect id
+    let! testResults = TestRunnerImpl.runTests progress TestRunnerImpl.asyncSequential tests
     let errors = testResults |> Seq.sumBy TestRunnerImpl.countErrors
     return { Errors = errors; Results = testResults }
   }
@@ -92,8 +88,7 @@ type TestRunner() =
   //[<Obsolete>]
   member __.RunSynchronouslyAllTests(progress, tests) =
     // Keep forward sequence.
-    let testResultsList = tests |> Seq.map (TestRunnerImpl.asyncRunSynchronouslyTest progress >> Async.RunSynchronously)
-    let testResults = testResultsList |> Seq.collect id |> Seq.toArray
+    let testResults = TestRunnerImpl.runTests progress TestRunnerImpl.asyncSequential tests |> Async.RunSynchronously
     let errors = testResults |> Seq.sumBy TestRunnerImpl.countErrors
     { Errors = errors; Results = testResults }
 
@@ -122,7 +117,7 @@ type TestRunner() =
       if containsKey testCase.UniqueName then
         before.Invoke(testCase)
         // Map test case to async runner (with callback side effect)
-        Some (TestRunnerImpl.asyncRunTest callback.Invoke testCase)
+        Some (TestRunnerImpl.runTests callback.Invoke TestRunnerImpl.asyncSequential [ testCase ])
       else None
     )
     |> Async.Parallel

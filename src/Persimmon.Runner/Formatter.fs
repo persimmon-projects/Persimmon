@@ -78,27 +78,54 @@ module Formatter =
 
   module XmlFormatter =
 
-    open System.Xml
     open System.Xml.Linq
     open SummaryFormatter
 
     let private xname name = XName.Get(name)
 
-    let timeSpanToStr (span: TimeSpan) = sprintf "%.3f" span.TotalSeconds
+    let private timeSpanToStr (span: TimeSpan) = sprintf "%.3f" span.TotalSeconds
 
-    let private toXDocument result =
-      let rec inner (acc: XElement) = function
+    let private toXElements result =
+      let element () = XElement(xname "testsuite")
+      let summary (children: ResizeArray<XElement * Summary>) (result: ResultNode) (suite: XElement) =
+        let total = result |> Summary.collectSummary Summary.empty
+        let summary =
+          children
+          |> Seq.fold (fun acc (_, x) ->
+            {
+              Run = acc.Run - x.Run
+              Skipped = acc.Skipped - x.Skipped
+              Violated = acc.Violated - x.Violated
+              Error = acc.Error - x.Error
+              Duration = acc.Duration
+            }
+          ) total
+        suite.Add(
+          XAttribute(xname "timestamp", DateTime.Now.ToString()),
+          XAttribute(xname "tests", summary.Run),
+          XAttribute(xname "failures", summary.Violated),
+          XAttribute(xname "errors", summary.Error),
+          XAttribute(xname "skipped", summary.Skipped)
+        )
+        (suite, summary)
+      let rec inner (results: ResizeArray<XElement * Summary>) (acc: XElement) = function
       | EndMarker -> acc
       | ContextResult contextResult ->
-        let name =
-          match acc.Attribute(xname "name") with
-          | null -> contextResult.Context.DisplayName
-          | x ->
-            x.Remove()
-            sprintf "%s.%s" x.Value contextResult.Context.DisplayName
-        let nameAttr = XAttribute(xname "name", name)
-        acc.Add(nameAttr)
-        contextResult.Results |> Seq.fold inner acc
+        let name = xname "name"
+        match acc.Attribute(name) with
+        | null ->
+          acc.Add(XAttribute(name, contextResult.Context.DisplayName))
+          contextResult.Results |> Seq.fold (inner results) acc
+        | x ->
+          let suite = element ()
+          suite.Add(XAttribute(name, (sprintf "%s.%s" x.Value contextResult.Context.DisplayName)))
+          let children = ResizeArray<XElement * Summary>()
+          contextResult.Results
+          |> Seq.fold (inner children) suite
+          |> summary children contextResult
+          |> results.Add
+          results.AddRange(children)
+          acc
       | TestResult tr ->
         let testCase =
           XElement(
@@ -131,16 +158,15 @@ module Formatter =
               XAttribute(xname "time", timeSpanToStr duration))
         acc.Add(testCase)
         acc
-      let suite = inner (XElement(xname "testsuite")) result
-      let summary = result |> Summary.collectSummary Summary.empty
-      suite.Add(
-        XAttribute(xname "timestamp", DateTime.Now.ToString()),
-        XAttribute(xname "tests", summary.Run),
-        XAttribute(xname "failures", summary.Violated),
-        XAttribute(xname "errors", summary.Error),
-        XAttribute(xname "skipped", summary.Skipped)
+      let results = ResizeArray<XElement * Summary>()
+      inner results (element ()) result
+      |> summary results result
+      |> results.Add
+      results
+      |> Seq.choose (fun (x, _) ->
+        if Seq.isEmpty <| x.Elements() then None
+        else Some x
       )
-      suite
 
     let addSummary (watch: Stopwatch) results (suites: XElement) =
       let summary = results |> Seq.fold Summary.collectSummary { Summary.empty with Duration = watch.Elapsed }
@@ -154,6 +180,6 @@ module Formatter =
     let junitStyle watch =
       { new IFormatter<ResultNode seq> with
         member __.Format(results: ResultNode seq) =
-          let xdocument = XDocument(XElement(xname "testsuites", results |> Seq.map toXDocument) |> addSummary watch results)
+          let xdocument = XDocument(XElement(xname "testsuites", results |> Seq.collect toXElements) |> addSummary watch results)
           Writable.xdocument(xdocument)
       }
