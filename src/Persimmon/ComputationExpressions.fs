@@ -21,7 +21,7 @@ type TestBuilder private (name: string option) =
   member __.ReturnFrom(x: BindingValue<_>) =
     match x with
     | UnitAssertionResult x | NonUnitAssertionResult x -> TestCase.makeDone name [] x
-    | UnitTestCase x | NonUnitTestCase x -> TestCase<_>(name, x.Parameters, fun _ -> x.Run())
+    | UnitTestCase x | NonUnitTestCase x -> TestCase<_>(name, x.Parameters, fun _ -> x.AsyncRun())
   // let! a = (x: AssertionResult<unit>) in ...
   member __.Source(x: AssertionResult<unit>, [<CallerLineNumber>]?line : int) =
     let x =
@@ -50,14 +50,20 @@ type TestBuilder private (name: string option) =
       let c = f x // TODO: try-with
       match box x with
       | :? exn as e ->
-        TestCase<_>(c.Name, c.Parameters, fun _ ->
-          match c.Run() with
-          | Done (_, (Passed _, []), _) as d -> d
-          | Done (tc, assertionResults, duration) ->
-            match assertionResults |> NonEmptyList.toSeq |> AssertionResult.Seq.onlyNotPassed |> Seq.toList with
-            | [] -> failwith "oops!"
-            | notPassed -> Error (tc, [e], notPassed, duration)
-          | Error _ as e -> e
+        TestCase<_>(
+          c.Name,
+          c.Parameters,
+          fun _ -> async {
+            let! result = c.AsyncRun()
+            return
+              match result with
+              | Done (_, (Passed _, []), _) as d -> d
+              | Done (tc, assertionResults, duration) ->
+                match assertionResults |> NonEmptyList.toSeq |> AssertionResult.Seq.onlyNotPassed |> Seq.toList with
+                | [] -> failwith "oops!"
+                | notPassed -> Error (tc, [|e|], notPassed, duration)
+              | Error _ as e -> e
+          }
         )
       | _ -> c
     | UnitAssertionResult (NotPassed(line, cause)) ->
@@ -75,13 +81,12 @@ type TestBuilder private (name: string option) =
     this.TryFinally((fun () -> f x), dispose)
   member __.TryFinally(f, g) =
     TestCase.init None [] (fun _ -> async {
-      return
-        try
-          let case =
-            try f ()
-            with e -> TestCase.makeError None [] e
-          case.Run()
-        finally g ()
+      try
+        let case =
+          try f ()
+          with e -> TestCase.makeError None [] e
+        return! case.AsyncRun()
+      finally g ()
     })
   member __.Delay(f) = f
   member __.Run(f: unit -> TestCase<_>) =
@@ -123,7 +128,7 @@ type ParameterizeBuilder() =
     source
     |> Seq.map (fun x ->
       let ret = f x
-      TestCase<_>(ret.Name, (toList x), fun _ -> ret.Run()))
+      TestCase<_>(ret.Name, (toList x), fun _ -> ret.AsyncRun()))
 
 type TrapBuilder () =
   member __.Zero () = ()

@@ -4,8 +4,6 @@ open System
 open System.Collections.Generic
 open System.Threading
 
-///////////////////////////////////////////////////////////////////////////////////
-
 /// <summary>
 /// Delegation F#'s async continuation.
 /// (From FSharp.Control.FusionTasks https://github.com/kekyo/FSharp.Control.FusionTasks)
@@ -15,64 +13,56 @@ open System.Threading
 /// </description>
 /// <typeparam name="'T">Computation result type</typeparam>
 [<Sealed; NoEquality; NoComparison; AutoSerializable(false)>]
-type private AsyncCompletionSource<'T> =
+type private AsyncCompletionSource<'T>() as this =
 
-  [<DefaultValue>]
-  val mutable private _value : 'T option
-  [<DefaultValue>]
-  val mutable private _exn : exn option
+  let mutable value : 'T option = None
+  let mutable exn : exn option = None
+  let mutable completed : ('T -> unit) option = None
+  let mutable caught : (exn -> unit) option = None
 
-  [<DefaultValue>]
-  val mutable private _completed : ('T -> unit) option
-  [<DefaultValue>]
-  val mutable private _caught : (exn -> unit) option
+  let body = Async.FromContinuations<'T>(fun (callback, error, _) ->
+    lock (this) (fun _ ->
+      match value, exn with
+      | Some value, None -> callback value
+      | None, Some exn -> error exn
+      | Some value, Some exn ->
+        callback value
+        error exn
+      | None, None -> ()
 
-  val private _async : Async<'T>
-
-  /// <summary>
-  /// Constructor.
-  /// </summary>
-  new () as this = {
-    _async = Async.FromContinuations<'T>(fun (completed, caught, _) ->
-      lock (this) (fun _ ->
-        match this._value, this._exn with
-        | Some value, None -> completed value
-        | None, Some exn -> caught exn
-        | Some value, Some exn ->
-          completed value
-          caught exn
-        | None, None -> ()
-
-        this._completed <- Some completed
-        this._caught <- Some caught))
-  }
+      completed <- Some callback
+      caught <- Some error
+    )
+  )
 
   /// <summary>
   /// Target Async&lt;'T&gt; instance.
   /// </summary>
-  member this.Async = this._async
+  member this.Async = body
 
   /// <summary>
   /// Set result value and continue continuation.
   /// </summary>
   /// <param name="value">Result value</param>
-  member this.SetResult value =
-    lock (this) (fun () ->
-      match this._completed with
-      | Some completed -> completed value
-      | None -> this._value <- Some value)
+  member this.Result
+    with set(v) =
+      lock (this) (fun () ->
+        match completed with
+        | Some completed -> completed v
+        | None -> value <- Some v
+      )
 
   /// <summary>
   /// Set exception and continue continuation.
   /// </summary>
   /// <param name="exn">Exception instance</param>
-  member this.SetException exn =
-    lock (this) (fun () ->
-      match this._caught with
-      | Some caught -> caught exn
-      | None -> this._exn <- Some exn)
-
-///////////////////////////////////////////////////////////////////////////////////
+  member this.Exception
+    with set(e) =
+      lock (this) (fun () ->
+        match caught with
+        | Some caught -> caught e
+        | None -> exn <- Some e
+      )
 
 /// <summary>
 /// Pseudo lock primitive on F#'s async workflow/.NET Task.
@@ -81,18 +71,18 @@ type private AsyncCompletionSource<'T> =
 [<Sealed; NoEquality; NoComparison; AutoSerializable(false)>]
 type private AsyncLock () =
 
-  let _queue = new Queue<unit -> unit>()
-  let mutable _enter = false
+  let queue = new Queue<unit -> unit>()
+  let mutable enter = false
 
   let locker continuation =
     let result =
-      lock (_queue) (fun _ ->
-        match _enter with
+      lock (queue) (fun _ ->
+        match enter with
         | true ->
-          _queue.Enqueue(continuation)
+          queue.Enqueue(continuation)
           false
         | false ->
-          _enter <- true
+          enter <- true
           true)
     match result with
     | true -> continuation()
@@ -100,13 +90,13 @@ type private AsyncLock () =
 
   let unlocker () =
     let result =
-      lock (_queue) (fun _ ->
-        match _queue.Count with
+      lock (queue) (fun _ ->
+        match queue.Count with
         | 0 ->
-          _enter <- false
+          enter <- false
           None
         | _ ->
-          Some (_queue.Dequeue()))
+          Some (queue.Dequeue()))
     match result with
     | Some continuation -> continuation()
     | None -> ()
@@ -116,12 +106,10 @@ type private AsyncLock () =
       member __.Dispose() = unlocker()
   }
 
-  member __.asyncLock() =
+  member __.AsyncLock() =
     let acs = new AsyncCompletionSource<IDisposable>()
-    locker (fun _ -> acs.SetResult disposable)
+    locker (fun _ -> acs.Result <- disposable)
     acs.Async
-
-///////////////////////////////////////////////////////////////////////////////////
 
 /// <summary>
 /// Asynchronos lazy instance generator.
@@ -129,28 +117,17 @@ type private AsyncLock () =
 /// </summary>
 /// <typeparam name="'T">Computation result type</typeparam>
 [<Sealed; NoEquality; NoComparison; AutoSerializable(false)>]
-type internal AsyncLazy<'T> =
+type internal AsyncLazy<'T>(asyncBody: unit -> Async<'T>) =
 
-  val private _lock : AsyncLock
-  val private _asyncBody : unit -> Async<'T>
-  val mutable private _value : 'T option
+  let lock = AsyncLock()
+  let mutable value : 'T option = None
 
-  /// <summary>
-  /// Constructor.
-  /// </summary>
-  /// <param name="asyncBody">Lazy instance factory.</param>
-  new (asyncBody: unit -> Async<'T>) = {
-    _lock = new AsyncLock()
-    _asyncBody = asyncBody
-    _value = None
-  }
-
-  member internal this.asyncGetValue() = async {
-    use! al = this._lock.asyncLock()
-    match this._value with
+  member internal this.AsyncGetValue() = async {
+    use! al = lock.AsyncLock()
+    match value with
     | Some value -> return value
     | None ->
-      let! value = this._asyncBody()
-      this._value <- Some value
-      return value
+      let! v = asyncBody ()
+      value <- Some v
+      return v
   }

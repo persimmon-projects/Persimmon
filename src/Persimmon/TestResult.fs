@@ -7,8 +7,9 @@ open System.Diagnostics
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module TestResult =
 
-  let private endMarkerTestBody (tc:TestCase<unit>) : TestResult<unit> =
-    new InvalidOperationException() |> raise
+  let private endMarkerTestBody (tc:TestCase<unit>) : Async<TestResult<unit>> = async {
+    return InvalidOperationException() |> raise
+  }
   let private endMarkerTestCase =
     new TestCase<unit>(Some "endMarker", [], endMarkerTestBody) :> TestCase
   let private endMarkerResult : AssertionResult<unit> = NotPassed (None, Skipped "endMarker")
@@ -34,7 +35,7 @@ module TestResult =
     | Done (testCase, results, d) -> Done (testCase, results, d + x)
     | Error (testCase, es, results, ts) -> Error (testCase, es, results, ts + x)
 
-  let addExceptions (es: exn list) = function
+  let addExceptions (es: exn []) = function
     | Done (testCase, (Passed _, []), d) -> Error(testCase, es, [], d)
     | Done (testCase, results, d) ->
       let results =
@@ -44,4 +45,4 @@ module TestResult =
         |> Seq.toList
       Error(testCase, es, results, d)
     | Error (testCase, es0, results, d) ->
-      Error (testCase, List.append es0 es, results, d)
+      Error (testCase, Array.append es0 es, results, d)

@@ -16,6 +16,7 @@
     <Compile Include="..\Persimmon\Types.fs" />
     <Compile Include="..\Persimmon\TestResult.fs" />
     <Compile Include="..\Persimmon\ActivePatterns.fs" />
+    <Compile Include="..\Persimmon\ResultNode.fs" />
     <Compile Include="..\Persimmon\TestCase.fs" />
     <Compile Include="..\Persimmon\Assertions.fs" />
     <Compile Include="..\Persimmon\ComputationExpressions.fs" />

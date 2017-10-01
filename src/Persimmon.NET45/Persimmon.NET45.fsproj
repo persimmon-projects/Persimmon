@@ -82,6 +82,9 @@
     <Compile Include="..\Persimmon\ActivePatterns.fs">
       <Link>ActivePatterns.fs</Link>
     </Compile>
+    <Compile Include="..\Persimmon\ResultNode.fs">
+      <Link>ResultNode.fs</Link>
+    </Compile>
     <Compile Include="..\Persimmon\TestCase.fs">
       <Link>TestCase.fs</Link>
     </Compile>
