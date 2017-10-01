@@ -181,7 +181,11 @@ type TestCollector() =
   let collect targetAssembly =
     targetAssembly
     |> TestCollectorImpl.publicTypes
-    |> Seq.map (fun typ -> Context(typ.FullName, TestCollectorImpl.collectTests typ))
+    |> Seq.choose (fun typ ->
+      let tests = TestCollectorImpl.collectTests typ
+      if Seq.isEmpty tests then None
+      else Some(Context(typ.FullName, tests))
+    )
 
   /// Remove contexts and flatten structured test objects.
   let rec flattenTestCase (testMetadata: TestMetadata) = seq {
