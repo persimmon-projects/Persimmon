@@ -300,29 +300,35 @@ and TestResult<'T> =
   inherit TestResult
 
 /// This case represents the error.
-and [<Sealed>] Error<'T>(testCase: TestCase, exns: exn list, causes: NotPassedCause list, duration: TimeSpan) =
+and [<Sealed>] Error<'T>(testCase: TestCase, exns: exn [], causes: NotPassedCause list, duration: TimeSpan) =
   inherit MarshalByRefObject()
 
-  member internal this.TestCase : TestCase = testCase
-  member internal this.Exceptions : exn list = exns
-  member internal this.Causes : NotPassedCause list = causes
-  member internal this.Duration : TimeSpan = duration
+  member __.TestCase : TestCase = testCase
+  member __.Exceptions : exn [] = exns
+  member __.Causes : NotPassedCause list = causes
+  member __.Duration : TimeSpan = duration
 
-  override this.ToString() = sprintf "%A: Result=Error" testCase
+  member __.FailureMessages =
+    causes
+    |> NotPassedCause.Seq.violatedMessages
+    |> Seq.toArray
+
+  member __.SkipMessages =
+    causes
+    |> NotPassedCause.Seq.skipMessages
+    |> Seq.toArray
+
+  override __.ToString() = sprintf "%A: Result=Error" testCase
 
   interface TestResult<'T> with
-    member this.TestCase = testCase
+    member __.TestCase = testCase
     member this.IsError = true
     member this.FailureMessages =
-      causes
-      |> NotPassedCause.Seq.violatedMessages
-      |> Seq.toArray
+      this.FailureMessages
     member this.SkipMessages =
-      causes
-      |> NotPassedCause.Seq.skipMessages
-      |> Seq.toArray
+      this.SkipMessages
     member this.Exceptions = exns |> Seq.toArray
-    member this.Duration = duration
+    member this.Duration = this.Duration
     member this.AssertionResults = [||]
     member this.Box() = Error(testCase, exns, causes, duration) :> TestResult<obj>
 
@@ -330,29 +336,35 @@ and [<Sealed>] Error<'T>(testCase: TestCase, exns: exn list, causes: NotPassedCa
 and [<Sealed>] Done<'T>(testCase: TestCase, results: NonEmptyList<AssertionResult<'T>>, duration: TimeSpan) =
   inherit MarshalByRefObject()
 
-  member internal this.TestCase : TestCase = testCase
-  member internal this.Results : NonEmptyList<AssertionResult<'T>> = results
-  member internal this.Duration : TimeSpan = duration
+  member __.TestCase : TestCase = testCase
+  member __.Results : NonEmptyList<AssertionResult<'T>> = results
+  member __.Duration : TimeSpan = duration
+  member __.Exceptions: exn [] = [||]
 
-  override this.ToString() = sprintf "%A: Result=Done" testCase
+  member __.FailureMessages =
+    results
+    |> NonEmptyList.toSeq
+    |> AssertionResult.Seq.onlyNotPassed
+    |> NotPassedCause.Seq.violatedMessages
+    |> Seq.toArray
+  member __.SkipMessages =
+    results
+    |> NonEmptyList.toSeq
+    |> AssertionResult.Seq.onlyNotPassed
+    |> NotPassedCause.Seq.skipMessages
+    |> Seq.toArray
+
+  override __.ToString() = sprintf "%A: Result=Done" testCase
 
   interface TestResult<'T> with
-    member this.TestCase = testCase
-    member this.IsError = false
+    member __.TestCase = testCase
+    member __.IsError = false
     member this.FailureMessages =
-      results
-      |> NonEmptyList.toSeq
-      |> AssertionResult.Seq.onlyNotPassed
-      |> NotPassedCause.Seq.violatedMessages
-      |> Seq.toArray
+      this.FailureMessages
     member this.SkipMessages =
-      results
-      |> NonEmptyList.toSeq
-      |> AssertionResult.Seq.onlyNotPassed
-      |> NotPassedCause.Seq.skipMessages
-      |> Seq.toArray
-    member this.Exceptions = [||]
-    member this.Duration = duration
+      this.SkipMessages
+    member this.Exceptions = this.Exceptions
+    member this.Duration = this.Duration
     member this.AssertionResults =
       results |> NonEmptyList.toList |> Seq.map (fun ar -> ar :> AssertionResult) |> Seq.toArray
     member this.Box() =
@@ -367,7 +379,7 @@ module TestCaseExtensions =
     | :? Done<'T> as d -> Done(d.TestCase, d.Results, d.Duration)
     | _ -> ArgumentException() |> raise
 
-  let Error (testCase: TestCase, exns: exn list, causes: NotPassedCause list, duration: TimeSpan) = Error(testCase, exns, causes, duration) :> TestResult<'T>
+  let Error (testCase: TestCase, exns: exn [], causes: NotPassedCause list, duration: TimeSpan) = Error(testCase, exns, causes, duration) :> TestResult<'T>
   let Done (testCase: TestCase, results: NonEmptyList<AssertionResult<'T>>, duration: TimeSpan) = Done(testCase, results, duration) :> TestResult<'T>
 
 /// Test context class. (structuring nested test node)

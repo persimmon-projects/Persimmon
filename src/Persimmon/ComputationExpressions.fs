@@ -61,7 +61,7 @@ type TestBuilder private (name: string option) =
               | Done (tc, assertionResults, duration) ->
                 match assertionResults |> NonEmptyList.toSeq |> AssertionResult.Seq.onlyNotPassed |> Seq.toList with
                 | [] -> failwith "oops!"
-                | notPassed -> Error (tc, [e], notPassed, duration)
+                | notPassed -> Error (tc, [|e|], notPassed, duration)
               | Error _ as e -> e
           }
         )

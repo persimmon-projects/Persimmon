@@ -47,7 +47,7 @@ module Helper =
       | Done (m, results, d) -> Done (m, results |> NonEmptyList.map (function
         | Passed _ -> Passed ()
         | NotPassed(l, x) -> NotPassed(l, x)), d)
-      | Error (m, [], results, d) ->
+      | Error (m, [||], results, d) ->
         Done (m, (fail (sprintf "Expect: raise %s\nActual: not raise exception" (typeof<'T>.Name)), []), d)
-      | Error (m, x::_, results, d) -> Done (m, (assertEquals typeof<'T> (x.GetType()), []), d)
+      | Error (m, xs, results, d) -> Done (m, (assertEquals typeof<'T> (xs.[0].GetType()), []), d)
     init x inner

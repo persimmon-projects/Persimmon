@@ -35,7 +35,7 @@ module TestResult =
     | Done (testCase, results, d) -> Done (testCase, results, d + x)
     | Error (testCase, es, results, ts) -> Error (testCase, es, results, ts + x)
 
-  let addExceptions (es: exn list) = function
+  let addExceptions (es: exn []) = function
     | Done (testCase, (Passed _, []), d) -> Error(testCase, es, [], d)
     | Done (testCase, results, d) ->
       let results =
@@ -45,4 +45,4 @@ module TestResult =
         |> Seq.toList
       Error(testCase, es, results, d)
     | Error (testCase, es0, results, d) ->
-      Error (testCase, List.append es0 es, results, d)
+      Error (testCase, Array.append es0 es, results, d)

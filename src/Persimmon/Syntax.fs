@@ -24,7 +24,7 @@ let timeout time (target: TestCase<'T>): TestCase<'T> =
       with
       | :? System.TimeoutException as e ->
         watch.Stop()
-        Error(target, [e], [], watch.Elapsed)
+        Error(target, [|e|], [], watch.Elapsed)
   }
   TestCase<'T>(target.Name, target.Parameters, body)
 
