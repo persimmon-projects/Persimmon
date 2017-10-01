@@ -65,6 +65,7 @@
     <Compile Include="Types.fs" />
     <Compile Include="TestResult.fs" />
     <Compile Include="ActivePatterns.fs" />
+    <Compile Include="ResultNode.fs" />
     <Compile Include="TestCase.fs" />
     <Compile Include="Assertions.fs" />
     <Compile Include="ComputationExpressions.fs" />
