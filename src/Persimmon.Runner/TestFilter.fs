@@ -19,9 +19,17 @@ module TestFilter =
 
   let private categories (t: TestMetadata) = Set.ofArray t.Categories
 
+  let private testCaseFilter (pred: TestCase -> bool) = fun (t: TestMetadata) ->
+    match t with
+    | :? TestCase as tc -> pred tc
+    | _ -> true
+
   let make (filter: TestFilter) : TestMetadata -> bool =
     match filter.IncludeCategories.IsEmpty, filter.ExcludeCategories.IsEmpty with
     | true, true -> fun _ -> true
-    | false, false -> fun t -> let categories = categories t in (includeCategoryFilter filter.IncludeCategories categories && excludeCategoryFilter filter.ExcludeCategories categories)
-    | false, true -> fun t -> let categories = categories t in (includeCategoryFilter filter.IncludeCategories categories)
-    | true, false -> fun t -> let categories = categories t in (excludeCategoryFilter filter.ExcludeCategories categories)
+    | false, false ->
+      testCaseFilter <| fun tc -> let categories = categories tc in (includeCategoryFilter filter.IncludeCategories categories && excludeCategoryFilter filter.ExcludeCategories categories)
+    | false, true ->
+      testCaseFilter <| fun tc -> let categories = categories tc in (includeCategoryFilter filter.IncludeCategories categories)
+    | true, false ->
+      testCaseFilter <| fun tc -> let categories = categories tc in (excludeCategoryFilter filter.ExcludeCategories categories)

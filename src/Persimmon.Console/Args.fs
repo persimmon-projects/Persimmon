@@ -19,6 +19,8 @@ type Args = {
   NoProgress: bool
   Parallel: bool
 
+  Filter: TestFilter
+
   Help: bool
 }
 
@@ -27,7 +29,7 @@ module Args =
   open System.Text
   open System.Diagnostics
 
-  let empty = { Inputs = []; Output = None; Error = None; Format = Normal; NoProgress = false; Parallel = false; Help = false }
+  let empty = { Inputs = []; Output = None; Error = None; Format = Normal; NoProgress = false; Parallel = false; Filter = TestFilter.allPass; Help = false }
 
   let private (|StartsWith|_|) (prefix: string) (target: string) =
     if target.StartsWith(prefix) then
@@ -59,6 +61,12 @@ module Args =
           | "xml" -> JUnitStyleXml
           | _ -> Normal
         parse { acc with Format = format } rest
+      | "category" ->
+        let includes = value.Split(',') |> Set.ofArray
+        parse { acc with Filter = { acc.Filter with IncludeCategories = acc.Filter.IncludeCategories + includes } } rest
+      | "exclude-category" ->
+        let excludes = value.Split(',') |> Set.ofArray
+        parse { acc with Filter = { acc.Filter with ExcludeCategories = acc.Filter.ExcludeCategories + excludes } } rest
       | other -> failwithf "unknown option: %s" other
   | other::rest -> parse { acc with Inputs = (FileInfo(other))::acc.Inputs } rest
 
