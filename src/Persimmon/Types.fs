@@ -111,7 +111,7 @@ module AssertionResult =
 
 /// Test metadata base class.
 [<AbstractClass; StructuredFormatDisplay("{DisplayName}")>]
-type TestMetadata internal(name: string option) =
+type TestMetadata internal(name: string option, categories: string seq) =
   inherit MarshalByRefObject()
 
 
@@ -121,6 +121,8 @@ type TestMetadata internal(name: string option) =
   val mutable private parent : TestMetadata option
   [<DefaultValue>]
   val mutable private index : int option
+
+  let categories = ResizeArray(categories)
 
   /// The test name. It doesn't contain the parameters.
   /// If not set, fallback to raw symbol name.
@@ -138,6 +140,9 @@ type TestMetadata internal(name: string option) =
 
   /// Index if metadata place into sequence.
   member this.Index = this.index
+
+  /// Metadata categories.
+  member this.Categories = categories.ToArray()
 
   /// For internal use only.
   member internal this.RawSymbolName = this.symbolName
@@ -181,6 +186,9 @@ type TestMetadata internal(name: string option) =
     | None -> this.parent <- Some parent
     | _ -> ()
 
+  /// For internal use only.
+  member internal this.AddCategories(xs: string seq) = categories.AddRange(xs)
+
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module private TestMetadata =
 
@@ -201,8 +209,8 @@ module private TestMetadata =
 
 /// Test case base class.
 [<AbstractClass>]
-type TestCase internal (name: string option, parameters: (Type * obj) seq) =
-  inherit TestMetadata (name)
+type TestCase internal (name: string option, categories: string seq, parameters: (Type * obj) seq) =
+  inherit TestMetadata (name, categories)
 
   /// The test parameters.
   /// If the test has no parameters then the value is empty list.
@@ -260,12 +268,12 @@ and TestResult =
 /// Test case class.
 and
   [<Sealed>]
-  TestCase<'T> internal (name: string option, parameters: (Type * obj) seq, asyncBody: AsyncLazy<TestResult<'T>>) =
-  inherit TestCase(name, parameters)
+  TestCase<'T> internal (name: string option, categories: string seq, parameters: (Type * obj) seq, asyncBody: AsyncLazy<TestResult<'T>>) =
+  inherit TestCase(name, categories, parameters)
 
   /// Test body is async operation.
-  new(name: string option, parameters: (Type * obj) seq, asyncBody: TestCase<'T> -> Async<TestResult<'T>>) as this =
-    TestCase<'T>(name, parameters, AsyncLazy<TestResult<'T>>(fun _ -> asyncBody(this)))
+  new(name: string option, categories: string seq, parameters: (Type * obj) seq, asyncBody: TestCase<'T> -> Async<TestResult<'T>>) as this =
+    TestCase<'T>(name, categories, parameters, AsyncLazy<TestResult<'T>>(fun _ -> asyncBody(this)))
 
   member private this.InternalAsyncRun() = async {
     let watch = Stopwatch.StartNew()
@@ -292,7 +300,7 @@ and
       let! result = this.AsyncRun()
       return result.Box()
     }
-    TestCase<obj>(this.Name, this.Parameters, asyncBody)
+    TestCase<obj>(this.Name, this.Categories, this.Parameters, asyncBody)
 
 /// Test result type.
 /// Inherited from ResultNode
@@ -372,7 +380,7 @@ and [<Sealed>] Done<'T>(testCase: TestCase, results: NonEmptyList<AssertionResul
       :> TestResult<obj>
 
 [<AutoOpen>]
-module TestCaseExtensions =
+module TestResultExtensions =
   let (|Error|Done|) (testResult: TestResult<'T>) =
     match testResult with
     | :? Error<'T> as e -> Error(e.TestCase, e.Exceptions, e.Causes, e.Duration)
@@ -391,8 +399,8 @@ type Context =
   val mutable private _children : TestMetadata[]
 
   /// Constructor.
-  new (name: string, children: TestMetadata seq) as this =
-    { inherit TestMetadata(Some name) } then
+  new (name: string, categories: string seq, children: TestMetadata seq) as this =
+    { inherit TestMetadata(Some name, categories) } then
       this._children <- children |> Seq.toArray
       for child in this._children do child.TrySetParent(this :> TestMetadata)
 
@@ -429,3 +437,10 @@ type ContextResult internal (context: Context, results: ResultNode[]) =
   member __.Results = results
 
   interface ResultNode
+
+/// Set categories for tests that belong to the module or the type.
+[<AttributeUsage(AttributeTargets.Class, AllowMultiple = true)>]
+type CategoryAttribute([<ParamArray>] categories: string[]) =
+  inherit Attribute()
+
+  member this.Categories = categories

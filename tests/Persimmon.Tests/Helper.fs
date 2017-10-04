@@ -13,7 +13,7 @@ module Helper =
   let run (x: TestCase<_>) = x.AsyncRun() |> Async.RunSynchronously
 
   let private init (x: TestCase<'T>) f =
-    TestCase.init x.Name x.Parameters (fun _ -> async { return f (run x) })
+    TestCase.init x.Name x.Categories x.Parameters (fun _ -> async { return f (run x) })
 
   let shouldPassed<'T when 'T : equality> (expected: 'T) (x: TestCase<'T>) =
     let inner = function

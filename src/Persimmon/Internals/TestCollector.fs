@@ -72,7 +72,7 @@ module private TestCollectorImpl =
         tests
         |> Seq.mapi (fun index child -> (child, index))
         |> Seq.collect (fun entry -> fixupAndCollectTests(fst entry, symbolName, Some (snd entry)))
-      yield Context(symbolName, children) :> TestMetadata
+      yield Context(symbolName, [], children) :> TestMetadata
 
     /////////////////////////////////////////////////////
     // Unknown type, ignored.
@@ -129,50 +129,75 @@ module private TestCollectorImpl =
   let private collectTestsFromMethod (m: MethodInfo) =
     collectPersimmonTests (fun () -> m.Invoke(null, [||])) m.ReturnType m.Name
 
+  let private collectCategories (typ: Type) =
+#if PCL || NETSTANDARD
+    let info = typ.GetTypeInfo()
+    info.GetCustomAttributes(typeof<CategoryAttribute>, true)
+#else
+    typ.GetCustomAttributes(typeof<CategoryAttribute>, true)
+#endif
+    |> Seq.collect (fun attr -> (attr :?> CategoryAttribute).Categories)
+    |> Seq.toArray
+
+  let rec private addCategories (categories: string[]) (target: TestMetadata) =
+    target.AddCategories(categories)
+    match target with
+    | :? Context as context -> context.Children |> Array.iter (addCategories categories)
+    | _ -> ()
+
   /// Retreive test object via target type, and traverse.
-  let rec collectTests (typ: Type) = seq {
-    // For properties (value binding):
-    yield!
-      typ
+  let rec collectTests (typ: Type) =
+    seq {
+      // For properties (value binding):
+      yield!
+        typ
 #if PCL || NETSTANDARD
-        .GetTypeInfo().DeclaredProperties
-      |> Seq.filter (fun p ->
-        let m = p.GetMethod
-        (m <> null) && m.IsStatic && m.IsPublic
-          // Ignore setter only property / indexers
-          && p.CanRead && (p.GetIndexParameters() |> Array.isEmpty)
-      )
+          .GetTypeInfo().DeclaredProperties
+        |> Seq.filter (fun p ->
+          let m = p.GetMethod
+          (m <> null) && m.IsStatic && m.IsPublic
+            // Ignore setter only property / indexers
+            && p.CanRead && (p.GetIndexParameters() |> Array.isEmpty)
+        )
 #else
-        .GetProperties(BindingFlags.Static ||| BindingFlags.Public)
-      // Ignore setter only property / indexers
-      |> Seq.filter (fun p -> p.CanRead && (p.GetGetMethod() <> null) && (p.GetIndexParameters() |> Array.isEmpty))
+          .GetProperties(BindingFlags.Static ||| BindingFlags.Public)
+        // Ignore setter only property / indexers
+        |> Seq.filter (fun p -> p.CanRead && (p.GetGetMethod() <> null) && (p.GetIndexParameters() |> Array.isEmpty))
 #endif
-      |> Seq.collect collectTestsFromProperty
-    // For methods (function binding):
-    yield!
-      typ
+        |> Seq.collect collectTestsFromProperty
+      // For methods (function binding):
+      yield!
+        typ
 #if PCL || NETSTANDARD
-        .GetTypeInfo().DeclaredMethods
-      // Ignore getter methods / open generic methods / method has parameters
-      |> Seq.filter (fun m ->
-        m.IsStatic && m.IsPublic &&
-        not m.IsSpecialName && not m.IsGenericMethodDefinition && (m.GetParameters() |> Array.isEmpty)
-      )
+          .GetTypeInfo().DeclaredMethods
+        // Ignore getter methods / open generic methods / method has parameters
+        |> Seq.filter (fun m ->
+          m.IsStatic && m.IsPublic &&
+          not m.IsSpecialName && not m.IsGenericMethodDefinition && (m.GetParameters() |> Array.isEmpty)
+        )
 #else
-        .GetMethods(BindingFlags.Static ||| BindingFlags.Public)
-      // Ignore getter methods / open generic methods / method has parameters
-      |> Seq.filter (fun m -> not m.IsSpecialName && not m.IsGenericMethodDefinition && (m.GetParameters() |> Array.isEmpty))
+          .GetMethods(BindingFlags.Static ||| BindingFlags.Public)
+        // Ignore getter methods / open generic methods / method has parameters
+        |> Seq.filter (fun m -> not m.IsSpecialName && not m.IsGenericMethodDefinition && (m.GetParameters() |> Array.isEmpty))
 #endif
-      |> Seq.collect collectTestsFromMethod
-    // For nested modules:
+        |> Seq.collect collectTestsFromMethod
+      // For nested modules:
 #if PCL || NETSTANDARD
 #else
-    for nestedType in publicNestedTypes typ do
-      let testCases = collectTests nestedType |> Seq.toArray
-      if Array.isEmpty testCases then ()
-      else yield Context(nestedType.Name, testCases) :> TestMetadata
+      for nestedType in publicNestedTypes typ do
+        match collectTestsAsContext nestedType with
+        | Some t -> yield t
+        | None -> ()
 #endif
-  }
+    }
+  and collectTestsAsContext (typ: Type) =
+    let categories = collectCategories typ
+    let tests = collectTests typ |> Seq.toArray
+    if Array.isEmpty tests then
+      None
+    else
+      do tests |> Array.iter (addCategories categories)
+      Some (Context(typ.Name, categories, tests) :> TestMetadata)
 
 [<Sealed>]
 type TestCollector() =
@@ -181,11 +206,7 @@ type TestCollector() =
   let collect targetAssembly =
     targetAssembly
     |> TestCollectorImpl.publicTypes
-    |> Seq.choose (fun typ ->
-      let tests = TestCollectorImpl.collectTests typ
-      if Seq.isEmpty tests then None
-      else Some(Context(typ.FullName, tests))
-    )
+    |> Seq.choose (TestCollectorImpl.collectTestsAsContext)
 
   /// Remove contexts and flatten structured test objects.
   let rec flattenTestCase (testMetadata: TestMetadata) = seq {

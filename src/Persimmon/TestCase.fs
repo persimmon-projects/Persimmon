@@ -19,21 +19,22 @@ type TestCaseType<'T> =
 module TestCase =
 
   /// Create test case manually.
-  let init name parameters (asyncBody: TestCase<_> -> Async<TestResult<_>>) =
-    TestCase<_>(name, parameters, asyncBody)
+  let init name categories parameters (asyncBody: TestCase<_> -> Async<TestResult<_>>) =
+    TestCase<_>(name, categories, parameters, asyncBody)
 
   /// Create always completion test case.
-  let makeDone name parameters x =
-    TestCase<_>(name, parameters, fun testCase -> async { return Done (testCase, NonEmptyList.singleton x, TimeSpan.Zero) })
+  let makeDone name categories parameters x =
+    TestCase<_>(name, categories, parameters, fun testCase -> async { return Done (testCase, NonEmptyList.singleton x, TimeSpan.Zero) })
 
   /// Create always error test case.
-  let makeError name parameters exn =
-    TestCase<_>(name, parameters, fun testCase -> async { return Error (testCase, [|exn|], [], TimeSpan.Zero) })
+  let makeError name categories parameters exn =
+    TestCase<_>(name, categories, parameters, fun testCase -> async { return Error (testCase, [|exn|], [], TimeSpan.Zero) })
 
   /// Add not passed test after test.
   let addNotPassed line notPassedCause (x: TestCase<_>) =
     TestCase<_>(
       x.Name,
+      x.Categories,
       x.Parameters,
       fun _ -> async {
         let! result = x.AsyncRun()
@@ -134,6 +135,6 @@ module TestCase =
   let combine (x: TestCaseType<'T>) (rest: 'T -> TestCase<'U>) =
     match x with
     | NoValueTest x ->
-      TestCase<'U>(x.Name, x.Parameters, fun _ -> runNoValueTest x rest)
+      TestCase<'U>(x.Name, x.Categories, x.Parameters, fun _ -> runNoValueTest x rest)
     | HasValueTest x ->
-      TestCase<'U>(x.Name, x.Parameters, fun _ -> runHasValueTest x rest)
+      TestCase<'U>(x.Name, x.Categories, x.Parameters, fun _ -> runHasValueTest x rest)

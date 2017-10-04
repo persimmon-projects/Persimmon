@@ -16,12 +16,12 @@ type TestBuilder private (name: string option) =
   new() = TestBuilder(None)
   new(name: string) = TestBuilder(Some name)
   // return x
-  member __.Return(x) = TestCase.makeDone name [] (Passed x)
+  member __.Return(x) = TestCase.makeDone name [] [] (Passed x)
   // return! x
   member __.ReturnFrom(x: BindingValue<_>) =
     match x with
-    | UnitAssertionResult x | NonUnitAssertionResult x -> TestCase.makeDone name [] x
-    | UnitTestCase x | NonUnitTestCase x -> TestCase<_>(name, x.Parameters, fun _ -> x.AsyncRun())
+    | UnitAssertionResult x | NonUnitAssertionResult x -> TestCase.makeDone name [] [] x
+    | UnitTestCase x | NonUnitTestCase x -> TestCase<_>(name, [], [], fun _ -> x.AsyncRun())
   // let! a = (x: AssertionResult<unit>) in ...
   member __.Source(x: AssertionResult<unit>, [<CallerLineNumber>]?line : int) =
     let x =
@@ -52,7 +52,8 @@ type TestBuilder private (name: string option) =
       | :? exn as e ->
         TestCase<_>(
           c.Name,
-          c.Parameters,
+          [],
+          [],
           fun _ -> async {
             let! result = c.AsyncRun()
             return
@@ -71,7 +72,7 @@ type TestBuilder private (name: string option) =
         let res = f Unchecked.defaultof<'T> // TODO : try-with
         res |> TestCase.addNotPassed line cause
     | NonUnitAssertionResult (NotPassed(line, cause)) ->
-      TestCase.makeDone name [] (NotPassed(line, cause))
+      TestCase.makeDone name [] [] (NotPassed(line, cause))
     | UnitTestCase case ->
         TestCase.combine (NoValueTest case) f
     | NonUnitTestCase case ->
@@ -80,20 +81,20 @@ type TestBuilder private (name: string option) =
     let dispose () = match box x with null -> () | _ -> x.Dispose()
     this.TryFinally((fun () -> f x), dispose)
   member __.TryFinally(f, g) =
-    TestCase.init None [] (fun _ -> async {
+    TestCase.init None [] [] (fun _ -> async {
       try
         let case =
           try f ()
-          with e -> TestCase.makeError None [] e
+          with e -> TestCase.makeError None [] [] e
         return! case.AsyncRun()
       finally g ()
     })
   member __.Delay(f) = f
   member __.Run(f: unit -> TestCase<_>) =
-    TestCase.init name [] (fun _ ->
+    TestCase.init name [] [] (fun _ ->
       let case =
         try f ()
-        with e -> TestCase.makeError name [] e
+        with e -> TestCase.makeError name [] [] e
       case.AsyncRun()
     )
 
@@ -114,7 +115,7 @@ type ParameterizeBuilder() =
       f ()
     with e ->
       let e = exn("Failed to initialize `source` or `case` in `parameterize` computation expression.", e)
-      TestCase.makeError None [] e
+      TestCase.makeError None [] [] e
       |> Seq.singleton
   member __.Yield(()) = Seq.empty
   member __.Yield(x) = Seq.singleton x
@@ -128,7 +129,7 @@ type ParameterizeBuilder() =
     source
     |> Seq.map (fun x ->
       let ret = f x
-      TestCase<_>(ret.Name, (toList x), fun _ -> ret.AsyncRun()))
+      TestCase<_>(ret.Name, ret.Categories, (toList x), fun _ -> ret.AsyncRun()))
 
 type TrapBuilder () =
   member __.Zero () = ()
@@ -149,5 +150,5 @@ type AsyncRunBuilder() =
   member __.It((), a: Async<'T>) = a
   member __.Run(a) =
     match a |> Async.Catch |> Async.RunSynchronously with
-    | Choice1Of2 r -> TestCase.makeDone None [] (Passed r)
-    | Choice2Of2 e -> TestCase.makeError None [] e
+    | Choice1Of2 r -> TestCase.makeDone None [] [] (Passed r)
+    | Choice2Of2 e -> TestCase.makeError None [] [] e

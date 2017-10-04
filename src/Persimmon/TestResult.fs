@@ -11,7 +11,7 @@ module TestResult =
     return InvalidOperationException() |> raise
   }
   let private endMarkerTestCase =
-    new TestCase<unit>(Some "endMarker", [], endMarkerTestBody) :> TestCase
+    new TestCase<unit>(Some "endMarker", [], [], endMarkerTestBody) :> TestCase
   let private endMarkerResult : AssertionResult<unit> = NotPassed (None, Skipped "endMarker")
   let private endMarkerResults = [endMarkerResult] |> NonEmptyList.ofSeq
 
