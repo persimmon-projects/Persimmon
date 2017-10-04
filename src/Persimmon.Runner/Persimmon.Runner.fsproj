@@ -62,6 +62,7 @@
     <Compile Include="Printer.fs" />
     <Compile Include="Reporter.fs" />
     <Compile Include="TestCollector.fs" />
+    <Compile Include="TestFilter.fs" />
     <Compile Include="TestRunner.fs" />
     <None Include="..\..\Persimmon.snk">
       <Link>Persimmon.snk</Link>

@@ -58,6 +58,7 @@
     <None Include="paket.references" />
     <Content Include="app.config" />
     <Compile Include="FormatterTest.fs" />
+    <Compile Include="TestFilterTest.fs" />
     <None Include="..\..\Persimmon.snk">
       <Link>Persimmon.snk</Link>
     </None>

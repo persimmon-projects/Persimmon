@@ -24,7 +24,7 @@ module Xml =
     let filePath = Guid.NewGuid().ToString() |> outFile
     let writer = new StreamWriter(filePath)
     formatter.Format(
-      Internals.TestRunnerImpl.runTests ignore Internals.TestRunnerImpl.asyncSequential tests |> Async.RunSynchronously
+      Internals.TestRunnerImpl.runTests ignore Internals.TestRunnerImpl.asyncSequential (fun _ -> true) tests |> Async.RunSynchronously
     ).WriteTo(writer)
     writer.Dispose()
     let doc = XDocument.Load(filePath)

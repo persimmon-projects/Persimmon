@@ -37,7 +37,7 @@ module Helper =
 
   let shouldEqualErrorCount expected xs =
     use printer = new Printer<_>(new StringWriter(), Formatter.ProgressFormatter.dot)
-    (xs |> TestRunner.runAllTests printer.Print).Errors
+    (xs |> TestRunner.runAllTests printer.Print TestFilter.allPass).Errors
     |> assertEquals expected
 
   let shouldFirstRaise<'T, 'U when 'T :> exn> (x: TestCase<'U>) =

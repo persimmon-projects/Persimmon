@@ -64,6 +64,9 @@
     <Compile Include="..\Persimmon.Runner\TestCollector.fs">
       <Link>TestCollector.fs</Link>
     </Compile>
+    <Compile Include="..\Persimmon.Runner\TestFilter.fs">
+      <Link>TestFilter.fs</Link>
+    </Compile>
     <Compile Include="..\Persimmon.Runner\TestRunner.fs">
       <Link>TestRunner.fs</Link>
     </Compile>
