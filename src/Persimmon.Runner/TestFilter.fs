@@ -17,19 +17,21 @@ module TestFilter =
   let private includeCategoryFilter (includes: Set<string>) (categories: Set<string>) =
     Set.intersect includes categories = includes
 
-  let private categories (t: TestMetadata) = Set.ofArray t.Categories
+  let private makeSet (t: TestMetadata) = Set.ofArray t.Categories
 
   let private testCaseFilter (pred: TestCase -> bool) = fun (t: TestMetadata) ->
     match t with
     | :? TestCase as tc -> pred tc
     | _ -> true
 
+  let private (|Empty|NotEmpty|) (x: Set<_>) = if x.IsEmpty then Empty else NotEmpty
+
   let make (filter: TestFilter) : TestMetadata -> bool =
-    match filter.IncludeCategories.IsEmpty, filter.ExcludeCategories.IsEmpty with
-    | true, true -> fun _ -> true
-    | false, false ->
-      testCaseFilter <| fun tc -> let categories = categories tc in (includeCategoryFilter filter.IncludeCategories categories && excludeCategoryFilter filter.ExcludeCategories categories)
-    | false, true ->
-      testCaseFilter <| fun tc -> let categories = categories tc in (includeCategoryFilter filter.IncludeCategories categories)
-    | true, false ->
-      testCaseFilter <| fun tc -> let categories = categories tc in (excludeCategoryFilter filter.ExcludeCategories categories)
+    match filter.IncludeCategories, filter.ExcludeCategories with
+    | Empty, Empty -> fun _ -> true
+    | NotEmpty, NotEmpty ->
+      testCaseFilter <| fun tc -> let categories = makeSet tc in (includeCategoryFilter filter.IncludeCategories categories && excludeCategoryFilter filter.ExcludeCategories categories)
+    | NotEmpty, Empty ->
+      testCaseFilter <| fun tc -> let categories = makeSet tc in (includeCategoryFilter filter.IncludeCategories categories)
+    | Empty, NotEmpty ->
+      testCaseFilter <| fun tc -> let categories = makeSet tc in (excludeCategoryFilter filter.ExcludeCategories categories)

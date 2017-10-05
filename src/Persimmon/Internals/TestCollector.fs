@@ -6,7 +6,7 @@ open System.Reflection
 open Microsoft.FSharp.Collections
 open Persimmon
 
-module private TestCollectorImpl =
+module internal TestCollectorImpl =
 
   let publicTypes (asm: Assembly) =
 #if PCL || NETSTANDARD
@@ -199,14 +199,11 @@ module private TestCollectorImpl =
       do tests |> Array.iter (addCategories categories)
       Some (Context(typ.Name, categories, tests) :> TestMetadata)
 
-[<Sealed>]
-type TestCollector() =
-
   /// Collect test cases from assembly
   let collect targetAssembly =
     targetAssembly
-    |> TestCollectorImpl.publicTypes
-    |> Seq.choose (TestCollectorImpl.collectTestsAsContext)
+    |> publicTypes
+    |> Seq.choose (collectTestsAsContext)
 
   /// Remove contexts and flatten structured test objects.
   let rec flattenTestCase (testMetadata: TestMetadata) = seq {
@@ -218,18 +215,20 @@ type TestCollector() =
     | _ -> ()
   }
 
+[<Sealed>]
+type TestCollector() =
   /// Collect tests with basic procedure.
   member __.Collect targetAssembly =
-    collect targetAssembly |> Seq.toArray
+    TestCollectorImpl.collect targetAssembly |> Seq.toArray
 
   /// Collect test cases.
   member __.CollectOnlyTestCases targetAssembly =
-    collect targetAssembly
-    |> Seq.collect flattenTestCase
+    TestCollectorImpl.collect targetAssembly
+    |> Seq.collect TestCollectorImpl.flattenTestCase
     |> Seq.toArray
 
   /// CollectAndCallback collect test cases and callback. (Internal use only)
   member __.CollectAndCallback(targetAssembly, callback: Action<obj>) =
-    collect targetAssembly
-    |> Seq.collect flattenTestCase
+    TestCollectorImpl.collect targetAssembly
+    |> Seq.collect TestCollectorImpl.flattenTestCase
     |> Seq.iter callback.Invoke
