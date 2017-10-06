@@ -98,5 +98,27 @@ let ``some assertions test`` = [
 
 (**
 
+## テストのカテゴリ化
+
+テストにカテゴリを設定すると、実行するテストをカテゴリでフィルタできます。
+
+*)
+
+let categorizedTest =
+  test "test1" {
+    do! assertEquals 2 1
+  }
+  |> category "SomeCategory" // "SomeCategory" が付与されます
+
+// このモジュール配下の全てのテストに "SomeCategory" が付与されます
+[<Category("SomeCategory")>]
+module CategorizedTests =
+  let someTest =
+    test "test2" {
+      do! assertEquals 2 1
+    }
+
+(**
+
 </div>
 *)
