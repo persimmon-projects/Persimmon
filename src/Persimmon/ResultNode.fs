@@ -71,8 +71,8 @@ module ResultNode =
             testResult.AssertionResults
             |> Seq.choose (fun ar -> ar.Status |> Option.map (fun cause -> (ar.LineNumber, cause)))
             |> causesToStrs indent
-          yield indent + (String.bar (70 - indent.Length) '-' "exceptions")
-          yield! exns |> Seq.toList |> List.rev |> exnsToStrs indent
+        yield indent + (String.bar (70 - indent.Length) '-' "exceptions")
+        yield! exns |> Seq.toList |> List.rev |> exnsToStrs indent
       }
     | _ ->
       seq {

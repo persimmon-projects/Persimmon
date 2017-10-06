@@ -77,6 +77,9 @@
     <Compile Include="..\Persimmon.Tests\TrapTest.fs">
       <Link>TrapTest.fs</Link>
     </Compile>
+    <Compile Include="..\Persimmon.Tests\ResultNodeTest.fs">
+      <Link>ResultNodeTest.fs</Link>
+    </Compile>
     <None Include="..\..\Persimmon.snk">
       <Link>Persimmon.snk</Link>
     </None>
