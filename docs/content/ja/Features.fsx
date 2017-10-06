@@ -3,6 +3,7 @@
 // 見せたくない補助的なものを定義するために使います。
 #I "../../../bin/Persimmon"
 #I "../../../bin/Persimmon.Runner"
+#r "Persimmon.dll"
 open Persimmon
 
 type Provider() =

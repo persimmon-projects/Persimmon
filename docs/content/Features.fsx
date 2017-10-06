@@ -3,6 +3,7 @@
 // it to define helpers that you do not want to show in the documentation.
 #I "../../bin/Persimmon"
 #I "../../bin/Persimmon.Runner"
+#r "Persimmon.dll"
 open Persimmon
 
 type Provider() =
