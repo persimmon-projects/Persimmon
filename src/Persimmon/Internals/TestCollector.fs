@@ -139,12 +139,6 @@ module internal TestCollectorImpl =
     |> Seq.collect (fun attr -> (attr :?> CategoryAttribute).Categories)
     |> Seq.toArray
 
-  let rec private addCategories (categories: string[]) (target: TestMetadata) =
-    target.AddCategories(categories)
-    match target with
-    | :? Context as context -> context.Children |> Array.iter (addCategories categories)
-    | _ -> ()
-
   /// Retreive test object via target type, and traverse.
   let rec collectTests (typ: Type) =
     seq {
@@ -191,12 +185,11 @@ module internal TestCollectorImpl =
 #endif
     }
   and collectTestsAsContext (typ: Type) =
-    let categories = collectCategories typ
     let tests = collectTests typ |> Seq.toArray
     if Array.isEmpty tests then
       None
     else
-      do tests |> Array.iter (addCategories categories)
+      let categories = collectCategories typ
       Some (Context(typ.Name, categories, tests) :> TestMetadata)
 
   /// Collect test cases from assembly

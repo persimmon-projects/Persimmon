@@ -122,7 +122,7 @@ type TestMetadata internal(name: string option, categories: string seq) =
   [<DefaultValue>]
   val mutable private index : int option
 
-  let categories = ResizeArray(categories)
+  let categories = Seq.toArray categories
 
   /// The test name. It doesn't contain the parameters.
   /// If not set, fallback to raw symbol name.
@@ -142,7 +142,7 @@ type TestMetadata internal(name: string option, categories: string seq) =
   member this.Index = this.index
 
   /// Metadata categories.
-  member this.Categories = categories.ToArray()
+  member this.Categories = this.InternalCategories |> Seq.toArray
 
   /// For internal use only.
   member internal this.RawSymbolName = this.symbolName
@@ -187,7 +187,13 @@ type TestMetadata internal(name: string option, categories: string seq) =
     | _ -> ()
 
   /// For internal use only.
-  member internal this.AddCategories(xs: string seq) = categories.AddRange(xs)
+  member internal this.InternalCategories =
+    seq {
+      yield! categories
+      match this.parent with
+      | Some p -> yield! p.InternalCategories
+      | None -> ()
+    }
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module private TestMetadata =

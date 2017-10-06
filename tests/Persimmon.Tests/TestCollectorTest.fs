@@ -9,31 +9,42 @@ open Helper
 module TestCollectorTest =
   type private Dummy() = class end
 
+  let rec findContext names (acc: Context) =
+    match names with
+    | [] -> acc
+    | name :: rest ->
+      acc.Children
+      |> Seq.pick (function
+        | Context ctx when ctx.DisplayName = name -> Some ctx
+        | _ -> None)
+      |> findContext rest
+
   let ``should read category`` = parameterize {
     source [
-      "", "noCategory", [||]
-      "", "oneCategory", [| "A" |]
-      "", "manyCategory", [| "A"; "B" |]
-      "", "immutable", [| "A"; "C" |]
-      "", "parameterizeTests(1)[0]", [| "A" |]
-      "+WithCategoryAttribute", "noCategory", [| "ModuleCategory" |]
-      "+WithCategoryAttribute", "oneCategory", [| "a"; "ModuleCategory" |]
-      "+WithCategoryAttribute", "immutable", [| "a"; "c"; "ModuleCategory" |]
-      "+WithCategoryAttribute", "parameterizeTests(1)[0]", [| "a"; "ModuleCategory" |]
-      "+WithCategoryAttribute+NestedModule", "test1", [| "ModuleCategory" |]
-      "+WithCategoryAttribute+NestedModule2", "test1", [| "ModuleCategory"; "ModuleCategory2" |]
-      "+Multiple", "test1", [| "A"; "B"; "C" |]
+      [], "noCategory", []
+      [], "oneCategory", [ "A" ]
+      [], "manyCategory", [ "A"; "B" ]
+      [], "immutable", [ "A"; "C" ]
+      [], "parameterizeTests(1)[0]", [ "A" ]
+      [], "notTransfer", []
+      [ "WithCategoryAttribute" ], "noCategory", [ "ModuleCategory" ]
+      [ "WithCategoryAttribute" ], "oneCategory", [ "a"; "ModuleCategory" ]
+      [ "WithCategoryAttribute" ], "immutable", [ "a"; "c"; "ModuleCategory" ]
+      [ "WithCategoryAttribute" ], "parameterizeTests(1)[0]", [ "a"; "ModuleCategory" ]
+      [ "WithCategoryAttribute"; "NestedModule" ], "test1", [ "ModuleCategory" ]
+      [ "WithCategoryAttribute"; "NestedModule2" ], "test1", [ "ModuleCategory"; "ModuleCategory2" ]
+      [ "Multiple" ], "test1", [ "A"; "B"; "C" ]
     ]
-    run (fun (moduleName, testName, expected) -> test {
-      let fullModuleName = "Persimmon.Tests.TestCollectorTest+ForCategoryTest" + moduleName
-      let moduleType = Internals.Runtime.getModule<Dummy> fullModuleName
+    run (fun (contextNames, testName, expected) -> test {
+      let moduleType = Internals.Runtime.getModule<Dummy> "Persimmon.Tests.TestCollectorTest+ForCategoryTest"
       let tests =
-        Internals.TestCollectorImpl.collectTests moduleType
-        |> Seq.collect Internals.TestCollectorImpl.flattenTestCase
+        Internals.TestCollectorImpl.collectTestsAsContext moduleType
+        |> Option.map (unbox<Context> >> findContext contextNames)
+        |> function Some ctx -> Internals.TestCollectorImpl.flattenTestCase ctx | None -> Seq.empty
       let actual = tests |> Seq.find (fun x -> x.DisplayName = testName)
-      do! (Array.sort actual.Categories) |> assertEquals (Array.sort expected)
+      do! (Array.sort actual.Categories) |> assertEquals (Array.sort (Array.ofList expected))
     })
-  }
+  } 
 
   module ForCategoryTest =
     // These are dummy test for reading category test.
@@ -46,6 +57,11 @@ module TestCollectorTest =
     let parameterizeTests = parameterize {
       source [ 1..2 ]
       run (fun n -> test { do! pass() } |> category "A")
+    }
+
+    let notTransfer = test {
+      let x = (test { return 3 } |> category "D")
+      do! pass()
     }
 
     [<Category("ModuleCategory")>]
