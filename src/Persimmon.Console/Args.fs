@@ -130,6 +130,10 @@ module Args =
     disabled the report of progress.
 --parallel
     run the tests asynchronous.
+--category:<names>
+    commma separated category names to run.
+--exclude-category:<names>
+    commma separated category names to not run.
 --help
     print this help message.
 ================
