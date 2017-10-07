@@ -17,7 +17,7 @@ type PersimmonProxy() =
     let tests = TestCollector.collectRootTestObjects [ asm ]
     use progress = Args.progressPrinter args
     if args.Parallel then
-      TestRunner.asyncRunAllTests progress.Print tests
+      TestRunner.asyncRunAllTests progress.Print args.Filter tests
       |> Async.RunSynchronously
     else
-      TestRunner.runAllTests progress.Print tests
+      TestRunner.runAllTests progress.Print args.Filter tests

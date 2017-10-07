@@ -24,7 +24,7 @@ module AsyncTest =
   let ``should catch unhandled exception`` = test {
     let! e =
       match asyncRun { it asyncRaiseMyException } |> run with
-      | Error(m, es, _, _) -> TestCase.makeDone m.Name m.Parameters (Passed (es.[0]))
-      | Done(m, xs, _) -> TestCase.makeDone m.Name m.Parameters (NotPassed(None, Violated "expected throw exception, but was success"))
+      | Error(m, es, _, _) -> TestCase.makeDone m.Name m.Categories m.Parameters (Passed (es.[0]))
+      | Done(m, xs, _) -> TestCase.makeDone m.Name m.Categories m.Parameters (NotPassed(None, Violated "expected throw exception, but was success"))
     do! assertEquals (typeof<MyException>) (e.GetType())
   }

@@ -3,6 +3,7 @@
 // it to define helpers that you do not want to show in the documentation.
 #I "../../bin/Persimmon"
 #I "../../bin/Persimmon.Runner"
+#r "Persimmon.dll"
 open Persimmon
 
 type Provider() =
@@ -94,6 +95,28 @@ let ``some assertions test`` = [
     do! assertEquals 3 4 // continue to execute and violate
   }
 ]
+
+(**
+
+## Categorize tests
+
+By setting categories for test, you can filter tests to be run by category.
+
+*)
+
+let categorizedTest =
+  test "test1" {
+    do! assertEquals 2 1
+  }
+  |> category "SomeCategory" // categorize as "SomeCategory"
+
+// categorize all tests in module as "SomeCategory"
+[<Category("SomeCategory")>]
+module Module =
+  let someTest =
+    test "test2" {
+      do! assertEquals 2 1
+    }
 
 (**
 

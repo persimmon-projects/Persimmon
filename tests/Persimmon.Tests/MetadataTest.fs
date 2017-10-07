@@ -12,9 +12,9 @@ module MetadataTest =
 
   let ``should output full name`` = parameterize {
     source [
-      TestCase.init (Some "test") [] dummyRun, "test"
-      TestCase.init (Some "test") [ (typeof<int>, box 1) ] dummyRun, "test(1)"
-      TestCase.init (Some "test") [ (typeof<int>, box 1); (typeof<string>, box "param") ] dummyRun, """test(1, "param")"""
+      TestCase.init (Some "test") [] [] dummyRun, "test"
+      TestCase.init (Some "test") [] [ (typeof<int>, box 1) ] dummyRun, "test(1)"
+      TestCase.init (Some "test") [] [ (typeof<int>, box 1); (typeof<string>, box "param") ] dummyRun, """test(1, "param")"""
     ]
     run (fun (metadata, expected) -> test {
       do! assertEquals expected <| sprintf "%A" metadata

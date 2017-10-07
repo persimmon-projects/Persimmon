@@ -3,6 +3,7 @@
 // 見せたくない補助的なものを定義するために使います。
 #I "../../../bin/Persimmon"
 #I "../../../bin/Persimmon.Runner"
+#r "Persimmon.dll"
 open Persimmon
 
 type Provider() =
@@ -94,6 +95,28 @@ let ``some assertions test`` = [
     do! assertEquals 3 4 // 実行を続け違反する
   }
 ]
+
+(**
+
+## テストのカテゴリ化
+
+テストにカテゴリを設定すると、実行するテストをカテゴリでフィルタできます。
+
+*)
+
+let categorizedTest =
+  test "test1" {
+    do! assertEquals 2 1
+  }
+  |> category "SomeCategory" // "SomeCategory" が付与されます
+
+// このモジュール配下の全てのテストに "SomeCategory" が付与されます
+[<Category("SomeCategory")>]
+module CategorizedTests =
+  let someTest =
+    test "test2" {
+      do! assertEquals 2 1
+    }
 
 (**
 

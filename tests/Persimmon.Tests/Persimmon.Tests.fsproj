@@ -67,6 +67,7 @@
     <Compile Include="RunnerTest.fs" />
     <Compile Include="AppDomainTest.fs" />
     <Compile Include="ResultNodeTest.fs" />
+    <Compile Include="TestCollectorTest.fs" />
     <None Include="..\..\Persimmon.snk">
       <Link>Persimmon.snk</Link>
     </None>

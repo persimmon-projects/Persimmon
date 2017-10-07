@@ -24,7 +24,7 @@ module Xml =
     let filePath = Guid.NewGuid().ToString() |> outFile
     let writer = new StreamWriter(filePath)
     formatter.Format(
-      Internals.TestRunnerImpl.runTests ignore Internals.TestRunnerImpl.asyncSequential tests |> Async.RunSynchronously
+      Internals.TestRunnerImpl.runTests ignore Internals.TestRunnerImpl.asyncSequential (fun _ -> true) tests |> Async.RunSynchronously
     ).WriteTo(writer)
     writer.Dispose()
     let doc = XDocument.Load(filePath)
@@ -42,16 +42,16 @@ module Xml =
   let ``should validate result xml`` = parameterize {
     source [
       [
-        Context("FormatterTest", [TestCase.makeDone (Some "testcase0") [] (Passed ())])
+        Context("FormatterTest", [], [TestCase.makeDone (Some "testcase0") [] [] (Passed ())])
       ]
       [
-        Context("FormatterTest", [TestCase.makeDone (Some "testcase0") [] (NotPassed(None, Skipped "skip test"))])
+        Context("FormatterTest", [], [TestCase.makeDone (Some "testcase0") [] [] (NotPassed(None, Skipped "skip test"))])
       ]
       [
-        Context("FormatterTest", [TestCase.makeDone (Some "testcase0") [] (NotPassed(None, Violated "fail test"))])
+        Context("FormatterTest", [], [TestCase.makeDone (Some "testcase0") [] [] (NotPassed(None, Violated "fail test"))])
       ]
       [
-        Context("FormatterTest", [TestCase.makeError (Some "testcase0") [] (exn("test"))])
+        Context("FormatterTest", [], [TestCase.makeError (Some "testcase0") [] [] (exn("test"))])
       ]
     ]
     run validate

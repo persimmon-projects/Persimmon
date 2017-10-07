@@ -6,7 +6,7 @@ open System.Reflection
 open Microsoft.FSharp.Collections
 open Persimmon
 
-module private TestCollectorImpl =
+module internal TestCollectorImpl =
 
   let publicTypes (asm: Assembly) =
 #if PCL || NETSTANDARD
@@ -72,7 +72,7 @@ module private TestCollectorImpl =
         tests
         |> Seq.mapi (fun index child -> (child, index))
         |> Seq.collect (fun entry -> fixupAndCollectTests(fst entry, symbolName, Some (snd entry)))
-      yield Context(symbolName, children) :> TestMetadata
+      yield Context(symbolName, [], children) :> TestMetadata
 
     /////////////////////////////////////////////////////
     // Unknown type, ignored.
@@ -129,63 +129,74 @@ module private TestCollectorImpl =
   let private collectTestsFromMethod (m: MethodInfo) =
     collectPersimmonTests (fun () -> m.Invoke(null, [||])) m.ReturnType m.Name
 
-  /// Retreive test object via target type, and traverse.
-  let rec collectTests (typ: Type) = seq {
-    // For properties (value binding):
-    yield!
-      typ
+  let private collectCategories (typ: Type) =
 #if PCL || NETSTANDARD
-        .GetTypeInfo().DeclaredProperties
-      |> Seq.filter (fun p ->
-        let m = p.GetMethod
-        (m <> null) && m.IsStatic && m.IsPublic
-          // Ignore setter only property / indexers
-          && p.CanRead && (p.GetIndexParameters() |> Array.isEmpty)
-      )
+    let info = typ.GetTypeInfo()
+    info.GetCustomAttributes(typeof<CategoryAttribute>, true)
 #else
-        .GetProperties(BindingFlags.Static ||| BindingFlags.Public)
-      // Ignore setter only property / indexers
-      |> Seq.filter (fun p -> p.CanRead && (p.GetGetMethod() <> null) && (p.GetIndexParameters() |> Array.isEmpty))
+    typ.GetCustomAttributes(typeof<CategoryAttribute>, true)
 #endif
-      |> Seq.collect collectTestsFromProperty
-    // For methods (function binding):
-    yield!
-      typ
-#if PCL || NETSTANDARD
-        .GetTypeInfo().DeclaredMethods
-      // Ignore getter methods / open generic methods / method has parameters
-      |> Seq.filter (fun m ->
-        m.IsStatic && m.IsPublic &&
-        not m.IsSpecialName && not m.IsGenericMethodDefinition && (m.GetParameters() |> Array.isEmpty)
-      )
-#else
-        .GetMethods(BindingFlags.Static ||| BindingFlags.Public)
-      // Ignore getter methods / open generic methods / method has parameters
-      |> Seq.filter (fun m -> not m.IsSpecialName && not m.IsGenericMethodDefinition && (m.GetParameters() |> Array.isEmpty))
-#endif
-      |> Seq.collect collectTestsFromMethod
-    // For nested modules:
-#if PCL || NETSTANDARD
-#else
-    for nestedType in publicNestedTypes typ do
-      let testCases = collectTests nestedType |> Seq.toArray
-      if Array.isEmpty testCases then ()
-      else yield Context(nestedType.Name, testCases) :> TestMetadata
-#endif
-  }
+    |> Seq.collect (fun attr -> (attr :?> CategoryAttribute).Categories)
+    |> Seq.toArray
 
-[<Sealed>]
-type TestCollector() =
+  /// Retreive test object via target type, and traverse.
+  let rec collectTests (typ: Type) =
+    seq {
+      // For properties (value binding):
+      yield!
+        typ
+#if PCL || NETSTANDARD
+          .GetTypeInfo().DeclaredProperties
+        |> Seq.filter (fun p ->
+          let m = p.GetMethod
+          (m <> null) && m.IsStatic && m.IsPublic
+            // Ignore setter only property / indexers
+            && p.CanRead && (p.GetIndexParameters() |> Array.isEmpty)
+        )
+#else
+          .GetProperties(BindingFlags.Static ||| BindingFlags.Public)
+        // Ignore setter only property / indexers
+        |> Seq.filter (fun p -> p.CanRead && (p.GetGetMethod() <> null) && (p.GetIndexParameters() |> Array.isEmpty))
+#endif
+        |> Seq.collect collectTestsFromProperty
+      // For methods (function binding):
+      yield!
+        typ
+#if PCL || NETSTANDARD
+          .GetTypeInfo().DeclaredMethods
+        // Ignore getter methods / open generic methods / method has parameters
+        |> Seq.filter (fun m ->
+          m.IsStatic && m.IsPublic &&
+          not m.IsSpecialName && not m.IsGenericMethodDefinition && (m.GetParameters() |> Array.isEmpty)
+        )
+#else
+          .GetMethods(BindingFlags.Static ||| BindingFlags.Public)
+        // Ignore getter methods / open generic methods / method has parameters
+        |> Seq.filter (fun m -> not m.IsSpecialName && not m.IsGenericMethodDefinition && (m.GetParameters() |> Array.isEmpty))
+#endif
+        |> Seq.collect collectTestsFromMethod
+      // For nested modules:
+#if PCL || NETSTANDARD
+#else
+      for nestedType in publicNestedTypes typ do
+        match collectTestsAsContext nestedType with
+        | Some t -> yield t
+        | None -> ()
+#endif
+    }
+  and collectTestsAsContext (typ: Type) =
+    let tests = collectTests typ |> Seq.toArray
+    if Array.isEmpty tests then
+      None
+    else
+      let categories = collectCategories typ
+      Some (Context(typ.Name, categories, tests) :> TestMetadata)
 
   /// Collect test cases from assembly
   let collect targetAssembly =
     targetAssembly
-    |> TestCollectorImpl.publicTypes
-    |> Seq.choose (fun typ ->
-      let tests = TestCollectorImpl.collectTests typ
-      if Seq.isEmpty tests then None
-      else Some(Context(typ.FullName, tests))
-    )
+    |> publicTypes
+    |> Seq.choose (collectTestsAsContext)
 
   /// Remove contexts and flatten structured test objects.
   let rec flattenTestCase (testMetadata: TestMetadata) = seq {
@@ -197,18 +208,20 @@ type TestCollector() =
     | _ -> ()
   }
 
+[<Sealed>]
+type TestCollector() =
   /// Collect tests with basic procedure.
   member __.Collect targetAssembly =
-    collect targetAssembly |> Seq.toArray
+    TestCollectorImpl.collect targetAssembly |> Seq.toArray
 
   /// Collect test cases.
   member __.CollectOnlyTestCases targetAssembly =
-    collect targetAssembly
-    |> Seq.collect flattenTestCase
+    TestCollectorImpl.collect targetAssembly
+    |> Seq.collect TestCollectorImpl.flattenTestCase
     |> Seq.toArray
 
   /// CollectAndCallback collect test cases and callback. (Internal use only)
   member __.CollectAndCallback(targetAssembly, callback: Action<obj>) =
-    collect targetAssembly
-    |> Seq.collect flattenTestCase
+    TestCollectorImpl.collect targetAssembly
+    |> Seq.collect TestCollectorImpl.flattenTestCase
     |> Seq.iter callback.Invoke
