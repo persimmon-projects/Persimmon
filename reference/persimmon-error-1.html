@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>AssertionResult - Persimmon</title>
+    <title>Error<'T> - Persimmon</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="persimmon-projects">
@@ -30,15 +30,41 @@
 
 
 
-<h1>AssertionResult</h1>
+<h1>Error<'T></h1>
 <p>
   <span>Namespace: Persimmon</span><br />
 </p>
 <div class="xmldoc">
-<p>The result of each assertion. (fake base type)
-Can use active recognizers: Passed / NotPassed cause</p>
+<p>This case represents the error.</p>
 
 </div>
+  <h3>Constructors</h3>
+  <table class="table table-bordered member-list">
+    <thead>
+      <tr><td>Constructor</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '112', 112)" onmouseover="showTip(event, '112', 112)">
+            new(testCase, exns, causes, duration)
+          </code>
+          <div class="tip" id="112">
+            <strong>Signature:</strong> (testCase:TestCase * exns:exn [] * causes:NotPassedCause list * duration:TimeSpan) -&gt; Error&lt;&#39;T&gt;<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L317-317" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>.ctor</code></p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
   <h3>Instance members</h3>
   <table class="table table-bordered member-list">
     <thead>
@@ -48,80 +74,115 @@ Can use active recognizers: Passed / NotPassed cause</p>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '85', 85)" onmouseover="showTip(event, '85', 85)">
-            Box()
+          <code onmouseout="hideTip(event, '113', 113)" onmouseover="showTip(event, '113', 113)">
+            Causes
           </code>
-          <div class="tip" id="85">
-            <strong>Signature:</strong> unit -&gt; AssertionResult&lt;obj&gt;<br />
-              <strong>Modifiers:</strong> abstract<br />
+          <div class="tip" id="113">
+            <strong>Signature:</strong> NotPassedCause list<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L27-27" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L322-322" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           
+              <p>CompiledName: <code>get_Causes</code></p>
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '86', 86)" onmouseover="showTip(event, '86', 86)">
-            LineNumber
+          <code onmouseout="hideTip(event, '114', 114)" onmouseover="showTip(event, '114', 114)">
+            Duration
           </code>
-          <div class="tip" id="86">
-            <strong>Signature:</strong> int option<br />
-              <strong>Modifiers:</strong> abstract<br />
+          <div class="tip" id="114">
+            <strong>Signature:</strong> TimeSpan<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L25-25" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L323-323" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           
-              <p>CompiledName: <code>get_LineNumber</code></p>
+              <p>CompiledName: <code>get_Duration</code></p>
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '87', 87)" onmouseover="showTip(event, '87', 87)">
-            Status
+          <code onmouseout="hideTip(event, '115', 115)" onmouseover="showTip(event, '115', 115)">
+            Exceptions
           </code>
-          <div class="tip" id="87">
-            <strong>Signature:</strong> NotPassedCause option<br />
-              <strong>Modifiers:</strong> abstract<br />
+          <div class="tip" id="115">
+            <strong>Signature:</strong> exn []<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L26-26" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L321-321" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           
-              <p>CompiledName: <code>get_Status</code></p>
+              <p>CompiledName: <code>get_Exceptions</code></p>
         </td>
       </tr>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '88', 88)" onmouseover="showTip(event, '88', 88)">
-            Value
+          <code onmouseout="hideTip(event, '116', 116)" onmouseover="showTip(event, '116', 116)">
+            FailureMessages
           </code>
-          <div class="tip" id="88">
-            <strong>Signature:</strong> obj option<br />
-              <strong>Modifiers:</strong> abstract<br />
+          <div class="tip" id="116">
+            <strong>Signature:</strong> string []<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L24-24" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L325-325" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           
-              <p>CompiledName: <code>get_Value</code></p>
+              <p>CompiledName: <code>get_FailureMessages</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '117', 117)" onmouseover="showTip(event, '117', 117)">
+            SkipMessages
+          </code>
+          <div class="tip" id="117">
+            <strong>Signature:</strong> string []<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L330-330" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>get_SkipMessages</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '118', 118)" onmouseover="showTip(event, '118', 118)">
+            TestCase
+          </code>
+          <div class="tip" id="118">
+            <strong>Signature:</strong> TestCase<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L320-320" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          
+              <p>CompiledName: <code>get_TestCase</code></p>
         </td>
       </tr>
     </tbody>

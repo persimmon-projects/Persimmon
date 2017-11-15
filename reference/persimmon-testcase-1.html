@@ -38,32 +38,6 @@
 <p>Test case class.</p>
 
 </div>
-  <h3>Record Fields</h3>
-  <table class="table table-bordered member-list">
-    <thead>
-      <tr><td>Record Field</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="member-name">
-
-          <code onmouseout="hideTip(event, '123', 123)" onmouseover="showTip(event, '123', 123)">
-            _asyncBody
-          </code>
-          <div class="tip" id="123">
-            <strong>Signature:</strong> AsyncLazy&lt;TestResult&lt;&#39;T&gt;&gt;<br />
-                      </div>
-        </td>
-        <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L271-271" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          
-        </td>
-      </tr>
-    </tbody>
-  </table>
   <h3>Constructors</h3>
   <table class="table table-bordered member-list">
     <thead>
@@ -73,42 +47,19 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '124', 124)" onmouseover="showTip(event, '124', 124)">
-            new(name, parameters, body)
+          <code onmouseout="hideTip(event, '149', 149)" onmouseover="showTip(event, '149', 149)">
+            new(...)
           </code>
-          <div class="tip" id="124">
-            <strong>Signature:</strong> (name:string option * parameters:seq&lt;Type * obj&gt; * body:(TestCase&lt;&#39;T&gt; -&gt; TestResult&lt;&#39;T&gt;)) -&gt; TestCase&lt;&#39;T&gt;<br />
+          <div class="tip" id="149">
+            <strong>Signature:</strong> (name:string option * categories:seq&lt;string&gt; * parameters:seq&lt;Type * obj&gt; * asyncBody:(TestCase&lt;&#39;T&gt; -&gt; Async&lt;TestResult&lt;&#39;T&gt;&gt;)) -&gt; TestCase&lt;&#39;T&gt;<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L282-282" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L281-281" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          <p>Constructor.
-Test body is synch operation.</p>
-
-
-              <p>CompiledName: <code>.ctor</code></p>
-        </td>
-      </tr>
-      <tr>
-        <td class="member-name">
-
-          <code onmouseout="hideTip(event, '125', 125)" onmouseover="showTip(event, '125', 125)">
-            new(name, parameters, asyncBody)
-          </code>
-          <div class="tip" id="125">
-            <strong>Signature:</strong> (name:string option * parameters:seq&lt;Type * obj&gt; * asyncBody:(TestCase&lt;&#39;T&gt; -&gt; Async&lt;TestResult&lt;&#39;T&gt;&gt;)) -&gt; TestCase&lt;&#39;T&gt;<br />
-                      </div>
-        </td>
-        <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L275-275" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          <p>Constructor.
-Test body is async operation.</p>
+          <p>Test body is async operation.</p>
 
 
               <p>CompiledName: <code>.ctor</code></p>
@@ -125,40 +76,19 @@ Test body is async operation.</p>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '126', 126)" onmouseover="showTip(event, '126', 126)">
+          <code onmouseout="hideTip(event, '150', 150)" onmouseover="showTip(event, '150', 150)">
             AsyncRun()
           </code>
-          <div class="tip" id="126">
+          <div class="tip" id="150">
             <strong>Signature:</strong> unit -&gt; Async&lt;TestResult&lt;&#39;T&gt;&gt;<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L301-301" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L296-296" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
           <p>Execute this test case.</p>
-
-
-        </td>
-      </tr>
-      <tr>
-        <td class="member-name">
-
-          <code onmouseout="hideTip(event, '127', 127)" onmouseover="showTip(event, '127', 127)">
-            Run()
-          </code>
-          <div class="tip" id="127">
-            <strong>Signature:</strong> unit -&gt; TestResult&lt;&#39;T&gt;<br />
-                      </div>
-        </td>
-        <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L306-306" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          <p>Execute this test case.
-TODO: Omit all synch caller.</p>
 
 
         </td>

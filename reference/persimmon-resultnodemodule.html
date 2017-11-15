@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>TestCaseType<'T> - Persimmon</title>
+    <title>ResultNode - Persimmon</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="persimmon-projects">
@@ -30,62 +30,37 @@
 
 
 
-<h1>TestCaseType<'T></h1>
+<h1>ResultNode</h1>
 <p>
   <span>Namespace: Persimmon</span><br />
 </p>
 <div class="xmldoc">
-<p>This DU represents the type of the test case.
-If the test has some return values, then the type of the test case is HasValueTest.
-If not, then it is NoValueTest.</p>
-
 </div>
-  <h3>Union Cases</h3>
+
+<!-- Render nested types and modules, if there are any -->
+
+  <h3>Functions and values</h3>
   <table class="table table-bordered member-list">
     <thead>
-      <tr><td>Union Case</td><td>Description</td></tr>
+      <tr><td>Function or value</td><td>Description</td></tr>
     </thead>
     <tbody>
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '151', 151)" onmouseover="showTip(event, '151', 151)">
-            HasValueTest(TestCase&lt;&#39;T&gt;)
+          <code onmouseout="hideTip(event, '22', 22)" onmouseover="showTip(event, '22', 22)">
+            toStrs indent _arg1
           </code>
-          <div class="tip" id="151">
-            <strong>Signature:</strong> TestCase&lt;&#39;T&gt;<br />
+          <div class="tip" id="22">
+            <strong>Signature:</strong> indent:int -&gt; _arg1:ResultNode -&gt; seq&lt;string&gt;<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/TestCase.fs#L15-15" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ResultNode.fs#L51-51" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          <p>The TestCase has some return values.
-It means that the TestCase is not TestCase<unit>.</p>
-
-
-        </td>
-      </tr>
-      <tr>
-        <td class="member-name">
-
-          <code onmouseout="hideTip(event, '152', 152)" onmouseover="showTip(event, '152', 152)">
-            NoValueTest(TestCase&lt;&#39;T&gt;)
-          </code>
-          <div class="tip" id="152">
-            <strong>Signature:</strong> TestCase&lt;&#39;T&gt;<br />
-                      </div>
-        </td>
-        <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/TestCase.fs#L12-12" class="github-link">
-              <img src="../content/img/github.png" class="normal" />
-              <img src="../content/img/github-blue.png" class="hover" />
-            </a>
-          <p>The TestCase does not have any return values.
-It means that the TestCase is TestCase<unit>.</p>
-
-
+          
         </td>
       </tr>
     </tbody>
