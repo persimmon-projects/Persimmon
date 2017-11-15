@@ -1,3 +1,10 @@
+### 3.0.0 - November 15 2017
+* separate AppDomain [#120](https://github.com/persimmon-projects/Persimmon/pull/120)
+* apply line number [#122](https://github.com/persimmon-projects/Persimmon/pull/122)
+* improve API [#124](https://github.com/persimmon-projects/Persimmon/pull/124)
+* fix test suite name [#125](https://github.com/persimmon-projects/Persimmon/pull/125)
+* support Category [#126](https://github.com/persimmon-projects/Persimmon/pull/126)
+
 ### 2.0.1 - April 6 2017
 * fix duplicate collect tests in nested type
 * fix get generic arguments
