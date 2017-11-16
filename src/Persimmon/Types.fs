@@ -27,14 +27,24 @@ type AssertionResult =
   abstract Box : unit -> AssertionResult<obj>
 
 /// The result of each assertion.
-and AssertionResult<'T> =
+and AssertionResult<[<EqualityConditionalOn>]'T> =
   inherit AssertionResult
 
 /// The assertion is passed.
-and [<Sealed>] Passed<'T>(value: 'T) =
+and [<Sealed>] Passed<[<EqualityConditionalOn>]'T>(value: 'T) =
   inherit MarshalByRefObject()
 
   member internal this.Value : 'T = value
+
+  override this.Equals(obj: obj) =
+    match obj with
+    | null -> false
+    | :? Passed<'T> as other -> Unchecked.equals this.Value other.Value
+    | _ -> false
+
+  override this.GetHashCode() = Unchecked.hash this.Value
+
+  override this.ToString() = sprintf "Passed %A" this.Value
 
   interface AssertionResult<'T> with
     member this.Value = Some (value :> obj)
@@ -43,11 +53,21 @@ and [<Sealed>] Passed<'T>(value: 'T) =
     member this.Box() = Passed(value :> obj) :> AssertionResult<obj>
 
 /// The assertion is not passed.
-and [<Sealed>] NotPassed<'T>(lineNumber: int option, cause: NotPassedCause) =
+and [<Sealed>] NotPassed<[<EqualityConditionalOn>]'T>(lineNumber: int option, cause: NotPassedCause) =
   inherit MarshalByRefObject()
 
   member internal this.LineNumber : int option = lineNumber
   member internal this.Cause : NotPassedCause = cause
+
+  override this.Equals(obj: obj) =
+    match obj with
+    | null -> false
+    | :? NotPassed<'T> as other -> this.LineNumber = other.LineNumber && this.Cause = other.Cause
+    | _ -> false
+
+  override this.GetHashCode() = hash (this.LineNumber, this.Cause)
+
+  override this.ToString() = sprintf "NotPassed (%A, %A)" this.LineNumber this.Cause
 
   interface AssertionResult<'T> with
     member this.Value = None
