@@ -58,6 +58,7 @@
     <None Include="paket.references" />
     <Content Include="app.config" />
     <Compile Include="Helper.fs" />
+    <Compile Include="AssertionResultTest.fs" />
     <Compile Include="MetadataTest.fs" />
     <Compile Include="PersimmonTest.fs" />
     <Compile Include="SideEffectTest.fs" />
