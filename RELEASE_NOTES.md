@@ -1,3 +1,6 @@
+### 3.1.0 - November 17 2017
+* implement Equals, GetHashCode and ToString to AssertionResult [#129](https://github.com/persimmon-projects/Persimmon/pull/129)
+
 ### 3.0.0 - November 15 2017
 * separate AppDomain [#120](https://github.com/persimmon-projects/Persimmon/pull/120)
 * apply line number [#122](https://github.com/persimmon-projects/Persimmon/pull/122)
