@@ -1,3 +1,6 @@
+### 3.1.1 - November 22 2017
+* fix top level context name [#130](https://github.com/persimmon-projects/Persimmon/pull/130)
+
 ### 3.1.0 - November 17 2017
 * implement Equals, GetHashCode and ToString to AssertionResult [#129](https://github.com/persimmon-projects/Persimmon/pull/129)
 
