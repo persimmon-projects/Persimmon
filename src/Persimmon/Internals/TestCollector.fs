@@ -184,19 +184,21 @@ module internal TestCollectorImpl =
         | None -> ()
 #endif
     }
-  and collectTestsAsContext (typ: Type) =
+  and private collectTestsAsContextImpl name (typ: Type) =
     let tests = collectTests typ |> Seq.toArray
     if Array.isEmpty tests then
       None
     else
       let categories = collectCategories typ
-      Some (Context(typ.Name, categories, tests) :> TestMetadata)
+      Some (Context(name, categories, tests) :> TestMetadata)
+  and collectTestsAsContext (typ: Type) =
+    collectTestsAsContextImpl typ.Name typ
 
   /// Collect test cases from assembly
   let collect targetAssembly =
     targetAssembly
     |> publicTypes
-    |> Seq.choose (collectTestsAsContext)
+    |> Seq.choose (fun t -> collectTestsAsContextImpl t.FullName t)
 
   /// Remove contexts and flatten structured test objects.
   let rec flattenTestCase (testMetadata: TestMetadata) = seq {
