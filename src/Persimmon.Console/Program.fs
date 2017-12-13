@@ -63,6 +63,9 @@ let run (args: Args) =
   let requireFileName = Args.requireFileName args
   use reporter = Args.reporter watch args
 
+  if args.Help then
+    reporter.ReportError(Args.help)
+
   let founds, notFounds = args.Inputs |> List.partition (fun file -> file.Exists)
   if founds |> List.isEmpty then
     reporter.ReportError("input is empty.")
