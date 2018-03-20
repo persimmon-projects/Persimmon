@@ -233,6 +233,27 @@ module private TestMetadata =
       // Root: unresolved.
       | None -> "[Unresolved]"
 
+/// Wrap exception for cross AppDomain.
+[<Sealed>]
+type ExceptionWrapper internal (ex: exn) =
+  inherit MarshalByRefObject()
+
+  /// Get full type name of wrapped exception.
+  member this.FullTypeName : string = ex.GetType().FullName
+  /// Get message of wrapped exception.
+  member this.Message : string = ex.Message
+  /// Get stack trace of wrapped exception.
+  member this.StackTrace : string = ex.StackTrace
+  /// Get inner exception of wrapped exception.
+  member this.InnerException : ExceptionWrapper option =
+    match ex.InnerException with
+    | null -> None
+    | inner -> Some (ExceptionWrapper(inner))
+  /// Get wrapped exception.
+  member this.Unwrap : exn = ex
+
+  override this.ToString() = ex.ToString()
+
 /// Test case base class.
 [<AbstractClass>]
 type TestCase internal (name: string option, categories: string seq, parameters: (Type * obj) seq) =
@@ -286,7 +307,7 @@ and TestResult =
   abstract IsError: bool
   abstract FailureMessages: string[]
   abstract SkipMessages: string[]
-  abstract Exceptions: exn[]
+  abstract Exceptions: ExceptionWrapper[]
   abstract Duration: TimeSpan
   abstract AssertionResults: AssertionResult[]
   abstract Box: unit -> TestResult<obj>
@@ -334,11 +355,11 @@ and TestResult<'T> =
   inherit TestResult
 
 /// This case represents the error.
-and [<Sealed>] Error<'T>(testCase: TestCase, exns: exn [], causes: NotPassedCause list, duration: TimeSpan) =
+and [<Sealed>] Error<'T>(testCase: TestCase, exns: ExceptionWrapper[], causes: NotPassedCause list, duration: TimeSpan) =
   inherit MarshalByRefObject()
 
   member __.TestCase : TestCase = testCase
-  member __.Exceptions : exn [] = exns
+  member __.Exceptions : ExceptionWrapper [] = exns
   member __.Causes : NotPassedCause list = causes
   member __.Duration : TimeSpan = duration
 
@@ -361,7 +382,7 @@ and [<Sealed>] Error<'T>(testCase: TestCase, exns: exn [], causes: NotPassedCaus
       this.FailureMessages
     member this.SkipMessages =
       this.SkipMessages
-    member this.Exceptions = exns |> Seq.toArray
+    member this.Exceptions = this.Exceptions
     member this.Duration = this.Duration
     member this.AssertionResults = [||]
     member this.Box() = Error(testCase, exns, causes, duration) :> TestResult<obj>
@@ -373,7 +394,7 @@ and [<Sealed>] Done<'T>(testCase: TestCase, results: NonEmptyList<AssertionResul
   member __.TestCase : TestCase = testCase
   member __.Results : NonEmptyList<AssertionResult<'T>> = results
   member __.Duration : TimeSpan = duration
-  member __.Exceptions: exn [] = [||]
+  member __.Exceptions: ExceptionWrapper [] = [||]
 
   member __.FailureMessages =
     results
@@ -413,7 +434,7 @@ module TestResultExtensions =
     | :? Done<'T> as d -> Done(d.TestCase, d.Results, d.Duration)
     | _ -> ArgumentException() |> raise
 
-  let Error (testCase: TestCase, exns: exn [], causes: NotPassedCause list, duration: TimeSpan) = Error(testCase, exns, causes, duration) :> TestResult<'T>
+  let Error (testCase: TestCase, exns: ExceptionWrapper [], causes: NotPassedCause list, duration: TimeSpan) = Error(testCase, exns, causes, duration) :> TestResult<'T>
   let Done (testCase: TestCase, results: NonEmptyList<AssertionResult<'T>>, duration: TimeSpan) = Done(testCase, results, duration) :> TestResult<'T>
 
 /// Test context class. (structuring nested test node)

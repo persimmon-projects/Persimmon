@@ -35,7 +35,7 @@ module TestResult =
     | Done (testCase, results, d) -> Done (testCase, results, d + x)
     | Error (testCase, es, results, ts) -> Error (testCase, es, results, ts + x)
 
-  let addExceptions (es: exn []) = function
+  let addExceptions (es: ExceptionWrapper []) = function
     | Done (testCase, (Passed _, []), d) -> Error(testCase, es, [], d)
     | Done (testCase, results, d) ->
       let results =

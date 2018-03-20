@@ -49,5 +49,8 @@ module Helper =
         | NotPassed(l, x) -> NotPassed(l, x)), d)
       | Error (m, [||], results, d) ->
         Done (m, (fail (sprintf "Expect: raise %s\nActual: not raise exception" (typeof<'T>.Name)), []), d)
-      | Error (m, xs, results, d) -> Done (m, (assertEquals typeof<'T> (xs.[0].GetType()), []), d)
+      | Error (m, xs, results, d) ->
+        let expectedTypeName = typeof<'T>.FullName
+        let actualTypeName = xs.[0].FullTypeName
+        Done (m, (assertEquals expectedTypeName actualTypeName, []), d)
     init x inner

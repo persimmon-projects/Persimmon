@@ -62,7 +62,7 @@ type TestBuilder private (name: string option) =
               | Done (tc, assertionResults, duration) ->
                 match assertionResults |> NonEmptyList.toSeq |> AssertionResult.Seq.onlyNotPassed |> Seq.toList with
                 | [] -> failwith "oops!"
-                | notPassed -> Error (tc, [|e|], notPassed, duration)
+                | notPassed -> Error (tc, [| ExceptionWrapper(e) |], notPassed, duration)
               | Error _ as e -> e
           }
         )
@@ -85,7 +85,7 @@ type TestBuilder private (name: string option) =
       try
         let case =
           try f ()
-          with e -> TestCase.makeError None [] [] e
+          with e -> TestCase.makeError None [] [] (ExceptionWrapper(e))
         return! case.AsyncRun()
       finally g ()
     })
@@ -94,7 +94,7 @@ type TestBuilder private (name: string option) =
     TestCase.init name [] [] (fun _ ->
       let case =
         try f ()
-        with e -> TestCase.makeError name [] [] e
+        with e -> TestCase.makeError name [] [] (ExceptionWrapper(e))
       case.AsyncRun()
     )
 
@@ -115,7 +115,7 @@ type ParameterizeBuilder() =
       f ()
     with e ->
       let e = exn("Failed to initialize `source` or `case` in `parameterize` computation expression.", e)
-      TestCase.makeError None [] [] e
+      TestCase.makeError None [] [] (ExceptionWrapper(e))
       |> Seq.singleton
   member __.Yield(()) = Seq.empty
   member __.Yield(x) = Seq.singleton x
@@ -151,4 +151,4 @@ type AsyncRunBuilder() =
   member __.Run(a) =
     match a |> Async.Catch |> Async.RunSynchronously with
     | Choice1Of2 r -> TestCase.makeDone None [] [] (Passed r)
-    | Choice2Of2 e -> TestCase.makeError None [] [] e
+    | Choice2Of2 e -> TestCase.makeError None [] [] (ExceptionWrapper(e))

@@ -51,7 +51,7 @@ module Xml =
         Context("FormatterTest", [], [TestCase.makeDone (Some "testcase0") [] [] (NotPassed(None, Violated "fail test"))])
       ]
       [
-        Context("FormatterTest", [], [TestCase.makeError (Some "testcase0") [] [] (exn("test"))])
+        Context("FormatterTest", [], [TestCase.makeError (Some "testcase0") [] [] (ExceptionWrapper(exn("test")))])
       ]
     ]
     run validate

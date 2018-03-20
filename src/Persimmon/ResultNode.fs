@@ -35,7 +35,7 @@ module ResultNode =
           yield! xs |> Seq.map (fun x -> indent + (String.replicate no.Length " ") + x)
       })
 
-  let private exnsToStrs indent (exns: exn seq) =
+  let private exnsToStrs indent (exns: ExceptionWrapper seq) =
     exns
     |> Seq.mapi (fun i exn -> (i + 1, exn))
     |> Seq.collect (fun (i, exn) ->
