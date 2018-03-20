@@ -248,3 +248,4 @@ module PersimmonTest =
       do raise TestException
       do! fail "fail test"
     }
+    |> skip "skip exception test"
