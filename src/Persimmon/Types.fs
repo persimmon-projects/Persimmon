@@ -235,7 +235,7 @@ module private TestMetadata =
 
 /// Wrap exception for cross AppDomain.
 [<Sealed>]
-type ExceptionWrapper internal (ex: exn) =
+type ExceptionWrapper (ex: exn) =
   inherit MarshalByRefObject()
 
   /// Get full type name of wrapped exception.
