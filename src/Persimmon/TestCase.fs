@@ -28,7 +28,7 @@ module TestCase =
 
   /// Create always error test case.
   let makeError name categories parameters exn =
-    TestCase<_>(name, categories, parameters, fun testCase -> async { return Error (testCase, [|exn|], [], TimeSpan.Zero) })
+    TestCase<_>(name, categories, parameters, fun testCase -> async { return Error (testCase, [| exn |], [], TimeSpan.Zero) })
 
   /// Add not passed test after test.
   let addNotPassed line notPassedCause (x: TestCase<_>) =
@@ -54,7 +54,7 @@ module TestCase =
         finally watch.Stop()
       with e ->
         watch.Stop()
-        return Error (testCase, [|e|], [], duration + watch.Elapsed)
+        return Error (testCase, [| ExceptionWrapper(e) |], [], duration + watch.Elapsed)
     | Done (testCase, assertionResults, duration) ->
       // If the TestCase does not have any values,
       // even if the assertion is not passed,
@@ -78,7 +78,7 @@ module TestCase =
             |> TestResult.addDuration duration
       with e ->
         watch.Stop()
-        return Error (testCase, [|e|], notPassed, duration + watch.Elapsed)
+        return Error (testCase, [| ExceptionWrapper(e) |], notPassed, duration + watch.Elapsed)
     | Error (testCase, es, results, duration) ->
       // If the TestCase does not have any values,
       // even if the assertion is not passed,
@@ -100,7 +100,7 @@ module TestCase =
            |> TestResult.addExceptions es
       with e ->
         watch.Stop()
-        return Error (testCase, Array.append [|e|] es, results, duration + watch.Elapsed)
+        return Error (testCase, Array.append [| ExceptionWrapper(e) |] es, results, duration + watch.Elapsed)
   }
 
   let private runHasValueTest (x: TestCase<'T>) (rest: 'T -> TestCase<'U>) = async {
@@ -114,7 +114,7 @@ module TestCase =
         return result
       with e ->
         watch.Stop()
-        return Error (testCase, [|e|], [], duration + watch.Elapsed)
+        return Error (testCase, [| ExceptionWrapper(e) |], [], duration + watch.Elapsed)
     | Done (testCase, assertionResults, duration) ->
       // If the TestCase has some values,
       // the test is not continuable.

@@ -241,3 +241,11 @@ module PersimmonTest =
     test "first binding exception" {
       do! shouldFirstRaise<TestException, unit> bindingTest
     }
+
+  // bug #135
+  let ``can fail with exception`` =
+    test "can fail with exception" {
+      do raise TestException
+      do! fail "fail test"
+    }
+    |> skip "skip exception test"
