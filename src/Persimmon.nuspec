@@ -13,32 +13,18 @@
     <releaseNotes>@releaseNotes@</releaseNotes>
     <tags>F# fsharp testing</tags>
     <dependencies>
-      <group targetFramework=".NETFramework2.0">
-        <dependency id="FSharp.Core" version="3.1.2.5" />
-      </group>
-      <group targetFramework=".NETFramework4.0">
-        <dependency id="FSharp.Core" version="3.1.2.5" />
-      </group>
       <group targetFramework=".NETFramework4.5">
         <dependency id="FSharp.Core" version="3.1.2.5" />
       </group>
-      <group targetFramework="portable-net45+win+wpa81+wp80+MonoAndroid10+xamarinios10+MonoTouch10">
-        <dependency id="FSharp.Core" version="3.1.2.5" />
-      </group>
       <group targetFramework=".NETStandard1.6">
-        <dependency id="FSharp.Core" version="4.1.2" exclude="Build,Analyzers"></dependency>
+        <dependency id="FSharp.Core" version="4.1.18" exclude="Build,Analyzers"></dependency>
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="Persimmon/Persimmon.dll" target="lib/net20" />
-    <file src="Persimmon/Persimmon.XML" target="lib/net20" />
-    <file src="Persimmon.NET40/Persimmon.dll" target="lib/net40" />
-    <file src="Persimmon.NET40/Persimmon.XML" target="lib/net40" />
-    <file src="Persimmon.NET45/Persimmon.dll" target="lib/net45" />
-    <file src="Persimmon.NET45/Persimmon.XML" target="lib/net45" />
-    <file src="Persimmon.NETCore/netstandard1.6/Persimmon.dll" target="lib/netstandard1.6" />
-    <file src="Persimmon.Portable259/Persimmon.dll" target="lib/portable-net45+win+wpa81+wp80+MonoAndroid10+xamarinios10+MonoTouch10" />
-    <file src="Persimmon.Portable259/Persimmon.XML" target="lib/portable-net45+win+wpa81+wp80+MonoAndroid10+xamarinios10+MonoTouch10" />
+    <file src="Persimmon/net45/Persimmon.dll" target="lib/net45" />
+    <file src="Persimmon/net45/Persimmon.xml" target="lib/net45" />
+    <file src="Persimmon/netstandard1.6/Persimmon.dll" target="lib/netstandard1.6" />
+    <file src="Persimmon/netstandard1.6/Persimmon.xml" target="lib/netstandard1.6" />
   </files>
 </package>

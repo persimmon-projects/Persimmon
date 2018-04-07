@@ -1,9 +1,7 @@
 ﻿namespace Persimmon
 
 open System
-#if NET45 || NETSTANDARD
 open System.Runtime.CompilerServices
-#endif
 
 /// This type is used only in the library.
 type BindingValue<'T> =

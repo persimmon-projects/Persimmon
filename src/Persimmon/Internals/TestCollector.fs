@@ -9,7 +9,7 @@ open Persimmon
 module internal TestCollectorImpl =
 
   let publicTypes (asm: Assembly) =
-#if PCL || NETSTANDARD
+#if NETSTANDARD
     asm.ExportedTypes
     |> Seq.filter (fun typ ->
       let typ = typ.GetTypeInfo()
@@ -21,7 +21,7 @@ module internal TestCollectorImpl =
 #endif
 
   let private publicNestedTypes (typ: Type) =
-#if PCL || NETSTANDARD
+#if NETSTANDARD
     typ.GetTypeInfo().DeclaredNestedTypes
     |> Seq.choose (fun typ ->
       if typ.IsNestedPublic && typ.IsClass && not typ.IsGenericTypeDefinition then
@@ -80,7 +80,7 @@ module internal TestCollectorImpl =
   }
 
   let typedefis<'T>(typ: Type) =
-#if PCL || NETSTANDARD
+#if NETSTANDARD
     typ.GetTypeInfo().IsGenericType
 #else
     typ.IsGenericType
@@ -88,14 +88,14 @@ module internal TestCollectorImpl =
     && typ.GetGenericTypeDefinition() = typedefof<'T>
 
   let (|SubTypeOf|_|) (matching: Type) (typ: Type) =
-#if PCL || NETSTANDARD
+#if NETSTANDARD
     if matching.GetTypeInfo().IsAssignableFrom(typ.GetTypeInfo()) then Some typ else None
 #else
     if matching.IsAssignableFrom(typ) then Some typ else None
 #endif
   let (|ArrayType|_|) (typ: Type) = if typ.IsArray then Some (typ.GetElementType()) else None
   let (|GenericType|_|) (typ: Type) =
-#if PCL || NETSTANDARD
+#if NETSTANDARD
     let info = typ.GetTypeInfo()
     if info.IsGenericType then
       Some (typ.GetGenericTypeDefinition(), info.GenericTypeArguments)
@@ -130,7 +130,7 @@ module internal TestCollectorImpl =
     collectPersimmonTests (fun () -> m.Invoke(null, [||])) m.ReturnType m.Name
 
   let private collectCategories (typ: Type) =
-#if PCL || NETSTANDARD
+#if NETSTANDARD
     let info = typ.GetTypeInfo()
     info.GetCustomAttributes(typeof<CategoryAttribute>, true)
 #else
@@ -145,7 +145,7 @@ module internal TestCollectorImpl =
       // For properties (value binding):
       yield!
         typ
-#if PCL || NETSTANDARD
+#if NETSTANDARD
           .GetTypeInfo().DeclaredProperties
         |> Seq.filter (fun p ->
           let m = p.GetMethod
@@ -162,7 +162,7 @@ module internal TestCollectorImpl =
       // For methods (function binding):
       yield!
         typ
-#if PCL || NETSTANDARD
+#if NETSTANDARD
           .GetTypeInfo().DeclaredMethods
         // Ignore getter methods / open generic methods / method has parameters
         |> Seq.filter (fun m ->
@@ -176,7 +176,7 @@ module internal TestCollectorImpl =
 #endif
         |> Seq.collect collectTestsFromMethod
       // For nested modules:
-#if PCL || NETSTANDARD
+#if NETSTANDARD
 #else
       for nestedType in publicNestedTypes typ do
         match collectTestsAsContext nestedType with

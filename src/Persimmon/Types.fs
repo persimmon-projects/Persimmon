@@ -7,7 +7,7 @@ open System.Collections.Generic
 open System.Threading
 open Microsoft.FSharp.Control
 
-#if PCL || NETSTANDARD
+#if NETSTANDARD
 type MarshalByRefObject() = class end
 #endif
 

@@ -13,10 +13,7 @@
     <releaseNotes>@releaseNotes@</releaseNotes>
     <tags>F# fsharp testing</tags>
     <dependencies>
-      <group targetFramework=".NETFramework3.5">
-        <dependency id="Persimmon" version="@build.number@" />
-      </group>
-      <group targetFramework=".NETFramework4.0">
+      <group targetFramework=".NETFramework4.5">
         <dependency id="Persimmon" version="@build.number@" />
       </group>
       <group targetFramework=".NETStandard1.6">
@@ -25,17 +22,14 @@
       </group>
     </dependencies>
     <frameworkAssemblies>
-      <frameworkAssembly assemblyName="System.Xml" targetFramework=".NETFramework3.5" />
-      <frameworkAssembly assemblyName="System.Xml.Linq" targetFramework=".NETFramework3.5" />
-      <frameworkAssembly assemblyName="System.Xml" targetFramework=".NETFramework4.0" />
-      <frameworkAssembly assemblyName="System.Xml.Linq" targetFramework=".NETFramework4.0" />
+      <frameworkAssembly assemblyName="System.Xml" targetFramework=".NETFramework4.5" />
+      <frameworkAssembly assemblyName="System.Xml.Linq" targetFramework=".NETFramework4.5" />
     </frameworkAssemblies>
   </metadata>
   <files>
-    <file src="Persimmon.Runner/Persimmon.Runner.dll" target="lib/net35" />
-    <file src="Persimmon.Runner/Persimmon.Runner.XML" target="lib/net35" />
-    <file src="Persimmon.Runner.NET40/Persimmon.Runner.dll" target="lib/net40" />
-    <file src="Persimmon.Runner.NET40/Persimmon.Runner.XML" target="lib/net40" />
-    <file src="Persimmon.Runner.NETCore/netstandard1.6/Persimmon.Runner.dll" target="lib/netstandard1.6" />
+    <file src="Persimmon.Runner/net45/Persimmon.Runner.dll" target="lib/net45" />
+    <file src="Persimmon.Runner/net45/Persimmon.Runner.xml" target="lib/net45" />
+    <file src="Persimmon.Runner/netstandard1.6/Persimmon.Runner.dll" target="lib/netstandard1.6" />
+    <file src="Persimmon.Runner/netstandard1.6/Persimmon.Runner.xml" target="lib/netstandard1.6" />
   </files>
 </package>
