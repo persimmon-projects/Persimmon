@@ -1,9 +1,7 @@
 ﻿namespace Persimmon.Tests
 
-open System
 open Persimmon
 open UseTestNameByReflection
-open Helper
 
 module AppDomainTest =
   open System.Configuration

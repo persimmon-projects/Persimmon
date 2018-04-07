@@ -1,7 +1,6 @@
 ﻿namespace Persimmon.Tests
 
 open System.IO
-open System.Diagnostics
 
 open Persimmon
 open Persimmon.Runner
