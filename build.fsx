@@ -18,9 +18,6 @@ let configuration = getBuildParamOrDefault "configuration" "Release"
 
 let project = "Persimmon"
 
-let persimmonNETCoreProject = "src/Persimmon.NETCore/Persimmon.NETCore.fsproj"
-let persimmonRunnerNETCoreProject = "src/Persimmon.Runner.NETCore/Persimmon.Runner.NETCore.fsproj"
-
 // File system information
 let solutionFile  = "Persimmon.sln"
 
