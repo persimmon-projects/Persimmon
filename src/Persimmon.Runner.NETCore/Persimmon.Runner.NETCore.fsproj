@@ -1,4 +1,4 @@
-<Project Sdk="FSharp.NET.Sdk;Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>Persimmon.Runner</AssemblyName>
     <TargetFramework>netstandard1.6</TargetFramework>
@@ -18,7 +18,6 @@
     <Compile Include="..\Persimmon.Runner\TestRunner.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="FSharp.NET.Sdk" Version="1.0.*" PrivateAssets="All" />
     <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
     <ProjectReference Include="..\Persimmon.NETCore\Persimmon.NETCore.fsproj" />
   </ItemGroup>
