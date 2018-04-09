@@ -24,7 +24,7 @@ group Latest
   framework: net45
   source https://api.nuget.org/v3/index.json
 
-  nuget FSharp.Core
+  nuget FSharp.Core = 4.1.18
 
 group Legacy
   framework: net45
