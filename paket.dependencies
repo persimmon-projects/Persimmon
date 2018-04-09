@@ -1,13 +1,12 @@
+framework: netstandard1.6
 source https://api.nuget.org/v3/index.json
 
-nuget FSharp.Core <= 3.1.2.5
-
-group FSharp41
-  source https://api.nuget.org/v3/index.json
-
-  nuget FSharp.Core = 4.1.18
+nuget FSharp.Core >= 4.1.18 lowest_matching:true
+nuget System.Xml.XDocument >= 4.3.0 lowest_matching:true
 
 group Build
+  framework: net451
+  redirects: on
   source https://api.nuget.org/v3/index.json
 
   nuget FAKE
@@ -21,7 +20,14 @@ group Build
   github persimmon-projects/Persimmon.Materials StandardIcons/persimmon_128.png
   github bluebird75/luaunit junitxml/junit-jenkins.xsd
 
-group Test
+group Latest
+  framework: net45
   source https://api.nuget.org/v3/index.json
 
-  nuget FSharp.Core = 4.0.0.1
+  nuget FSharp.Core
+
+group Legacy
+  framework: net45
+  source https://api.nuget.org/v3/index.json
+
+  nuget FSharp.Core >= 3.1.2.5 lowest_matching:true

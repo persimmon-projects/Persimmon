@@ -136,26 +136,6 @@ Target "NuGet" (fun _ ->
         OutputPath = outDir
         Version = release.NugetVersion
         ReleaseNotes = toLines release.Notes})
-
-  NuGet (fun p ->
-    {
-      p with
-        OutputPath = outDir
-        WorkingDir = outDir
-        Version = release.NugetVersion
-        ReleaseNotes = toLines release.Notes
-    }
-  ) "src/Persimmon.nuspec"
-
-  NuGet (fun p ->
-    {
-      p with
-        OutputPath = outDir
-        WorkingDir = outDir
-        Version = release.NugetVersion
-        ReleaseNotes = toLines release.Notes
-    }
-  ) "src/Persimmon.Runner.nuspec"
 )
 
 Target "PublishNuget" (fun _ ->
