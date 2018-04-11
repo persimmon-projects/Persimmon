@@ -72,7 +72,10 @@ let references =
 let binaries =
     directoryInfo bin
     |> subDirectories
-    |> Array.choose (fun d -> if d.Name <> "Persimmon.Console" then Some(d.FullName @@ (sprintf "%s.dll" d.Name)) else None)
+    |> Array.choose (fun d ->
+      if d.Name = "Persimmon.Console" then None
+      else Some(d.FullName @@ "net45" @@ (sprintf "%s.dll" d.Name))
+    )
     |> List.ofArray
 
 let libDirs =

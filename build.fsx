@@ -2,9 +2,7 @@
 #r @"packages/build/FAKE.Persimmon/lib/net451/FAKE.Persimmon.dll"
 open Fake
 open Fake.Git
-open Fake.AssemblyInfoFile
 open Fake.ReleaseNotesHelper
-open System
 open System.IO
 #if MONO
 #else
@@ -14,22 +12,17 @@ open SourceLink
 
 let isAppVeyor = buildServer = AppVeyor
 
-let isDotnetInstalled = DotNetCli.isInstalled()
-
 let outDir = "bin"
 
 let configuration = getBuildParamOrDefault "configuration" "Release"
 
 let project = "Persimmon"
 
-let persimmonNETCoreProject = "src/Persimmon.NETCore/Persimmon.NETCore.fsproj"
-let persimmonRunnerNETCoreProject = "src/Persimmon.Runner.NETCore/Persimmon.Runner.NETCore.fsproj"
-
 // File system information
 let solutionFile  = "Persimmon.sln"
 
 // Pattern specifying assemblies to be tested using NUnit
-let testAssemblies = "tests/**/bin/Release/*Tests*.dll"
+let testAssemblies = "tests/**/bin/Release/net*/*Tests*.dll"
 
 // Git configuration (used for publishing documentation in gh-pages branch)
 // The profile where the project is posted
@@ -53,39 +46,11 @@ let (|Fsproj|Csproj|Vbproj|) (projFileName:string) =
   | f when f.EndsWith("vbproj") -> Vbproj
   | _                           -> failwith (sprintf "Project file %s not supported. Unknown project type." projFileName)
 
-// Generate assembly info files with the right version & up-to-date information
-Target "AssemblyInfo" (fun _ ->
-  let common = [
-      Attribute.Product project
-      Attribute.Version release.AssemblyVersion
-      Attribute.FileVersion release.AssemblyVersion
-      Attribute.InformationalVersion release.NugetVersion
-  ]
-
-  for suffix in [""; ".NET40"; ".NET45"; ".Portable259"] do
-    [
-      Attribute.Title "Persimmon"
-      Attribute.Description ""
-    ] @ common
-    |> CreateFSharpAssemblyInfo (sprintf "./src/Persimmon%s/AssemblyInfo.fs" suffix)
-
-  for suffix in [""; ".NET40"] do
-    [
-      Attribute.Title "Persimmon.Runner"
-      Attribute.Description ""
-    ] @ common
-    |> CreateFSharpAssemblyInfo (sprintf "./src/Persimmon.Runner%s/AssemblyInfo.fs" suffix)
-)
-
 // Copies binaries from default VS location to exepcted bin folder
 // But keeps a subdirectory structure for each project in the
 // src folder to support multiple project outputs
 Target "CopyBinaries" (fun _ ->
   !! "src/**/*.??proj"
-  |> Seq.filter (fun p ->
-    isDotnetInstalled
-      || (not <| System.IO.Path.GetFileNameWithoutExtension(p).EndsWith("NETCore"))
-  )
   |>  Seq.map (fun f -> ((System.IO.Path.GetDirectoryName f) @@ "bin" @@ configuration, outDir @@ (System.IO.Path.GetFileNameWithoutExtension f)))
   |>  Seq.iter (fun (fromDir, toDir) -> CopyDir toDir fromDir (fun _ -> true))
 )
@@ -109,44 +74,17 @@ Target "CleanDocs" (fun _ ->
 let isTravisCI = (environVarOrDefault "TRAVIS" "") = "true"
 
 Target "Build" (fun _ ->
+
+  DotNetCli.Restore (fun p ->
+    { p with
+        Project = solutionFile
+    }
+  )
+
   !! solutionFile
   |> MSBuild "" "Rebuild" [ ("Platform", "Any CPU"); ("Configuration", configuration) ]
   |> ignore
 )
-
-Target "Build.NETCore" (fun _ ->
-
-  let args = [ sprintf "/p:Version=%s" release.NugetVersion ]
-
-  DotNetCli.Restore (fun p ->
-    { p with
-        Project = persimmonNETCoreProject
-    }
-  )
-  DotNetCli.Build (fun p ->
-    { p with
-        Project = persimmonNETCoreProject
-        Configuration = configuration
-        AdditionalArgs = args
-    }
-  )
-
-  DotNetCli.Restore (fun p ->
-    { p with
-        Project = persimmonRunnerNETCoreProject
-    }
-  )
-  DotNetCli.Build (fun p ->
-    { p with
-        Project = persimmonRunnerNETCoreProject
-        Configuration = configuration
-        AdditionalArgs = args
-    }
-  )
-)
-
-// --------------------------------------------------------------------------------------
-// Run the unit tests using test runner
 
 Target "RunTests" (fun _ ->
   !! testAssemblies
@@ -156,10 +94,6 @@ Target "RunTests" (fun _ ->
         Output = OutputDestination.XmlFile "TestResult.xml"
     }
   )
-)
-
-Target "RunTests.NETCore" (fun _ ->
-  ()
 )
 
 Target "UploadTestResults" (fun _ ->
@@ -202,26 +136,6 @@ Target "NuGet" (fun _ ->
         OutputPath = outDir
         Version = release.NugetVersion
         ReleaseNotes = toLines release.Notes})
-
-  NuGet (fun p ->
-    {
-      p with
-        OutputPath = outDir
-        WorkingDir = outDir
-        Version = release.NugetVersion
-        ReleaseNotes = toLines release.Notes
-    }
-  ) "src/Persimmon.nuspec"
-
-  NuGet (fun p ->
-    {
-      p with
-        OutputPath = outDir
-        WorkingDir = outDir
-        Version = release.NugetVersion
-        ReleaseNotes = toLines release.Notes
-    }
-  ) "src/Persimmon.Runner.nuspec"
 )
 
 Target "PublishNuget" (fun _ ->
@@ -358,14 +272,10 @@ Target "Release" (fun _ ->
   |> Async.RunSynchronously
 )
 
-Target "NETCore" DoNothing
-
 Target "All" DoNothing
 
 "Clean"
-  ==> "AssemblyInfo"
   =?> ("Build", not isTravisCI)
-  =?> ("NETCore", isDotnetInstalled)
   =?> ("CopyBinaries", not isTravisCI)
   =?> ("RunTests", not isTravisCI)
   =?> ("UploadTestResults",isAppVeyor)
@@ -373,10 +283,6 @@ Target "All" DoNothing
   =?> ("GenerateDocs",isLocalBuild)
   ==> "All"
   =?> ("ReleaseDocs",isLocalBuild)
-
-"Build.NETCore"
-  ==> "RunTests.NETCore"
-  ==> "NETCore"
 
 "All"
 #if MONO

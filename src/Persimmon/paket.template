@@ -1,0 +1,28 @@
+type project
+id Persimmon
+owners
+    bleis-tift, Gab-km, pocketberserker, kekyo, yukitos
+authors
+    bleis-tift, Gab-km, pocketberserker, kekyo, yukitos
+projectUrl
+    https://github.com/persimmon-projects/Persimmon
+licenseUrl
+    https://github.com/persimmon-projects/Persimmon/blob/master/LICENSE
+iconUrl
+    https://raw.githubusercontent.com/persimmon-projects/Persimmon.Materials/master/StandardIcons/persimmon_128.png
+requireLicenseAcceptance
+    false
+tags
+    F#, fsharp, testing
+description
+    A test framework for F#
+dependencies
+  framework: net45
+    FSharp.Core >= LOCKEDVERSION-Legacy
+  framework: netstandard1.6
+	FSharp.Core >= LOCKEDVERSION
+files
+    bin/Release/net45/Persimmon.dll ==> lib/net45
+    bin/Release/net45/Persimmon.xml ==> lib/net45
+    bin/Release/netstandard1.6/Persimmon.dll ==> lib/netstandard1.6
+    bin/Release/netstandard1.6/Persimmon.xml ==> lib/netstandard1.6

@@ -1,14 +1,6 @@
 ﻿namespace Persimmon
 
-#if NET45 || NETSTANDARD
 open System.Runtime.CompilerServices
-#else
-open System
-
-[<AttributeUsage(AttributeTargets.Parameter, Inherited = false); Sealed>]
-type CallerLineNumberAttribute() =
-  inherit Attribute()
-#endif
 
 type Assert =
 

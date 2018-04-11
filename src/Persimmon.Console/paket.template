@@ -17,7 +17,7 @@ tags
 description
     The console command-line runner for Persimmon.
 files
-    bin/Release/*.exe ==> tools
-    bin/Release/*.config ==> tools
-    bin/Release/*.dll ==> tools
-    !bin/Release/*.XML
+    bin/Release/net45/*.exe ==> tools
+    bin/Release/net45/*.config ==> tools
+    bin/Release/net45/*.dll ==> tools
+    !bin/Release/net45/*.xml

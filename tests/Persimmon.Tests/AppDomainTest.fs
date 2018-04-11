@@ -1,9 +1,7 @@
 ﻿namespace Persimmon.Tests
 
-open System
 open Persimmon
 open UseTestNameByReflection
-open Helper
 
 module AppDomainTest =
   open System.Configuration
@@ -14,16 +12,16 @@ module AppDomainTest =
   }
 
   type NonSerializableType(value: int) =
-    member this.Value = value
+    member __.Value = value
 
     override this.Equals(other: obj) =
       match other with
       | :? NonSerializableType as other -> this.Value = other.Value
       | _ -> false
 
-    override this.GetHashCode() = 0
+    override __.GetHashCode() = 0
 
-    override this.ToString() = "NonSerializableType"
+    override __.ToString() = "NonSerializableType"
         
   let nonSerializableValue = test {
     return NonSerializableType(3)
