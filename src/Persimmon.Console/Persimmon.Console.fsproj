@@ -7,7 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Args.fs" />
-    <Compile Include="PersimmonProxy.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="..\..\Persimmon.snk">

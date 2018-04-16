@@ -22,6 +22,7 @@
     <Compile Include="AppDomainTest.fs" />
     <Compile Include="ResultNodeTest.fs" />
     <Compile Include="TestCollectorTest.fs" />
+    <Compile Include="TestFilterTest.fs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="paket.references" />

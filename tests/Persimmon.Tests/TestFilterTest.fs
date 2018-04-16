@@ -1,8 +1,8 @@
-﻿module Persimmon.Runner.Tests.TestFilterTest
+﻿module Persimmon.Tests.TestFilterTest
 
 open Persimmon
 open UseTestNameByReflection
-open Persimmon.Runner
+open Persimmon.Internals
 
 let ``should filter testcase`` = parameterize {
   source [

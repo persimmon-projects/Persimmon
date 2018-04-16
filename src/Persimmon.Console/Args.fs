@@ -2,7 +2,7 @@
 
 open System
 open System.IO
-open Persimmon.Runner
+open Persimmon.Internals
 open Persimmon.Output
 
 type FormatType =

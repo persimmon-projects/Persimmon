@@ -26,6 +26,8 @@
     <Compile Include="Internals\RuntimeUtil.fs" />
     <Compile Include="Internals\TestCollector.fs" />
     <Compile Include="Internals\TestRunner.fs" />
+    <Compile Include="Internals\TestFilter.fs" />
+    <Compile Include="Internals\TestManager.fs" />
     <Compile Include="Internals\Attributes.fs" />
   </ItemGroup>
   <ItemGroup>

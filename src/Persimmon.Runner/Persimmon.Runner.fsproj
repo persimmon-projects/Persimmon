@@ -15,9 +15,6 @@
     <Compile Include="Formatter.fs" />
     <Compile Include="Printer.fs" />
     <Compile Include="Reporter.fs" />
-    <Compile Include="TestCollector.fs" />
-    <Compile Include="TestFilter.fs" />
-    <Compile Include="TestRunner.fs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="paket.references" />
