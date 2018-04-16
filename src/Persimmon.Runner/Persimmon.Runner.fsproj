@@ -20,6 +20,10 @@
     <Compile Include="TestRunner.fs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="paket.references" />
+    <None Include="paket.template" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Persimmon\Persimmon.fsproj" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)'=='net45'">

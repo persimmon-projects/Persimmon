@@ -28,5 +28,9 @@
     <Compile Include="Internals\TestRunner.fs" />
     <Compile Include="Internals\Attributes.fs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="paket.references" />
+    <None Include="paket.template" />
+  </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

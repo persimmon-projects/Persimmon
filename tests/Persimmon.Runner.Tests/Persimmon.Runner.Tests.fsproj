@@ -13,6 +13,9 @@
     <Compile Include="TestFilterTest.fs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="paket.references" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Persimmon.Runner\Persimmon.Runner.fsproj" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />

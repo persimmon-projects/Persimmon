@@ -12,6 +12,8 @@
     <None Include="..\..\Persimmon.snk">
       <Link>Persimmon.snk</Link>
     </None>
+    <None Include="paket.references" />
+    <None Include="paket.template" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Persimmon.Runner\Persimmon.Runner.fsproj" />

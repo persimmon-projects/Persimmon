@@ -9,6 +9,9 @@
     <Compile Include="Sample.fs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="paket.references" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Persimmon\Persimmon.fsproj" />
     <Reference Include="System" />
   </ItemGroup>

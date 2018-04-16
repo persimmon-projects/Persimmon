@@ -23,6 +23,9 @@
     <Compile Include="TestCollectorTest.fs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="paket.references" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Persimmon\Persimmon.fsproj" />
     <ProjectReference Include="..\..\src\Persimmon.Runner\Persimmon.Runner.fsproj" />
     <Reference Include="System" />
