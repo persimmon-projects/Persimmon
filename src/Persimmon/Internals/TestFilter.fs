@@ -1,4 +1,4 @@
-﻿namespace Persimmon.Runner
+﻿namespace Persimmon.Internals
 
 type TestFilter = {
   IncludeCategories: Set<string>

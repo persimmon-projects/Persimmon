@@ -3,7 +3,6 @@
 open System.IO
 
 open Persimmon
-open Persimmon.Runner
 open Persimmon.Output
 open Persimmon.Internals
 
@@ -36,7 +35,7 @@ module Helper =
 
   let shouldEqualErrorCount expected xs =
     use printer = new Printer<_>(new StringWriter(), Formatter.ProgressFormatter.dot)
-    (xs |> TestRunner.runAllTests printer.Print TestFilter.allPass).Errors
+    TestRunner().RunSynchronouslyAllTests(printer.Print, TestFilter.make TestFilter.allPass, xs).Errors
     |> assertEquals expected
 
   let shouldFirstRaise<'T, 'U when 'T :> exn> (x: TestCase<'U>) =

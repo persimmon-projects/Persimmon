@@ -5,18 +5,18 @@ open System.Diagnostics
 open System.Reflection
 
 open Persimmon
-open Persimmon.Runner
+open Persimmon.Internals
 open Persimmon.Output
 open System.Security.Policy
 
-let createAppDomain (applicationBasePath: string) (assembly: FileInfo) =
+let createAppDomain (assembly: FileInfo) =
   let contextId = Guid.NewGuid()
   let separatedAppDomainName = sprintf "persimmon console domain - %s" (contextId.ToString()) 
-  let shadowCopyTargets = String.concat ";" [ assembly.Directory.FullName ;applicationBasePath ]
+  let shadowCopyTargets = assembly.Directory.FullName
   let separatedAppDomainSetup =
     AppDomainSetup(
       ApplicationName = separatedAppDomainName,
-      ApplicationBase = applicationBasePath,
+      ApplicationBase = assembly.Directory.FullName,
       ShadowCopyFiles = "false",
       ShadowCopyDirectories = shadowCopyTargets)
   let configurationFilePath = assembly.FullName + ".config"
@@ -27,6 +27,24 @@ let createAppDomain (applicationBasePath: string) (assembly: FileInfo) =
 
   AppDomain.CreateDomain(separatedAppDomainName, separatedAppDomainEvidence, separatedAppDomainSetup)
 
+type TestManagerCallback(progress: TestResult -> unit) =
+  inherit MarshalByRefObject()
+
+  interface ITestManagerCallback with
+    member this.Progress(testResult) = progress testResult
+
+let collectAndRun (args: Args) (appDomain: AppDomain) (assemblyPath: string) =
+  let t = typeof<TestManager>
+  let proxy = appDomain.CreateInstanceAndUnwrap(t.Assembly.FullName, t.FullName) :?> TestManager
+  
+  use progress = Args.progressPrinter args
+  proxy.Callback <- TestManagerCallback(progress.Print)
+  proxy.Parallel <- args.Parallel
+  proxy.Filter <- args.Filter
+  
+  proxy.Collect(assemblyPath)
+  proxy.Run()
+
 let runAndReport (args: Args) (watch: Stopwatch) (reporter: Reporter) (founds: FileInfo list)  =
   let appDomains = ResizeArray<_>()
   try
@@ -36,14 +54,11 @@ let runAndReport (args: Args) (watch: Stopwatch) (reporter: Reporter) (founds: F
     watch.Start()
 
     // collect and run
-    let currentSetUp = AppDomain.CurrentDomain.SetupInformation
-    let applicationBasePath = currentSetUp.ApplicationBase
     for assembly in founds do
-      let appDomain = createAppDomain applicationBasePath assembly
+      let appDomain = createAppDomain assembly
       appDomains.Add(appDomain)
 
-      let proxy = PersimmonProxy.Create(appDomain)
-      let testResults = proxy.CollectAndRun(assembly.FullName, args)
+      let testResults = collectAndRun args appDomain assembly.FullName
       do
         errors <- errors + testResults.Errors
         results.AddRange(testResults.Results)

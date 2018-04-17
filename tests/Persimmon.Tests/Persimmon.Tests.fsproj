@@ -6,6 +6,7 @@
     <AssemblyOriginatorKeyFile>../../Persimmon.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="app.config" />
@@ -21,6 +22,10 @@
     <Compile Include="AppDomainTest.fs" />
     <Compile Include="ResultNodeTest.fs" />
     <Compile Include="TestCollectorTest.fs" />
+    <Compile Include="TestFilterTest.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Persimmon\Persimmon.fsproj" />
