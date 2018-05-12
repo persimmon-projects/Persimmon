@@ -1,7 +1,7 @@
 framework: netstandard1.6
 source https://api.nuget.org/v3/index.json
 
-nuget FSharp.Core >= 4.1.18 lowest_matching:true
+nuget FSharp.Core >= 4.3.4 lowest_matching:true
 nuget System.Xml.XDocument >= 4.3.0 lowest_matching:true
 
 group Build
@@ -24,7 +24,7 @@ group Latest
   framework: net45
   source https://api.nuget.org/v3/index.json
 
-  nuget FSharp.Core = 4.1.18
+  nuget FSharp.Core = 4.3.4
 
 group Legacy
   framework: net45
@@ -36,4 +36,4 @@ group DifferentVersion
   framework: net45
   source https://api.nuget.org/v3/index.json
 
-  nuget FSharp.Core >= 4.3.4 lowest_matching:true
+  nuget FSharp.Core >= 4.2.3 lowest_matching:true

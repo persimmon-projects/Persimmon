@@ -1,7 +1,7 @@
 RESTRICTION: == netstandard1.6
 NUGET
   remote: https://api.nuget.org/v3/index.json
-    FSharp.Core (4.1.18)
+    FSharp.Core (4.3.4)
       System.Collections (>= 4.0.11)
       System.Console (>= 4.0)
       System.Diagnostics.Debug (>= 4.0.11)
@@ -492,13 +492,13 @@ GROUP DifferentVersion
 RESTRICTION: == net45
 NUGET
   remote: https://api.nuget.org/v3/index.json
-    FSharp.Core (4.3.4)
+    FSharp.Core (4.2.3)
 
 GROUP Latest
 RESTRICTION: == net45
 NUGET
   remote: https://api.nuget.org/v3/index.json
-    FSharp.Core (4.1.18)
+    FSharp.Core (4.3.4)
 
 GROUP Legacy
 RESTRICTION: == net45

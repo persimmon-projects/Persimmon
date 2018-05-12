@@ -5,5 +5,5 @@ open Persimmon.Syntax.UseTestNameByReflection
 
 let fsharpCoreVersionTest = test {
   let version = typedefof<option<_>>.Assembly.GetName().Version.ToString()
-  do! version |> assertEquals "4.4.3.0"
+  do! version |> assertEquals "4.4.1.0"
 }
