@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>CategoryAttribute - Persimmon</title>
+    <title>ExceptionWrapper - Persimmon</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="persimmon-projects">
@@ -30,12 +30,12 @@
 
 
 
-<h1>CategoryAttribute</h1>
+<h1>ExceptionWrapper</h1>
 <p>
   <span>Namespace: Persimmon</span><br />
 </p>
 <div class="xmldoc">
-<p>Set categories for tests that belong to the module or the type.</p>
+<p>Wrap exception for cross AppDomain.</p>
 
 </div>
   <h3>Constructors</h3>
@@ -47,15 +47,15 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '94', 94)" onmouseover="showTip(event, '94', 94)">
-            new(categories)
+          <code onmouseout="hideTip(event, '115', 115)" onmouseover="showTip(event, '115', 115)">
+            new(ex)
           </code>
-          <div class="tip" id="94">
-            <strong>Signature:</strong> (categories:string []) -&gt; CategoryAttribute<br />
+          <div class="tip" id="115">
+            <strong>Signature:</strong> ex:exn -&gt; ExceptionWrapper<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L490-490" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L238-238" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -74,20 +74,106 @@
       <tr>
         <td class="member-name">
 
-          <code onmouseout="hideTip(event, '95', 95)" onmouseover="showTip(event, '95', 95)">
-            Categories
+          <code onmouseout="hideTip(event, '116', 116)" onmouseover="showTip(event, '116', 116)">
+            FullTypeName
           </code>
-          <div class="tip" id="95">
-            <strong>Signature:</strong> string []<br />
+          <div class="tip" id="116">
+            <strong>Signature:</strong> string<br />
                       </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L493-493" class="github-link">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L242-242" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
-          
-              <p>CompiledName: <code>get_Categories</code></p>
+          <p>Get full type name of wrapped exception.</p>
+
+
+              <p>CompiledName: <code>get_FullTypeName</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '117', 117)" onmouseover="showTip(event, '117', 117)">
+            InnerException
+          </code>
+          <div class="tip" id="117">
+            <strong>Signature:</strong> ExceptionWrapper option<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L248-248" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Get inner exception of wrapped exception.</p>
+
+
+              <p>CompiledName: <code>get_InnerException</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '118', 118)" onmouseover="showTip(event, '118', 118)">
+            Message
+          </code>
+          <div class="tip" id="118">
+            <strong>Signature:</strong> string<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L244-244" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Get message of wrapped exception.</p>
+
+
+              <p>CompiledName: <code>get_Message</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '119', 119)" onmouseover="showTip(event, '119', 119)">
+            StackTrace
+          </code>
+          <div class="tip" id="119">
+            <strong>Signature:</strong> string<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L246-246" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Get stack trace of wrapped exception.</p>
+
+
+              <p>CompiledName: <code>get_StackTrace</code></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="member-name">
+
+          <code onmouseout="hideTip(event, '120', 120)" onmouseover="showTip(event, '120', 120)">
+            Unwrap
+          </code>
+          <div class="tip" id="120">
+            <strong>Signature:</strong> exn<br />
+                      </div>
+        </td>
+        <td class="xmldoc">
+            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L253-253" class="github-link">
+              <img src="../content/img/github.png" class="normal" />
+              <img src="../content/img/github-blue.png" class="hover" />
+            </a>
+          <p>Get wrapped exception.</p>
+
+
+              <p>CompiledName: <code>get_Unwrap</code></p>
         </td>
       </tr>
     </tbody>
