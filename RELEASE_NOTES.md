@@ -1,3 +1,9 @@
+### 4.0.0 - May 13 2018
+* drop support net20, net35, net40 and pcl259
+* fix to ptint help [#131](https://github.com/persimmon-projects/Persimmon/pull/131)
+* avoid SerializatioException [#135](https://github.com/persimmon-projects/Persimmon/issues/135)
+* support FShstp.Core of different version [#139](https://github.com/persimmon-projects/Persimmon/pull/139)
+
 ### 3.1.1 - November 22 2017
 * fix top level context name [#130](https://github.com/persimmon-projects/Persimmon/pull/130)
 

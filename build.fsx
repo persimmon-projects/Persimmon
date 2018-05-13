@@ -27,7 +27,7 @@ let testAssemblies = "tests/**/bin/Release/net*/*Tests*.dll"
 // Git configuration (used for publishing documentation in gh-pages branch)
 // The profile where the project is posted
 let gitOwner = "persimmon-projects"
-let gitHome = "https://github.com/" + gitOwner
+let gitHome = "git@github.com:" + gitOwner
 
 // The name of the project on GitHub
 let gitName = "Persimmon"
