@@ -11,6 +11,7 @@
     <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
     <Compile Include="NonEmptyList.fsi" />
     <Compile Include="NonEmptyList.fs" />
     <Compile Include="PrettyPrinter.fs" />

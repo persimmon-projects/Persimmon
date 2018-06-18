@@ -2,6 +2,7 @@
 #r @"packages/build/FAKE.Persimmon/lib/net451/FAKE.Persimmon.dll"
 open Fake
 open Fake.Git
+open Fake.AssemblyInfoFile
 open Fake.ReleaseNotesHelper
 open System.IO
 #if MONO
@@ -39,12 +40,41 @@ let gitRaw = environVarOrDefault "gitRaw" "https://raw.github.com/persimmon-proj
 let release = LoadReleaseNotes "RELEASE_NOTES.md"
 
 // Helper active pattern for project types
-let (|Fsproj|Csproj|Vbproj|) (projFileName:string) =
-  match projFileName with
-  | f when f.EndsWith("fsproj") -> Fsproj
-  | f when f.EndsWith("csproj") -> Csproj
-  | f when f.EndsWith("vbproj") -> Vbproj
-  | _                           -> failwith (sprintf "Project file %s not supported. Unknown project type." projFileName)
+let (|Fsproj|Csproj|Vbproj|Shproj|) (projFileName:string) =
+    match projFileName with
+    | f when f.EndsWith("fsproj") -> Fsproj
+    | f when f.EndsWith("csproj") -> Csproj
+    | f when f.EndsWith("vbproj") -> Vbproj
+    | f when f.EndsWith("shproj") -> Shproj
+    | _                           -> failwith (sprintf "Project file %s not supported. Unknown project type." projFileName)
+
+// Generate assembly info files with the right version & up-to-date information
+Target "AssemblyInfo" (fun _ ->
+    let getAssemblyInfoAttributes projectName =
+        [ Attribute.Title (projectName)
+          Attribute.Product project
+          Attribute.Version release.AssemblyVersion
+          Attribute.FileVersion release.AssemblyVersion
+          Attribute.Configuration configuration ]
+
+    let getProjectDetails projectPath =
+        let projectName = System.IO.Path.GetFileNameWithoutExtension(projectPath)
+        ( projectPath,
+          projectName,
+          System.IO.Path.GetDirectoryName(projectPath),
+          (getAssemblyInfoAttributes projectName)
+        )
+
+    !! "src/**/*.??proj"
+    |> Seq.map getProjectDetails
+    |> Seq.iter (fun (projFileName, projectName, folderName, attributes) ->
+        match projFileName with
+        | Fsproj -> CreateFSharpAssemblyInfo (folderName </> "AssemblyInfo.fs") attributes
+        | Csproj -> CreateCSharpAssemblyInfo ((folderName </> "Properties") </> "AssemblyInfo.cs") attributes
+        | Vbproj -> CreateVisualBasicAssemblyInfo ((folderName </> "My Project") </> "AssemblyInfo.vb") attributes
+        | Shproj -> ()
+        )
+)
 
 // Copies binaries from default VS location to exepcted bin folder
 // But keeps a subdirectory structure for each project in the
@@ -275,6 +305,7 @@ Target "Release" (fun _ ->
 Target "All" DoNothing
 
 "Clean"
+  =?> ("AssemblyInfo", not isTravisCI)
   =?> ("Build", not isTravisCI)
   =?> ("CopyBinaries", not isTravisCI)
   =?> ("RunTests", not isTravisCI)
