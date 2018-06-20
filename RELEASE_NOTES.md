@@ -1,3 +1,6 @@
+### 4.0.1 - June 20 2018
+* add AssemblyInfo [#140](https://github.com/persimmon-projects/Persimmon/pull/140)
+
 ### 4.0.0 - May 13 2018
 * drop support net20, net35, net40 and pcl259
 * fix to ptint help [#131](https://github.com/persimmon-projects/Persimmon/pull/131)
