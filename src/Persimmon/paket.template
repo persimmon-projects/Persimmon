@@ -20,7 +20,7 @@ dependencies
   framework: net45
     FSharp.Core >= LOCKEDVERSION-Legacy
   framework: netstandard1.6
-	FSharp.Core >= LOCKEDVERSION
+    FSharp.Core >= LOCKEDVERSION
 files
     bin/Release/net45/Persimmon.dll ==> lib/net45
     bin/Release/net45/Persimmon.xml ==> lib/net45

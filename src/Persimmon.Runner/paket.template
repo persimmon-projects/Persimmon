@@ -20,12 +20,13 @@ frameworkAssemblies
     System.Xml
     System.Xml.Linq
 dependencies
-  Persimmon CURRENTVERSION
   framework: net45
     FSharp.Core >= LOCKEDVERSION-Legacy
+    Persimmon ~> CURRENT:Minor
   framework: netstandard1.6
-	FSharp.Core >= LOCKEDVERSION
-	System.Xml.XDocument >= LOCKEDVERSION
+    FSharp.Core >= LOCKEDVERSION
+    System.Xml.XDocument >= LOCKEDVERSION
+    Persimmon ~> CURRENT:Minor
 files
     bin/Release/net45/Persimmon.Runner.dll ==> lib/net45
     bin/Release/net45/Persimmon.Runner.xml ==> lib/net45
