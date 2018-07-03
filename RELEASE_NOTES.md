@@ -1,3 +1,6 @@
+### 4.0.2 - July 4 2018
+* fix dependency version of Persimmon.Runner
+
 ### 4.0.1 - June 20 2018
 * add AssemblyInfo [#140](https://github.com/persimmon-projects/Persimmon/pull/140)
 
