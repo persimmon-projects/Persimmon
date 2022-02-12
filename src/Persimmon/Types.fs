@@ -2,14 +2,7 @@
 
 open System
 open System.Diagnostics
-open System.Reflection
-open System.Collections.Generic
-open System.Threading
 open Microsoft.FSharp.Control
-
-#if NETSTANDARD
-type MarshalByRefObject() = class end
-#endif
 
 /// The cause of not passed assertion.
 type NotPassedCause =

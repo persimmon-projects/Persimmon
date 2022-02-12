@@ -7,7 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="Args.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="..\..\Persimmon.snk">
@@ -18,6 +17,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Persimmon.Runner\Persimmon.Runner.fsproj" />
+    <ProjectReference Include="..\Persimmon\Persimmon.fsproj" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

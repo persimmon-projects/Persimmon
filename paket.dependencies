@@ -33,8 +33,14 @@ group Legacy
 
   nuget FSharp.Core >= 5.0.0 lowest_matching:true
 
-group DifferentVersion
-  framework: netstandard2.0
+group Net462_FS5
+  framework: net462
   source https://api.nuget.org/v3/index.json
 
-  nuget FSharp.Core >= 5.0.1 lowest_matching:true
+  nuget FSharp.Core = 5.0.0
+
+group Net462_FS6
+  framework: net462
+  source https://api.nuget.org/v3/index.json
+
+  nuget FSharp.Core = 6.0.0

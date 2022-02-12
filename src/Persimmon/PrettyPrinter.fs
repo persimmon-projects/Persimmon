@@ -4,19 +4,11 @@ open System
 open System.Collections
 open Microsoft.FSharp.Reflection
 
-#if NETSTANDARD
-open System.Reflection
-#endif
-
 module internal PrettyPrinter =
 
   let private isGenericType (typ: Type) =
     typ
-#if NETSTANDARD
-      .GetTypeInfo().IsGenericType
-#else
       .IsGenericType
-#endif
 
   let rec private printCollections printer (t: Type) (o: IEnumerable) =
     let tmp = ResizeArray()
