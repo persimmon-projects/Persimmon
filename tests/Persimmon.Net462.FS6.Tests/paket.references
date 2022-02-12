@@ -1,2 +1,3 @@
 group Net462_FS6
   FSharp.Core
+  System.Configuration.ConfigurationManager

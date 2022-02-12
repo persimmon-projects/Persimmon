@@ -9,7 +9,9 @@
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="app.config" />
     <Compile Include="Test.fs" />
+    <Compile Include="AppDomainTest.fs" />
     <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>

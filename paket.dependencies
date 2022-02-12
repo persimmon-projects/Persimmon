@@ -3,7 +3,6 @@ source https://api.nuget.org/v3/index.json
 
 nuget FSharp.Core >= 5.0.0 lowest_matching:true
 nuget System.Xml.XDocument >= 4.3.0 lowest_matching:true
-nuget System.Configuration.ConfigurationManager >= 6.0.0 lowest_matching:true
 
 group Build
   framework: net462
@@ -38,9 +37,11 @@ group Net462_FS5
   source https://api.nuget.org/v3/index.json
 
   nuget FSharp.Core = 5.0.0
+  nuget System.Configuration.ConfigurationManager >= 6.0.0 lowest_matching:true
 
 group Net462_FS6
   framework: net462
   source https://api.nuget.org/v3/index.json
 
   nuget FSharp.Core = 6.0.0
+  nuget System.Configuration.ConfigurationManager >= 6.0.0 lowest_matching:true
