@@ -7,11 +7,7 @@ open Microsoft.FSharp.Reflection
 module internal Runtime =
   let getModule<'TSameAssemblyType>(name: string) =
     (typeof<'TSameAssemblyType>)
-#if NETSTANDARD
-      .GetTypeInfo().Assembly.GetType(name)
-#else
       .Assembly.GetType(name)
-#endif
 
   let invoke (m: MethodInfo) typeArgs args =
     let f =
@@ -28,11 +24,7 @@ module internal Runtime =
 
     let getMethod name (typ: Type) =
       typ
-#if NETSTANDARD
-        .GetTypeInfo().GetDeclaredMethod(name)
-#else
         .GetMethod(name)
-#endif
 
 module internal RuntimeSeq =
   let private typ = Runtime.getModule<_ list>("Microsoft.FSharp.Collections.SeqModule")

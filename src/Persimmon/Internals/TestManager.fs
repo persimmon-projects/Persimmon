@@ -4,8 +4,6 @@ open System
 open Persimmon
 open System.Reflection
 
-#if NETSTANDARD
-#else
 
 type ITestManagerCallback =
   abstract Progress : testResult:TestResult -> unit
@@ -40,5 +38,3 @@ type TestManager() =
       |> Async.RunSynchronously
     else
       TestRunner().RunSynchronouslyAllTests(progress, filter, tests)
-
-#endif

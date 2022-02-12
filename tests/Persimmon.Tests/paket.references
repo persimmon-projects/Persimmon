@@ -1,2 +1,4 @@
+System.Configuration.ConfigurationManager
+
 group Latest
   FSharp.Core
