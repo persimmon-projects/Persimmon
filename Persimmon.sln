@@ -33,6 +33,12 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Persimmon.Net462.FS5.Tests"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Persimmon.Net462.FS6.Tests", "tests\Persimmon.Net462.FS6.Tests\Persimmon.Net462.FS6.Tests.fsproj", "{A25915D9-E6DF-4BEB-AA32-CDBFF5EF5BBB}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".fake", ".fake", "{4B56F6E7-9028-4994-A990-AF44F886CCC5}"
+	ProjectSection(SolutionItems) = preProject
+		build.fsx = build.fsx
+		build.fsx.lock = build.fsx.lock
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
