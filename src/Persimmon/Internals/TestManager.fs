@@ -24,10 +24,16 @@ type TestManager() =
   member val Filter = TestFilter.allPass with get, set
   member val Callback = emptyCallback with get, set
 
+  member this.AddTests(found: seq<TestMetadata>) =
+    do tests <- Seq.append tests found
+
+  member this.Collect(asm: Assembly): unit =
+    let found = TestCollector().Collect(asm)
+    this.AddTests(found)
+
   member this.Collect(assemblyPath: string) : unit =
     let asm = Assembly.LoadFrom(assemblyPath)
-    let found = TestCollector().Collect(asm)
-    do tests <- Seq.append tests found
+    this.Collect(asm)
 
   member this.Run() : RunResult<ResultNode> =
     let filter = TestFilter.make this.Filter
