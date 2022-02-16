@@ -37,7 +37,7 @@ Target.create "Build" (fun _ ->
 let consoleRunnerTestAssemblies = !! "tests/**/bin/Release/net462/*Tests.dll"
 let exeTestAssemblies = !! "tests/**/bin/Release/*/*Tests.exe"
 
-Target.create "Test" (fun _ ->
+Target.create "RunTests" (fun _ ->
   consoleRunnerTestAssemblies
   |> Fake.PersimmonConsole.Persimmon (fun p ->
   { p with
@@ -60,6 +60,7 @@ Target.create "All" ignore
 
 "Clean"
   ==> "Build"
+  ==> "RunTests"
   ==> "All"
 
 Target.runOrDefault "All"
