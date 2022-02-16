@@ -37,6 +37,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".fake", ".fake", "{4B56F6E7
 	ProjectSection(SolutionItems) = preProject
 		build.fsx = build.fsx
 		build.fsx.lock = build.fsx.lock
+		FAKE.PersimmonConsole.fsx = FAKE.PersimmonConsole.fsx
 	EndProjectSection
 EndProject
 Global
