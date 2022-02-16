@@ -20,7 +20,7 @@ jobs:
     - uses: actions/cache@v2
       with:
         path: ~/.nuget/packages
-        key: nuget-${{ hashFiles('**/paket.lock') }}
+        key: nuget-${{ hashFiles('**/paket.lock') }}-${{ hashFiles('**/build.fsx.lock') }}
         restore-keys: nuget
 
     - name: Restore tools
