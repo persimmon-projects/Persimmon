@@ -8,7 +8,8 @@ nuget Fake.Core.Trace
 nuget Fake.Testing.Common //"
 #load ".fake/build.fsx/intellisense.fsx"
 
-#load "FAKE.Persimmon.fsx"
+#load "FAKE.PersimmonConsole.fsx"
+#load "Fake.DotNet.Testing.Persimmon.fsx"
 
 open Fake.Core
 open Fake.DotNet
@@ -16,6 +17,7 @@ open Fake.IO
 open Fake.IO.FileSystemOperators
 open Fake.IO.Globbing.Operators
 open Fake.Core.TargetOperators
+open Fake.DotNet.Testing.Persimmon
 
 Target.initEnvironment ()
 
@@ -40,8 +42,18 @@ Target.create "Test" (fun _ ->
   |> Fake.PersimmonConsole.Persimmon (fun p ->
   { p with
       ToolPath = ProcessUtils.findFile [ "./src/Persimmon.Console/bin/Release/net462" ] "Persimmon.Console.exe"
-      Output = Fake.PersimmonConsole.OutputDestination.XmlFile "TestResult.xml"
+      Output = Fake.PersimmonConsole.OutputDestination.XmlFile "TestResult.Console.xml"
   })
+
+  exeTestAssemblies
+  |> Seq.iter (fun exe ->
+    let fileName = FileInfo.ofPath(exe).Name
+    Persimmon (fun p ->
+      { p with
+          ToolPath = exe
+          Output = OutputDestination.XmlFile ($"TestResult.{fileName}.xml")
+      })
+  )
 )
 
 Target.create "All" ignore

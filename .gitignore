@@ -196,3 +196,6 @@ temp/
 docs/files/images
 .vs/
 project.lock.json
+
+# Test results
+TestResult*.xml

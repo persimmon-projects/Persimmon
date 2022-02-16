@@ -1,14 +1,12 @@
-module Fake.PersimmonConsole
+module Fake.DotNet.Testing.Persimmon
 
 #load ".fake/build.fsx/intellisense.fsx"
 
 open System
 open System.IO
-open System.Text
 open Fake.Core
 open Fake.Testing.Common
 open Fake.IO
-open Fake.IO.FileSystemOperators
 
 type OutputDestination =
   | Console
@@ -30,7 +28,7 @@ type PersimmonParams = {
 }
 
 let PersimmonDefaults = {
-  ToolPath = ProcessUtils.tryFindFile [ "." @@ "tools" @@ "Persimmon.Console" ] "Persimmon.Console.exe" |> Option.defaultValue "Persimmon.Console.exe"
+  ToolPath = ""
   NoProgress = false
   Parallel = false
   Output = OutputDestination.Console
@@ -39,7 +37,7 @@ let PersimmonDefaults = {
   ErrorLevel = Error
 }
 
-let internal buildPersimmonArgs parameters assemblies =
+let internal buildPersimmonArgs parameters =
   let output, outputText =
     match parameters.Output with
     | OutputDestination.Console -> false, []
@@ -62,16 +60,13 @@ let internal buildPersimmonArgs parameters assemblies =
       yield "--no-progress"
     if parameters.Parallel then
       yield "--parallel"
-
-    yield! assemblies
   }
 
-let Persimmon setParams assemblies =
-  let details = String.separated ", " (assemblies |> Seq.map (fun p -> FileInfo.ofPath(p).Name))
-  use traceTask = Trace.traceTask "Persimmon.Console" details
-  
+let Persimmon setParams =
   let parameters = setParams PersimmonDefaults
-  let args = buildPersimmonArgs parameters assemblies
+  let details = FileInfo.ofPath(parameters.ToolPath).Name
+  use traceTask = Trace.traceTask "Persimmon" details
+  let args = buildPersimmonArgs parameters
   let procResult =
     Command.RawCommand(parameters.ToolPath, Arguments.OfArgs args)
     |> CreateProcess.fromCommand
