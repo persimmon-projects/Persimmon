@@ -67,12 +67,22 @@ Target.create "GenerateHelp" (fun _ ->
   Docs.generateHelp()
 )
 
+Target.create "GenerateReferenceDocs" (fun _ ->
+  Docs.generateReference()
+)
+
 Target.create "All" ignore
+Target.create "GenerateDocs" ignore
 
 "Clean"
   ==> "Build"
   ==> "CopyBinaries"
   ==> "RunTests"
   ==> "All"
+
+"CleanDocs"
+  ==> "GenerateHelp"
+  ==> "GenerateReferenceDocs"
+  ==> "GenerateDocs"
 
 Target.runOrDefault "All"

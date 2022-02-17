@@ -78,3 +78,21 @@ let generateHelp() =
           ProjectParameters  = ("root", root)::info
           Template = docTemplate
           FsiEval = true } )
+
+let binaries =
+  DirectoryInfo.ofPath bin
+  |> DirectoryInfo.getSubDirectories
+  |> Array.filter (fun d -> d.Name <> "Persimmon.Console")
+  |> Array.map (fun d -> d.FullName @@ "netstandard2.0" @@ $"{d.Name}.dll")
+
+let generateReference () =
+  let outputDir = output @@ "reference"
+  Shell.cleanDir outputDir
+
+  binaries
+  |> FSFormatting.createDocsForDlls (fun args ->
+    { args with
+        OutputDirectory = outputDir
+        LayoutRoots = layoutRootsAll.["en"]
+        ProjectParameters =  ("root", root)::info
+        SourceRepository = githubLink @@ "tree/master" })
