@@ -79,7 +79,7 @@ let generateHelp() =
           Template = docTemplate
           FsiEval = true } )
 
-let binaries =
+let binaries() =
   DirectoryInfo.ofPath bin
   |> DirectoryInfo.getSubDirectories
   |> Array.filter (fun d -> d.Name <> "Persimmon.Console")
@@ -89,7 +89,7 @@ let generateReference () =
   let outputDir = output @@ "reference"
   Shell.cleanDir outputDir
 
-  binaries
+  binaries()
   |> FSFormatting.createDocsForDlls (fun args ->
     { args with
         OutputDirectory = outputDir
