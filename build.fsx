@@ -1,15 +1,9 @@
-#r "paket:
-nuget Fake.DotNet.Cli
-nuget Fake.IO.FileSystem
-nuget Fake.Core.Target
-nuget Fake.Core.String
-nuget Fake.Core.Process
-nuget Fake.Core.Trace
-nuget Fake.Testing.Common //"
+#r "paket: groupref Build //"
 #load ".fake/build.fsx/intellisense.fsx"
 
 #load "FAKE.PersimmonConsole.fsx"
 #load "Fake.DotNet.Testing.Persimmon.fsx"
+#load "generate.fsx"
 
 open Fake.Core
 open Fake.DotNet
@@ -18,6 +12,8 @@ open Fake.IO.FileSystemOperators
 open Fake.IO.Globbing.Operators
 open Fake.Core.TargetOperators
 open Fake.DotNet.Testing.Persimmon
+
+let outDir = "bin"
 
 Target.initEnvironment ()
 
@@ -32,6 +28,12 @@ Target.create "Build" (fun _ ->
   ++ "tests/**/*.*proj"
   ++ "examples/**/*.*proj"
   |> Seq.iter (DotNet.build id)
+)
+
+Target.create "CopyBinaries" (fun _ ->
+  !! "src/**/*.??proj"
+  |>  Seq.map (fun f -> ((System.IO.Path.GetDirectoryName f) @@ "bin" @@ "Release", outDir @@ (System.IO.Path.GetFileNameWithoutExtension f)))
+  |>  Seq.iter (fun (fromDir, toDir) -> Shell.copyDir toDir fromDir (fun _ -> true))
 )
 
 let consoleRunnerTestAssemblies = !! "tests/**/bin/Release/net462/*Tests.dll"
@@ -56,10 +58,20 @@ Target.create "RunTests" (fun _ ->
   )
 )
 
+Target.create "CleanDocs" (fun _ ->
+  !! "docs/output"
+  |> Shell.cleanDirs
+)
+
+Target.create "GenerateHelp" (fun _ ->
+  Docs.generateHelp()
+)
+
 Target.create "All" ignore
 
 "Clean"
   ==> "Build"
+  ==> "CopyBinaries"
   ==> "RunTests"
   ==> "All"
 
