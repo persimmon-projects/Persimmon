@@ -40,10 +40,14 @@ type RunnerStrategyBase() =
       |> Seq.singleton
 
 
-type LoadFromAssemblyStrategy(asm: Assembly) =
+type LoadFromAssemblyStrategy(assemblies: seq<Assembly>) =
   inherit RunnerStrategyBase()
 
-  override _.CollectTests() = TestCollector().Collect(asm) :> seq<TestMetadata>
+  override _.CollectTests() =
+    [|
+      for asm in assemblies do
+        yield! TestCollector().Collect(asm)
+    |]
 
 type InstanceStrategy(tests: seq<TestMetadata>) =
   inherit RunnerStrategyBase()

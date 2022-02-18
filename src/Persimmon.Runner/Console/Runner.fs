@@ -33,8 +33,8 @@ let run (args: Args) (strategy: IRunnerStrategy) =
     reporter.ReportError("file not found: " + (String.Join(", ", notFounds)))
     -2
 
-let runTestsInAssembly (args: Args) (asm: Assembly) =
-  run args (LoadFromAssemblyStrategy(asm))
+let runTestsInAssembly (args: Args) (assemblies: seq<Assembly>) =
+  run args (LoadFromAssemblyStrategy(assemblies))
 
 let runTests (args: Args) (tests: seq<#TestMetadata>) =
   run args (InstanceStrategy(tests |> Seq.cast<TestMetadata>))
