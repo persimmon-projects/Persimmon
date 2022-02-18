@@ -15,12 +15,14 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: |
+          6.0.x
+          3.1.x
 
     - uses: actions/cache@v2
       with:
         path: ~/.nuget/packages
-        key: nuget-${{ hashFiles('**/paket.lock') }}-${{ hashFiles('**/build.fsx.lock') }}
+        key: nuget-${{ hashFiles('**/paket.lock') }}
         restore-keys: nuget
 
     - name: Restore tools
