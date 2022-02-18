@@ -28,12 +28,10 @@
         <div class="col-sm-9 blog-main" id="main">
           
 
-
-
 <h1>ActivePatterns</h1>
 <p>
   <span>Namespace: Persimmon</span><br />
-</p>
+  </p>
 <div class="xmldoc">
 </div>
 
@@ -47,16 +45,15 @@
     <tbody>
       <tr>
         <td class="member-name">
-
           <code onmouseout="hideTip(event, '1', 1)" onmouseover="showTip(event, '1', 1)">
-            ( |Context|TestCase| ) testMetadata
+            ( |Context|TestCase| )(testMetadata)
           </code>
           <div class="tip" id="1">
             <strong>Signature:</strong> testMetadata:TestMetadata -&gt; Choice&lt;Context,TestCase&gt;<br />
-                      </div>
+                                  </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ActivePatterns.fs#L6-6" class="github-link">
+                      <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ActivePatterns.fs#L6-6" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -68,16 +65,15 @@
       </tr>
       <tr>
         <td class="member-name">
-
           <code onmouseout="hideTip(event, '2', 2)" onmouseover="showTip(event, '2', 2)">
-            ( |ContextResult|TestResult|EndMarker| ) (...)
+            ( |ContextResult|TestResult|EndMarker| )(...)
           </code>
           <div class="tip" id="2">
             <strong>Signature:</strong> result:ResultNode -&gt; Choice&lt;ContextResult,TestResult,unit&gt;<br />
-                      </div>
+                                  </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ActivePatterns.fs#L13-13" class="github-link">
+                      <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ActivePatterns.fs#L13-13" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -89,16 +85,15 @@
       </tr>
       <tr>
         <td class="member-name">
-
           <code onmouseout="hideTip(event, '3', 3)" onmouseover="showTip(event, '3', 3)">
-            ( |Done|Error| ) result
+            ( |Done|Error| )(result)
           </code>
           <div class="tip" id="3">
             <strong>Signature:</strong> result:TestResult -&gt; Choice&lt;(TestCase * AssertionResult [] * TimeSpan),(TestCase * ExceptionWrapper [] * NotPassedCause [] * TimeSpan)&gt;<br />
-                      </div>
+                                  </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ActivePatterns.fs#L29-29" class="github-link">
+                      <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ActivePatterns.fs#L29-29" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -110,16 +105,15 @@
       </tr>
       <tr>
         <td class="member-name">
-
           <code onmouseout="hideTip(event, '4', 4)" onmouseover="showTip(event, '4', 4)">
-            ( |Passed|NotPassed| ) ar
+            ( |Passed|NotPassed| )(ar)
           </code>
           <div class="tip" id="4">
             <strong>Signature:</strong> ar:AssertionResult -&gt; Choice&lt;unit,NotPassedCause&gt;<br />
-                      </div>
+                                  </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ActivePatterns.fs#L23-23" class="github-link">
+                      <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/ActivePatterns.fs#L23-23" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>

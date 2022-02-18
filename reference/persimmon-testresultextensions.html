@@ -28,11 +28,14 @@
         <div class="col-sm-9 blog-main" id="main">
           
 
-
-
 <h1>TestResultExtensions</h1>
 <p>
   <span>Namespace: Persimmon</span><br />
+        <span>
+          Attributes:<br />
+[&lt;AutoOpen&gt;]<br />
+          
+      </span>
 </p>
 <div class="xmldoc">
 </div>
@@ -47,16 +50,15 @@
     <tbody>
       <tr>
         <td class="member-name">
-
           <code onmouseout="hideTip(event, '45', 45)" onmouseover="showTip(event, '45', 45)">
-            Done (testCase, results, duration)
+            Done(testCase, results, duration)
           </code>
           <div class="tip" id="45">
             <strong>Signature:</strong> (testCase:TestCase * results:NonEmptyList&lt;AssertionResult&lt;&#39;T&gt;&gt; * duration:TimeSpan) -&gt; TestResult&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L438-438" class="github-link">
+                      <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L431-431" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -65,16 +67,15 @@
       </tr>
       <tr>
         <td class="member-name">
-
           <code onmouseout="hideTip(event, '46', 46)" onmouseover="showTip(event, '46', 46)">
-            Error (testCase, exns, causes, duration)
+            Error(testCase, exns, causes, duration)
           </code>
           <div class="tip" id="46">
             <strong>Signature:</strong> (testCase:TestCase * exns:ExceptionWrapper [] * causes:NotPassedCause list * duration:TimeSpan) -&gt; TestResult&lt;&#39;T&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L437-437" class="github-link">
+                      <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L430-430" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
@@ -91,16 +92,15 @@
     <tbody>
       <tr>
         <td class="member-name">
-
           <code onmouseout="hideTip(event, '47', 47)" onmouseover="showTip(event, '47', 47)">
-            ( |Error|Done| ) testResult
+            ( |Error|Done| )(testResult)
           </code>
           <div class="tip" id="47">
             <strong>Signature:</strong> testResult:TestResult&lt;&#39;T&gt; -&gt; Choice&lt;(TestCase * ExceptionWrapper [] * NotPassedCause list * TimeSpan),(TestCase * NonEmptyList&lt;AssertionResult&lt;&#39;T&gt;&gt; * TimeSpan)&gt;<br />
-                          <strong>Type parameters:</strong> 'T          </div>
+                          <strong>Type parameters:</strong> 'T                      </div>
         </td>
         <td class="xmldoc">
-            <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L431-431" class="github-link">
+                      <a href="https://github.com/persimmon-projects/Persimmon/tree/master/src/Persimmon/Types.fs#L424-424" class="github-link">
               <img src="../content/img/github.png" class="normal" />
               <img src="../content/img/github-blue.png" class="hover" />
             </a>
