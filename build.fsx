@@ -33,11 +33,28 @@ let gitRaw = Environment.environVarOrDefault "gitRaw" "https://raw.github.com/pe
 
 let release = ReleaseNotes.load "RELEASE_NOTES.md"
 
+Target.create "CopyBinaries" (fun _ ->
+  !! "src/**/*.??proj"
+  |>  Seq.map (fun f -> ((System.IO.Path.GetDirectoryName f) @@ "bin" @@ configuration, outDir @@ (System.IO.Path.GetFileNameWithoutExtension f)))
+  |>  Seq.iter (fun (fromDir, toDir) -> Shell.copyDir toDir fromDir (fun _ -> true))
+)
+
+// --------------------------------------------------------------------------------------
+// Clean build results
+
 Target.create "Clean" (fun _ ->
   !! "**/bin"
   ++ "**/obj"
   |> Shell.cleanDirs 
 )
+
+Target.create "CleanDocs" (fun _ ->
+  !! "docs/output"
+  |> Shell.cleanDirs
+)
+
+// --------------------------------------------------------------------------------------
+// Build library & test project
 
 Target.create "Build" (fun _ ->
   !! "*.sln"
@@ -45,12 +62,6 @@ Target.create "Build" (fun _ ->
     { args with
         Configuration = DotNet.BuildConfiguration.fromString configuration
     }))
-)
-
-Target.create "CopyBinaries" (fun _ ->
-  !! "src/**/*.??proj"
-  |>  Seq.map (fun f -> ((System.IO.Path.GetDirectoryName f) @@ "bin" @@ configuration, outDir @@ (System.IO.Path.GetFileNameWithoutExtension f)))
-  |>  Seq.iter (fun (fromDir, toDir) -> Shell.copyDir toDir fromDir (fun _ -> true))
 )
 
 let consoleRunnerTestAssemblies = !! ("tests/**/bin/" @@ configuration @@ "/net462/*Tests.dll")
@@ -75,10 +86,8 @@ Target.create "RunTests" (fun _ ->
   )
 )
 
-Target.create "CleanDocs" (fun _ ->
-  !! "docs/output"
-  |> Shell.cleanDirs
-)
+// --------------------------------------------------------------------------------------
+// Generate the documentation
 
 Target.create "CopyCommonDocFiles" (fun _ ->
   Docs.copyCommonFiles()
