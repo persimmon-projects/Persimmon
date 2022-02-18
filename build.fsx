@@ -1,29 +1,27 @@
-#r @"packages/build/FAKE/tools/FakeLib.dll"
-#r @"packages/build/FAKE.Persimmon/lib/net451/FAKE.Persimmon.dll"
-open Fake
-open Fake.Git
-open Fake.AssemblyInfoFile
-open Fake.ReleaseNotesHelper
-open System.IO
-#if MONO
-#else
-#load "packages/build/SourceLink.Fake/tools/Fake.fsx"
-open SourceLink
-#endif
+#r "paket: groupref Build //"
+#load ".fake/build.fsx/intellisense.fsx"
 
-let isAppVeyor = buildServer = AppVeyor
+#load "FAKE.PersimmonConsole.fsx"
+#load "Fake.DotNet.Testing.Persimmon.fsx"
+#load "generate.fsx"
+
+open Fake.Api
+open Fake.Core
+open Fake.Core.TargetOperators
+open Fake.DotNet
+open Fake.DotNet.Testing
+open Fake.IO
+open Fake.IO.FileSystemOperators
+open Fake.IO.Globbing.Operators
+open Fake.Tools.Git
+
+Target.initEnvironment ()
 
 let outDir = "bin"
 
-let configuration = getBuildParamOrDefault "configuration" "Release"
+let configuration = Environment.environVarOrDefault "configuration" "Release"
 
 let project = "Persimmon"
-
-// File system information
-let solutionFile  = "Persimmon.sln"
-
-// Pattern specifying assemblies to be tested using NUnit
-let testAssemblies = "tests/**/bin/Release/net*/*Tests*.dll"
 
 // Git configuration (used for publishing documentation in gh-pages branch)
 // The profile where the project is posted
@@ -34,310 +32,211 @@ let gitHome = "git@github.com:" + gitOwner
 let gitName = "Persimmon"
 
 // The url for the raw files hosted
-let gitRaw = environVarOrDefault "gitRaw" "https://raw.github.com/persimmon-projects"
+let gitRaw = Environment.environVarOrDefault "gitRaw" "https://raw.github.com/persimmon-projects"
 
-// Read additional information from the release notes document
-let release = LoadReleaseNotes "RELEASE_NOTES.md"
+let release = ReleaseNotes.load "RELEASE_NOTES.md"
 
-// Helper active pattern for project types
-let (|Fsproj|Csproj|Vbproj|Shproj|) (projFileName:string) =
-    match projFileName with
-    | f when f.EndsWith("fsproj") -> Fsproj
-    | f when f.EndsWith("csproj") -> Csproj
-    | f when f.EndsWith("vbproj") -> Vbproj
-    | f when f.EndsWith("shproj") -> Shproj
-    | _                           -> failwith (sprintf "Project file %s not supported. Unknown project type." projFileName)
-
-// Generate assembly info files with the right version & up-to-date information
-Target "AssemblyInfo" (fun _ ->
-    let getAssemblyInfoAttributes projectName =
-        [ Attribute.Title (projectName)
-          Attribute.Product project
-          Attribute.Version release.AssemblyVersion
-          Attribute.FileVersion release.AssemblyVersion
-          Attribute.Configuration configuration ]
-
-    let getProjectDetails projectPath =
-        let projectName = System.IO.Path.GetFileNameWithoutExtension(projectPath)
-        ( projectPath,
-          projectName,
-          System.IO.Path.GetDirectoryName(projectPath),
-          (getAssemblyInfoAttributes projectName)
-        )
-
-    !! "src/**/*.??proj"
-    |> Seq.map getProjectDetails
-    |> Seq.iter (fun (projFileName, projectName, folderName, attributes) ->
-        match projFileName with
-        | Fsproj -> CreateFSharpAssemblyInfo (folderName </> "AssemblyInfo.fs") attributes
-        | Csproj -> CreateCSharpAssemblyInfo ((folderName </> "Properties") </> "AssemblyInfo.cs") attributes
-        | Vbproj -> CreateVisualBasicAssemblyInfo ((folderName </> "My Project") </> "AssemblyInfo.vb") attributes
-        | Shproj -> ()
-        )
-)
-
-// Copies binaries from default VS location to exepcted bin folder
-// But keeps a subdirectory structure for each project in the
-// src folder to support multiple project outputs
-Target "CopyBinaries" (fun _ ->
+Target.create "CopyBinaries" (fun _ ->
   !! "src/**/*.??proj"
   |>  Seq.map (fun f -> ((System.IO.Path.GetDirectoryName f) @@ "bin" @@ configuration, outDir @@ (System.IO.Path.GetFileNameWithoutExtension f)))
-  |>  Seq.iter (fun (fromDir, toDir) -> CopyDir toDir fromDir (fun _ -> true))
+  |>  Seq.iter (fun (fromDir, toDir) -> Shell.copyDir toDir fromDir (fun _ -> true))
+)
+
+let (|Fsproj|Csproj|Vbproj|Shproj|) (projFileName:string) =
+  match projFileName with
+  | f when f.EndsWith("fsproj") -> Fsproj
+  | f when f.EndsWith("csproj") -> Csproj
+  | f when f.EndsWith("vbproj") -> Vbproj
+  | f when f.EndsWith("shproj") -> Shproj
+  | _                           -> failwith (sprintf "Project file %s not supported. Unknown project type." projFileName)
+
+Target.create "AssemblyInfo" (fun _ ->
+  let getAssemblyInfoAttributes projectName =
+      [ AssemblyInfo.Title projectName
+        AssemblyInfo.Product project
+        AssemblyInfo.Version release.AssemblyVersion
+        AssemblyInfo.FileVersion release.AssemblyVersion
+        AssemblyInfo.Configuration configuration ]
+
+  let getProjectDetails (projectPath: string) =
+      let projectName = System.IO.Path.GetFileNameWithoutExtension(projectPath)
+      ( projectPath,
+        projectName,
+        System.IO.Path.GetDirectoryName(projectPath),
+        (getAssemblyInfoAttributes projectName)
+      )
+
+  !! "src/**/*.??proj"
+  |> Seq.map getProjectDetails
+  |> Seq.iter (fun (projFileName, _, folderName, attributes) ->
+      match projFileName with
+      | Fsproj -> AssemblyInfoFile.createFSharp (folderName </> "AssemblyInfo.fs") attributes
+      | Csproj -> AssemblyInfoFile.createCSharp (folderName </> "Properties" </> "AssemblyInfo.cs") attributes
+      | Vbproj -> AssemblyInfoFile.createVisualBasic (folderName </> "My Project" </> "AssemblyInfo.vb") attributes
+      | Shproj -> ()
+      )
 )
 
 // --------------------------------------------------------------------------------------
 // Clean build results
 
-Target "Clean" (fun _ ->
-  CleanDirs [outDir; "temp"]
-  !! ("./src/**/bin" @@ configuration)
-  |> CleanDirs
+Target.create "Clean" (fun _ ->
+  !! "**/bin"
+  ++ "**/obj"
+  |> Shell.cleanDirs 
 )
 
-Target "CleanDocs" (fun _ ->
-  CleanDirs ["docs/output"]
+Target.create "CleanDocs" (fun _ ->
+  !! "docs/output"
+  |> Shell.cleanDirs
 )
 
 // --------------------------------------------------------------------------------------
 // Build library & test project
 
-let isTravisCI = (environVarOrDefault "TRAVIS" "") = "true"
+Target.create "Build" (fun _ ->
+  !! "*.sln"
+  |> Seq.iter (DotNet.build (fun args ->
+    { args with
+        Configuration = DotNet.BuildConfiguration.fromString configuration
+    }))
+)
 
-Target "Build" (fun _ ->
+let consoleRunnerTestAssemblies = !! ("tests/**/bin/" @@ configuration @@ "/net462/*Tests.dll")
+let exeTestAssemblies = !! ("tests/**/bin/" @@ configuration @@ "/*/*Tests.exe")
 
-  DotNetCli.Restore (fun p ->
-    { p with
-        Project = solutionFile
+Target.create "RunTests" (fun ctx ->
+  let testResult =
+    seq {
+      yield
+        consoleRunnerTestAssemblies
+        |> Fake.PersimmonConsole.run' (fun p ->
+        { p with
+            ToolPath = ProcessUtils.findFile [ "./src/Persimmon.Console/bin/" @@ configuration @@ "/net462" ] "Persimmon.Console.exe"
+            Output = Fake.PersimmonConsole.XmlFile "TestResult.Console.xml"
+            ErrorLevel = Fake.Testing.Common.DontFailBuild
+        })
+
+      for exe in exeTestAssemblies do
+        let fileName = FileInfo.ofPath(exe).Name
+        yield
+          Persimmon.run' (fun p ->
+            { p with
+                ToolPath = exe
+                Output = Persimmon.XmlFile ($"TestResult.{fileName}.xml")
+                ErrorLevel = Fake.Testing.Common.DontFailBuild
+            })
     }
-  )
-
-  !! solutionFile
-  |> MSBuild "" "Rebuild" [ ("Platform", "Any CPU"); ("Configuration", configuration) ]
-  |> ignore
+    |> Seq.forall (fun result -> result.ExitCode = 0)
+  
+  if not testResult then failwith "Some tests failed."
 )
-
-Target "RunTests" (fun _ ->
-  !! testAssemblies
-  |> Persimmon (fun p ->
-    { p with
-        ToolPath = findToolInSubPath "Persimmon.Console.exe" (currentDirectory @@ "src" @@ "Persimmon.Console" @@ "bin" @@ configuration)
-        Output = OutputDestination.XmlFile "TestResult.xml"
-    }
-  )
-)
-
-Target "UploadTestResults" (fun _ ->
-  let url = sprintf "https://ci.appveyor.com/api/testresults/junit/%s" AppVeyor.AppVeyorEnvironment.JobId
-  let files = System.IO.Directory.GetFiles(path = currentDirectory, searchPattern = "*.xml")
-  use wc = new System.Net.WebClient()
-  files
-  |> Seq.iter (fun file ->
-    try
-      wc.UploadFile(url, file) |> ignore
-      printfn "Successfully uploaded test results %s" file
-    with
-      | ex -> printfn "An error occurred while uploading %s:\r\n%O" file ex
-  )
-)
-
-#if MONO
-#else
-// --------------------------------------------------------------------------------------
-// SourceLink allows Source Indexing on the PDB generated by the compiler, this allows
-// the ability to step through the source code of external libraries https://github.com/ctaggart/SourceLink
-
-Target "SourceLink" (fun _ ->
-  let baseUrl = sprintf "%s/%s/{0}/%%var2%%" gitRaw project
-  !! "src/**/*.??proj"
-  |> Seq.iter (fun projFile ->
-    let proj = VsProj.LoadRelease projFile
-    SourceLink.Index proj.CompilesNotLinked proj.OutputFilePdb __SOURCE_DIRECTORY__ baseUrl
-  )
-)
-
-#endif
 
 // --------------------------------------------------------------------------------------
 // Build a NuGet package
 
-Target "NuGet" (fun _ ->
-  Paket.Pack(fun p ->
-    { p with
-        OutputPath = outDir
-        Version = release.NugetVersion
-        ReleaseNotes = toLines release.Notes})
+Target.create "NuGet" (fun _ ->
+  use trace = Trace.traceTask "PaketPack" "."
+  let args =
+    Arguments.OfArgs([ "pack" ])
+    |> Arguments.append [ "--version"; release.NugetVersion ]
+    |> Arguments.append [ "--release-notes"; System.Net.WebUtility.HtmlEncode(release.Notes |> String.concat System.Environment.NewLine) ]
+    |> Arguments.append [ outDir ]
+  let result = DotNet.exec id "paket" (args.ToWindowsCommandLine)
+  if not result.OK then failwith "Error during packing."
+  trace.MarkSuccess()
 )
 
-Target "PublishNuget" (fun _ ->
-  Paket.Push(fun p -> { p with WorkingDir = outDir })
+Target.create "PublishNuget" (fun _ ->
+  let apiKey = Environment.environVar "api-key"
+  if (String.isNullOrEmpty apiKey = false) then TraceSecrets.register "<api-key>" apiKey
+
+  !! (outDir @@ "/**/*.nupkg")
+  |> Seq.iter (fun package ->
+    use trace = Trace.traceTask "PaketPublish" package
+    let args =
+      Arguments.OfArgs([ "push" ])
+      |> Arguments.appendNotEmpty "--api-key" apiKey
+      |> Arguments.append([ package ])
+    let result = DotNet.exec id "paket" (args.ToWindowsCommandLine)
+    if not result.OK then failwithf "Error during pushing %s" package
+    trace.MarkSuccess()
+  )
 )
 
 // --------------------------------------------------------------------------------------
 // Generate the documentation
 
-Target "GenerateReferenceDocs" (fun _ ->
-  if not <| executeFSIWithArgs "docs/tools" "generate.fsx" ["--define:RELEASE"; "--define:REFERENCE"] [] then
-    failwith "generating reference documentation failed"
+Target.create "CopyCommonDocFiles" (fun _ ->
+  Docs.copyCommonFiles()
 )
 
-let generateHelp' fail debug =
-  let args =
-    if debug then ["--define:HELP"]
-    else ["--define:RELEASE"; "--define:HELP"]
-  if executeFSIWithArgs "docs/tools" "generate.fsx" args [] then
-    traceImportant "Help generated"
-  else
-    if fail then
-      failwith "generating help documentation failed"
-    else
-      traceImportant "generating help documentation failed"
-
-let generateHelp fail =
-  generateHelp' fail false
-
-Target "GenerateHelp" (fun _ ->
-  DeleteFile "docs/content/release-notes.md"
-  CopyFile "docs/content/" "RELEASE_NOTES.md"
-  Rename "docs/content/release-notes.md" "docs/content/RELEASE_NOTES.md"
-
-  ensureDirectory "docs/files/images"
-  CopyFile "docs/files/images/favicon.ico" "paket-files/build/persimmon-projects/Persimmon.Materials/StandardIcons/persimmon.ico"
-  CopyFile "docs/files/images/logo.png" "paket-files/build/persimmon-projects/Persimmon.Materials/StandardIcons/persimmon_128.png"
-
-  generateHelp true
+Target.create "GenerateHelp" (fun _ ->
+  Docs.generateHelp()
 )
 
-Target "GenerateHelpDebug" (fun _ ->
-  DeleteFile "docs/content/release-notes.md"
-  CopyFile "docs/content/" "RELEASE_NOTES.md"
-  Rename "docs/content/release-notes.md" "docs/content/RELEASE_NOTES.md"
-
-  generateHelp' true true
+Target.create "GenerateReferenceDocs" (fun _ ->
+  Docs.generateReference()
 )
 
-Target "KeepRunning" (fun _ ->
-  use watcher = new FileSystemWatcher(DirectoryInfo("docs/content").FullName,"*.*")
-  watcher.EnableRaisingEvents <- true
-  watcher.Changed.Add(fun e -> generateHelp false)
-  watcher.Created.Add(fun e -> generateHelp false)
-  watcher.Renamed.Add(fun e -> generateHelp false)
-  watcher.Deleted.Add(fun e -> generateHelp false)
+Target.create "GenerateDocs" ignore
 
-  traceImportant "Waiting for help edits. Press any key to stop."
-
-  System.Console.ReadKey() |> ignore
-
-  watcher.EnableRaisingEvents <- false
-  watcher.Dispose()
-)
-
-Target "GenerateDocs" DoNothing
-
-let createIndexFsx lang =
-  let content = """(*** hide ***)
-// This block of code is omitted in the generated HTML documentation. Use
-// it to define helpers that you do not want to show in the documentation.
-#I "../../../bin"
-(**
-F# Project Scaffold ({0})
-=========================
-*)
-"""
-  let targetDir = "docs/content" @@ lang
-  let targetFile = targetDir @@ "index.fsx"
-  ensureDirectory targetDir
-  System.IO.File.WriteAllText(targetFile, System.String.Format(content, lang))
-
-Target "AddLangDocs" (fun _ ->
-  let args = System.Environment.GetCommandLineArgs()
-  if args.Length < 4 then
-    failwith "Language not specified."
-
-  args.[3..]
-  |> Seq.iter (fun lang ->
-      if lang.Length <> 2 && lang.Length <> 3 then
-        failwithf "Language must be 2 or 3 characters (ex. 'de', 'fr', 'ja', 'gsw', etc.): %s" lang
-
-      let templateFileName = "template.cshtml"
-      let templateDir = "docs/tools/templates"
-      let langTemplateDir = templateDir @@ lang
-      let langTemplateFileName = langTemplateDir @@ templateFileName
-
-      if System.IO.File.Exists(langTemplateFileName) then
-        failwithf "Documents for specified language '%s' have already been added." lang
-
-      ensureDirectory langTemplateDir
-      Copy langTemplateDir [ templateDir @@ templateFileName ]
-
-      createIndexFsx lang)
-)
-
-Target "ReleaseDocs" (fun _ ->
+Target.create "ReleaseDocs" (fun _ ->
   let tempDocsDir = "temp/gh-pages"
-  CleanDir tempDocsDir
+  Shell.cleanDir tempDocsDir
   Repository.cloneSingleBranch "" (gitHome + "/" + gitName + ".git") "gh-pages" tempDocsDir
 
-  CopyRecursive "docs/output" tempDocsDir true |> tracefn "%A"
-  StageAll tempDocsDir
-  Git.Commit.Commit tempDocsDir (sprintf "Update generated documentation for version %s" release.NugetVersion)
+  Shell.copyRecursive Docs.output tempDocsDir true |> Trace.tracefn "%A"
+  Staging.stageAll tempDocsDir
+  Commit.exec tempDocsDir (sprintf "Update generated documentation for version %s" release.NugetVersion)
   Branches.push tempDocsDir
 )
 
-#load "paket-files/build/fsharp/FAKE/modules/Octokit/Octokit.fsx"
-open Octokit
+Target.create "All" ignore
 
-Target "Release" (fun _ ->
-  StageAll ""
-  Git.Commit.Commit "" (sprintf "Bump version to %s" release.NugetVersion)
+Target.create "Release" (fun _ ->
+  Staging.stageAll ""
+  Commit.exec "" (sprintf "Bump version to %s" release.NugetVersion)
   Branches.pushBranch "" "origin" "master"
 
   Branches.tag "" release.NugetVersion
   Branches.pushTag "" "origin" release.NugetVersion
 
+  
   // release on github
-  createClient (getBuildParamOrDefault "github-user" "") (getBuildParamOrDefault "github-pw" "")
-  |> createDraft gitOwner gitName release.NugetVersion (release.SemVer.PreRelease <> None) release.Notes
-  // TODO: |> uploadFile "PATH_TO_FILE"
-  |> releaseDraft
-  |> Async.RunSynchronously
+  //let user = Environment.environVar "github-user"
+  //if String.isNullOrEmpty user then TraceSecrets.register "<github-user>" user
+  //let password = Environment.environVar "github-pw"
+  //if String.isNotNullOrEmpty password then TraceSecrets.register "<github-pw>" password
+  //GitHub.createClient user password
+  //|> GitHub.draftNewRelease gitOwner gitName release.NugetVersion (release.SemVer.PreRelease <> None) release.Notes
+  //// TODO: |> uploadFile "PATH_TO_FILE"
+  //|> GitHub.publishDraft
+  //|> Async.RunSynchronously
 )
 
-Target "All" DoNothing
-
 "Clean"
-  =?> ("AssemblyInfo", not isTravisCI)
-  =?> ("Build", not isTravisCI)
-  =?> ("CopyBinaries", not isTravisCI)
-  =?> ("RunTests", not isTravisCI)
-  =?> ("UploadTestResults",isAppVeyor)
-  =?> ("GenerateReferenceDocs",isLocalBuild)
-  =?> ("GenerateDocs",isLocalBuild)
+  ==> "AssemblyInfo"
+  ==> "Build"
+  ==> "CopyBinaries"
+  ==> "RunTests"
+  ==> "GenerateDocs"
   ==> "All"
-  =?> ("ReleaseDocs",isLocalBuild)
-
-"All"
-#if MONO
-#else
-  =?> ("SourceLink", Pdbstr.tryFind().IsSome )
-#endif
-  ==> "NuGet"
 
 "CleanDocs"
+  ==> "CopyBinaries"
+  ==> "CopyCommonDocFiles"
   ==> "GenerateHelp"
   ==> "GenerateReferenceDocs"
   ==> "GenerateDocs"
 
-"CleanDocs"
-  ==> "GenerateHelpDebug"
-
-"GenerateHelp"
-  ==> "KeepRunning"
-
-"ReleaseDocs"
+"All"
+  ==> "ReleaseDocs"
   ==> "Release"
 
-"NuGet"
+"All"
+  ==> "NuGet"
   ==> "PublishNuget"
   ==> "Release"
 
-RunTargetOrDefault "All"
+Target.runOrDefault "All"

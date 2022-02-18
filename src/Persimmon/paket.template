@@ -17,12 +17,8 @@ tags
 description
     A test framework for F#
 dependencies
-  framework: net45
-    FSharp.Core >= LOCKEDVERSION-Legacy
-  framework: netstandard1.6
+  framework: netstandard2.0
     FSharp.Core >= LOCKEDVERSION
 files
-    bin/Release/net45/Persimmon.dll ==> lib/net45
-    bin/Release/net45/Persimmon.xml ==> lib/net45
-    bin/Release/netstandard1.6/Persimmon.dll ==> lib/netstandard1.6
-    bin/Release/netstandard1.6/Persimmon.xml ==> lib/netstandard1.6
+    bin/Release/netstandard2.0/Persimmon.dll ==> lib/netstandard2.0
+    bin/Release/netstandard2.0/Persimmon.xml ==> lib/netstandard2.0

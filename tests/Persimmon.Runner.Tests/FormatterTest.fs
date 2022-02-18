@@ -25,7 +25,6 @@ module Xml =
     formatter.Format(
       Internals.TestRunnerImpl.runTests ignore Internals.TestRunnerImpl.asyncSequential (fun _ -> true) tests |> Async.RunSynchronously
     ).WriteTo(writer)
-    writer.Dispose()
     memory.Position <- 0
     let doc = XDocument.Load(new StreamReader(memory))
     let mutable ex: (exn * string) option = None
