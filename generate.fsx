@@ -42,6 +42,11 @@ do
    if name.Length = 2 || name.Length = 3 then
      layoutRootsAll.Add(name, [templates @@ name; formatting @@ "templates"; formatting @@ "templates/reference" ]))
 
+let copyCommonFiles() =
+  let dest = (output @@ "content")
+  Directory.ensure dest
+  Shell.copyDir (formatting @@ "styles") dest (fun _ -> true)
+
 let generateHelp() =
   File.delete "docs/content/release-notes.md"
   Shell.copyFile "docs/content/" "RELEASE_NOTES.md"

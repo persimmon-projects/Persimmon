@@ -19,6 +19,8 @@ let outDir = "bin"
 
 let configuration = Environment.environVarOrDefault "configuration" "Release"
 
+let release = ReleaseNotes.load "RELEASE_NOTES.md"
+
 Target.create "Clean" (fun _ ->
   !! "**/bin"
   ++ "**/obj"
@@ -66,6 +68,10 @@ Target.create "CleanDocs" (fun _ ->
   |> Shell.cleanDirs
 )
 
+Target.create "CopyCommonDocFiles" (fun _ ->
+  Docs.copyCommonFiles()
+)
+
 Target.create "GenerateHelp" (fun _ ->
   Docs.generateHelp()
 )
@@ -84,6 +90,7 @@ Target.create "GenerateDocs" ignore
   ==> "All"
 
 "CleanDocs"
+  ==> "CopyCommonDocFiles"
   ==> "GenerateHelp"
   ==> "GenerateReferenceDocs"
   ==> "GenerateDocs"

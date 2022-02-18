@@ -16,6 +16,7 @@ group Build
   nuget Fake.Core.String
   nuget Fake.Core.Process
   nuget Fake.Core.Trace
+  nuget Fake.Core.ReleaseNotes 
   nuget Fake.Testing.Common
   nuget Fake.DotNet.FSFormatting
 
