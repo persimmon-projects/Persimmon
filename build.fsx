@@ -12,12 +12,24 @@ open Fake.IO.FileSystemOperators
 open Fake.IO.Globbing.Operators
 open Fake.Core.TargetOperators
 open Fake.DotNet.Testing.Persimmon
+open Fake.Tools.Git
 
 Target.initEnvironment ()
 
 let outDir = "bin"
 
 let configuration = Environment.environVarOrDefault "configuration" "Release"
+
+// Git configuration (used for publishing documentation in gh-pages branch)
+// The profile where the project is posted
+let gitOwner = "persimmon-projects"
+let gitHome = "git@github.com:" + gitOwner
+
+// The name of the project on GitHub
+let gitName = "Persimmon"
+
+// The url for the raw files hosted
+let gitRaw = Environment.environVarOrDefault "gitRaw" "https://raw.github.com/persimmon-projects"
 
 let release = ReleaseNotes.load "RELEASE_NOTES.md"
 
@@ -80,8 +92,20 @@ Target.create "GenerateReferenceDocs" (fun _ ->
   Docs.generateReference()
 )
 
-Target.create "All" ignore
 Target.create "GenerateDocs" ignore
+
+Target.create "ReleaseDocs" (fun _ ->
+  let tempDocsDir = "temp/gh-pages"
+  Shell.cleanDir tempDocsDir
+  Repository.cloneSingleBranch "" (gitHome + "/" + gitName + ".git") "gh-pages" tempDocsDir
+
+  Shell.copyRecursive Docs.output tempDocsDir true |> Trace.tracefn "%A"
+  Staging.stageAll tempDocsDir
+  Commit.exec tempDocsDir (sprintf "Update generated documentation for version %s" release.NugetVersion)
+  Branches.push tempDocsDir
+)
+
+Target.create "All" ignore
 
 "Clean"
   ==> "Build"
@@ -94,5 +118,6 @@ Target.create "GenerateDocs" ignore
   ==> "GenerateHelp"
   ==> "GenerateReferenceDocs"
   ==> "GenerateDocs"
+  ==> "ReleaseDocs"
 
 Target.runOrDefault "All"
