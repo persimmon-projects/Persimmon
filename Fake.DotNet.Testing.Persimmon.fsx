@@ -62,7 +62,7 @@ let internal buildPersimmonArgs parameters =
       yield "--parallel"
   }
 
-let Persimmon setParams =
+let run' setParams =
   let parameters = setParams PersimmonDefaults
   let details = FileInfo.ofPath(parameters.ToolPath).Name
   use traceTask = Trace.traceTask "Persimmon" details
@@ -80,3 +80,7 @@ let Persimmon setParams =
     traceTask.MarkFailed()
   else
     traceTask.MarkSuccess()
+
+  procResult
+
+let run setParams = run' setParams |> ignore

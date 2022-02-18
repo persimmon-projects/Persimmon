@@ -9,7 +9,7 @@ open Fake.Api
 open Fake.Core
 open Fake.Core.TargetOperators
 open Fake.DotNet
-open Fake.DotNet.Testing.Persimmon
+open Fake.DotNet.Testing
 open Fake.IO
 open Fake.IO.FileSystemOperators
 open Fake.IO.Globbing.Operators
@@ -105,23 +105,31 @@ Target.create "Build" (fun _ ->
 let consoleRunnerTestAssemblies = !! ("tests/**/bin/" @@ configuration @@ "/net462/*Tests.dll")
 let exeTestAssemblies = !! ("tests/**/bin/" @@ configuration @@ "/*/*Tests.exe")
 
-Target.create "RunTests" (fun _ ->
-  consoleRunnerTestAssemblies
-  |> Fake.PersimmonConsole.Persimmon (fun p ->
-  { p with
-      ToolPath = ProcessUtils.findFile [ "./src/Persimmon.Console/bin/" @@ configuration @@ "/net462" ] "Persimmon.Console.exe"
-      Output = Fake.PersimmonConsole.OutputDestination.XmlFile "TestResult.Console.xml"
-  })
+Target.create "RunTests" (fun ctx ->
+  let testResult =
+    seq {
+      yield
+        consoleRunnerTestAssemblies
+        |> Fake.PersimmonConsole.run' (fun p ->
+        { p with
+            ToolPath = ProcessUtils.findFile [ "./src/Persimmon.Console/bin/" @@ configuration @@ "/net462" ] "Persimmon.Console.exe"
+            Output = Fake.PersimmonConsole.XmlFile "TestResult.Console.xml"
+            ErrorLevel = Fake.Testing.Common.DontFailBuild
+        })
 
-  exeTestAssemblies
-  |> Seq.iter (fun exe ->
-    let fileName = FileInfo.ofPath(exe).Name
-    Persimmon (fun p ->
-      { p with
-          ToolPath = exe
-          Output = OutputDestination.XmlFile ($"TestResult.{fileName}.xml")
-      })
-  )
+      for exe in exeTestAssemblies do
+        let fileName = FileInfo.ofPath(exe).Name
+        yield
+          Persimmon.run' (fun p ->
+            { p with
+                ToolPath = exe
+                Output = Persimmon.XmlFile ($"TestResult.{fileName}.xml")
+                ErrorLevel = Fake.Testing.Common.DontFailBuild
+            })
+    }
+    |> Seq.forall (fun result -> result.ExitCode = 0)
+  
+  if not testResult then failwith "Some tests failed."
 )
 
 // --------------------------------------------------------------------------------------

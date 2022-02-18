@@ -66,7 +66,7 @@ let internal buildPersimmonArgs parameters assemblies =
     yield! assemblies
   }
 
-let Persimmon setParams assemblies =
+let run' setParams assemblies =
   let details = String.separated ", " (assemblies |> Seq.map (fun p -> FileInfo.ofPath(p).Name))
   use traceTask = Trace.traceTask "Persimmon.Console" details
   
@@ -85,3 +85,7 @@ let Persimmon setParams assemblies =
     traceTask.MarkFailed()
   else
     traceTask.MarkSuccess()
+
+  procResult
+
+let run setParams assemblies = run' setParams assemblies |> ignore
