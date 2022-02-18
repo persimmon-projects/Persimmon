@@ -95,10 +95,27 @@ Target.create "NuGet" (fun _ ->
     Arguments.OfArgs([ "pack" ])
     |> Arguments.append [ "--version"; release.NugetVersion ]
     |> Arguments.append [ "--release-notes"; System.Net.WebUtility.HtmlEncode(release.Notes |> String.concat System.Environment.NewLine) ]
-    |> Arguments.append [ "bin" ]
+    |> Arguments.append [ outDir ]
   let result = DotNet.exec id "paket" (args.ToWindowsCommandLine)
   if not result.OK then failwith "Error during packing."
   trace.MarkSuccess()
+)
+
+Target.create "PublishNuget" (fun _ ->
+  let apiKey = Environment.environVar "api-key"
+  if (String.isNullOrEmpty apiKey = false) then TraceSecrets.register "<api-key>" apiKey
+
+  !! (outDir @@ "/**/*.nupkg")
+  |> Seq.iter (fun package ->
+    use trace = Trace.traceTask "PaketPublish" package
+    let args =
+      Arguments.OfArgs([ "push" ])
+      |> Arguments.appendNotEmpty "--api-key" apiKey
+      |> Arguments.append([ package ])
+    let result = DotNet.exec id "paket" (args.ToWindowsCommandLine)
+    if not result.OK then failwithf "Error during pushing %s" package
+    trace.MarkSuccess()
+  )
 )
 
 // --------------------------------------------------------------------------------------
