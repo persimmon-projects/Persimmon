@@ -21,6 +21,8 @@ let outDir = "bin"
 
 let configuration = Environment.environVarOrDefault "configuration" "Release"
 
+let project = "Persimmon"
+
 // Git configuration (used for publishing documentation in gh-pages branch)
 // The profile where the project is posted
 let gitOwner = "persimmon-projects"
@@ -38,6 +40,41 @@ Target.create "CopyBinaries" (fun _ ->
   !! "src/**/*.??proj"
   |>  Seq.map (fun f -> ((System.IO.Path.GetDirectoryName f) @@ "bin" @@ configuration, outDir @@ (System.IO.Path.GetFileNameWithoutExtension f)))
   |>  Seq.iter (fun (fromDir, toDir) -> Shell.copyDir toDir fromDir (fun _ -> true))
+)
+
+let (|Fsproj|Csproj|Vbproj|Shproj|) (projFileName:string) =
+  match projFileName with
+  | f when f.EndsWith("fsproj") -> Fsproj
+  | f when f.EndsWith("csproj") -> Csproj
+  | f when f.EndsWith("vbproj") -> Vbproj
+  | f when f.EndsWith("shproj") -> Shproj
+  | _                           -> failwith (sprintf "Project file %s not supported. Unknown project type." projFileName)
+
+Target.create "AssemblyInfo" (fun _ ->
+  let getAssemblyInfoAttributes projectName =
+      [ AssemblyInfo.Title (projectName)
+        AssemblyInfo.Product project
+        AssemblyInfo.Version release.AssemblyVersion
+        AssemblyInfo.FileVersion release.AssemblyVersion
+        AssemblyInfo.Configuration configuration ]
+
+  let getProjectDetails (projectPath: string) =
+      let projectName = System.IO.Path.GetFileNameWithoutExtension(projectPath)
+      ( projectPath,
+        projectName,
+        System.IO.Path.GetDirectoryName(projectPath),
+        (getAssemblyInfoAttributes projectName)
+      )
+
+  !! "src/**/*.??proj"
+  |> Seq.map getProjectDetails
+  |> Seq.iter (fun (projFileName, projectName, folderName, attributes) ->
+      match projFileName with
+      | Fsproj -> AssemblyInfoFile.createFSharp (folderName </> "AssemblyInfo.fs") attributes
+      | Csproj -> AssemblyInfoFile.createCSharp ((folderName </> "Properties") </> "AssemblyInfo.cs") attributes
+      | Vbproj -> AssemblyInfoFile.createVisualBasic ((folderName </> "My Project") </> "AssemblyInfo.vb") attributes
+      | Shproj -> ()
+      )
 )
 
 // --------------------------------------------------------------------------------------
@@ -171,6 +208,7 @@ Target.create "Release" (fun _ ->
 )
 
 "Clean"
+  ==> "AssemblyInfo"
   ==> "Build"
   ==> "CopyBinaries"
   ==> "RunTests"
@@ -178,6 +216,7 @@ Target.create "Release" (fun _ ->
   ==> "All"
 
 "CleanDocs"
+  ==> "CopyBinaries"
   ==> "CopyCommonDocFiles"
   ==> "GenerateHelp"
   ==> "GenerateReferenceDocs"

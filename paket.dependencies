@@ -18,6 +18,7 @@ group Build
   nuget Fake.Core.Trace
   nuget Fake.Core.ReleaseNotes 
   nuget Fake.Testing.Common
+  nuget Fake.DotNet.AssemblyInfoFile
   nuget Fake.DotNet.FSFormatting
   nuget Fake.Tools.Git
   nuget Fake.Api.GitHub
