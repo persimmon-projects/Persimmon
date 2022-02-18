@@ -20,8 +20,8 @@ group Build
   nuget Fake.Testing.Common
   nuget Fake.DotNet.FSFormatting
   nuget Fake.Tools.Git
+  nuget Fake.Api.GitHub
 
-  github fsharp/FAKE modules/Octokit/Octokit.fsx
   github persimmon-projects/Persimmon.Materials StandardIcons/persimmon.ico
   github persimmon-projects/Persimmon.Materials StandardIcons/persimmon_128.png
   github bluebird75/luaunit junitxml/junit-jenkins.xsd

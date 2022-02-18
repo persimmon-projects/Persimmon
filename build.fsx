@@ -13,6 +13,7 @@ open Fake.IO.Globbing.Operators
 open Fake.Core.TargetOperators
 open Fake.DotNet.Testing.Persimmon
 open Fake.Tools.Git
+open Fake.Api
 
 Target.initEnvironment ()
 
@@ -147,7 +148,27 @@ Target.create "ReleaseDocs" (fun _ ->
 )
 
 Target.create "All" ignore
-Target.create "Release" ignore
+
+Target.create "Release" (fun _ ->
+  Staging.stageAll ""
+  Commit.exec "" (sprintf "Bump version to %s" release.NugetVersion)
+  Branches.pushBranch "" "origin" "master"
+
+  Branches.tag "" release.NugetVersion
+  Branches.pushTag "" "origin" release.NugetVersion
+
+  
+  // release on github
+  //let user = Environment.environVar "github-user"
+  //if String.isNullOrEmpty user then TraceSecrets.register "<github-user>" user
+  //let password = Environment.environVar "github-pw"
+  //if String.isNotNullOrEmpty password then TraceSecrets.register "<github-pw>" password
+  //GitHub.createClient user password
+  //|> GitHub.draftNewRelease gitOwner gitName release.NugetVersion (release.SemVer.PreRelease <> None) release.Notes
+  //// TODO: |> uploadFile "PATH_TO_FILE"
+  //|> GitHub.publishDraft
+  //|> Async.RunSynchronously
+)
 
 "Clean"
   ==> "Build"
