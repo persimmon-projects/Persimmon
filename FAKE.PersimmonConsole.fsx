@@ -6,9 +6,9 @@ open System
 open System.IO
 open System.Text
 open Fake.Core
-open Fake.Testing.Common
 open Fake.IO
 open Fake.IO.FileSystemOperators
+open Fake.Testing.Common
 
 type OutputDestination =
   | Console

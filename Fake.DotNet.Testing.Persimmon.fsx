@@ -5,8 +5,8 @@ module Fake.DotNet.Testing.Persimmon
 open System
 open System.IO
 open Fake.Core
-open Fake.Testing.Common
 open Fake.IO
+open Fake.Testing.Common
 
 type OutputDestination =
   | Console

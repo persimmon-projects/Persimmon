@@ -5,15 +5,15 @@
 #load "Fake.DotNet.Testing.Persimmon.fsx"
 #load "generate.fsx"
 
+open Fake.Api
 open Fake.Core
+open Fake.Core.TargetOperators
 open Fake.DotNet
+open Fake.DotNet.Testing.Persimmon
 open Fake.IO
 open Fake.IO.FileSystemOperators
 open Fake.IO.Globbing.Operators
-open Fake.Core.TargetOperators
-open Fake.DotNet.Testing.Persimmon
 open Fake.Tools.Git
-open Fake.Api
 
 Target.initEnvironment ()
 
@@ -52,7 +52,7 @@ let (|Fsproj|Csproj|Vbproj|Shproj|) (projFileName:string) =
 
 Target.create "AssemblyInfo" (fun _ ->
   let getAssemblyInfoAttributes projectName =
-      [ AssemblyInfo.Title (projectName)
+      [ AssemblyInfo.Title projectName
         AssemblyInfo.Product project
         AssemblyInfo.Version release.AssemblyVersion
         AssemblyInfo.FileVersion release.AssemblyVersion
@@ -68,11 +68,11 @@ Target.create "AssemblyInfo" (fun _ ->
 
   !! "src/**/*.??proj"
   |> Seq.map getProjectDetails
-  |> Seq.iter (fun (projFileName, projectName, folderName, attributes) ->
+  |> Seq.iter (fun (projFileName, _, folderName, attributes) ->
       match projFileName with
       | Fsproj -> AssemblyInfoFile.createFSharp (folderName </> "AssemblyInfo.fs") attributes
-      | Csproj -> AssemblyInfoFile.createCSharp ((folderName </> "Properties") </> "AssemblyInfo.cs") attributes
-      | Vbproj -> AssemblyInfoFile.createVisualBasic ((folderName </> "My Project") </> "AssemblyInfo.vb") attributes
+      | Csproj -> AssemblyInfoFile.createCSharp (folderName </> "Properties" </> "AssemblyInfo.cs") attributes
+      | Vbproj -> AssemblyInfoFile.createVisualBasic (folderName </> "My Project" </> "AssemblyInfo.vb") attributes
       | Shproj -> ()
       )
 )
