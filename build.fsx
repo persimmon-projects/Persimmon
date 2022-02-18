@@ -147,11 +147,13 @@ Target.create "ReleaseDocs" (fun _ ->
 )
 
 Target.create "All" ignore
+Target.create "Release" ignore
 
 "Clean"
   ==> "Build"
   ==> "CopyBinaries"
   ==> "RunTests"
+  ==> "GenerateDocs"
   ==> "All"
 
 "CleanDocs"
@@ -159,6 +161,14 @@ Target.create "All" ignore
   ==> "GenerateHelp"
   ==> "GenerateReferenceDocs"
   ==> "GenerateDocs"
+
+"All"
   ==> "ReleaseDocs"
+  ==> "Release"
+
+"All"
+  ==> "NuGet"
+  ==> "PublishNuget"
+  ==> "Release"
 
 Target.runOrDefault "All"
