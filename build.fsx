@@ -87,6 +87,21 @@ Target.create "RunTests" (fun _ ->
 )
 
 // --------------------------------------------------------------------------------------
+// Build a NuGet package
+
+Target.create "NuGet" (fun _ ->
+  use trace = Trace.traceTask "PaketPack" "."
+  let args =
+    Arguments.OfArgs([ "pack" ])
+    |> Arguments.append [ "--version"; release.NugetVersion ]
+    |> Arguments.append [ "--release-notes"; System.Net.WebUtility.HtmlEncode(release.Notes |> String.concat System.Environment.NewLine) ]
+    |> Arguments.append [ "bin" ]
+  let result = DotNet.exec id "paket" (args.ToWindowsCommandLine)
+  if not result.OK then failwith "Error during packing."
+  trace.MarkSuccess()
+)
+
+// --------------------------------------------------------------------------------------
 // Generate the documentation
 
 Target.create "CopyCommonDocFiles" (fun _ ->
