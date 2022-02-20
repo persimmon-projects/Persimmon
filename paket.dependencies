@@ -1,39 +1,65 @@
-framework: netstandard1.6
+framework: netstandard2.0
 source https://api.nuget.org/v3/index.json
+storage: none
 
-nuget FSharp.Core >= 4.3.4 lowest_matching:true
+nuget FSharp.Core >= 5.0.0 lowest_matching:true
 nuget System.Xml.XDocument >= 4.3.0 lowest_matching:true
 
 group Build
-  framework: net451
-  redirects: on
+  framework: net60
   source https://api.nuget.org/v3/index.json
+  storage: none
 
-  nuget FAKE
-  nuget FAKE.Persimmon
-  nuget NuGet.CommandLine
-  nuget SourceLink.Fake
-  nuget FSharp.Formatting
+  nuget Fake.Api.GitHub
+  nuget Fake.Core.Process
+  nuget Fake.Core.ReleaseNotes 
+  nuget Fake.Core.String
+  nuget Fake.Core.Target
+  nuget Fake.Core.Trace
+  nuget Fake.DotNet.AssemblyInfoFile
+  nuget Fake.DotNet.Cli
+  nuget Fake.DotNet.FSFormatting
+  nuget Fake.IO.FileSystem
+  nuget Fake.Testing.Common
+  nuget Fake.Tools.Git
 
-  github fsharp/FAKE modules/Octokit/Octokit.fsx
   github persimmon-projects/Persimmon.Materials StandardIcons/persimmon.ico
   github persimmon-projects/Persimmon.Materials StandardIcons/persimmon_128.png
   github bluebird75/luaunit junitxml/junit-jenkins.xsd
 
-group Latest
-  framework: net45
+group Formatting
+  framework: net60
   source https://api.nuget.org/v3/index.json
+  storage: packages
 
-  nuget FSharp.Core = 4.3.4
+  nuget FSharp.Formatting.CommandTool = 4.1.0
+
+group Latest
+  framework: netstandard2.0
+  source https://api.nuget.org/v3/index.json
+  storage: none
+
+  nuget FSharp.Core = 6.0.3
 
 group Legacy
-  framework: net45
+  framework: netstandard2.0
   source https://api.nuget.org/v3/index.json
+  storage: none
 
-  nuget FSharp.Core >= 3.1.2.5 lowest_matching:true
+  nuget FSharp.Core >= 5.0.0 lowest_matching:true
 
-group DifferentVersion
-  framework: net45
+group Net462_FS5
+  framework: net462
   source https://api.nuget.org/v3/index.json
+  storage: none
 
-  nuget FSharp.Core >= 4.2.3 lowest_matching:true
+  nuget FSharp.Core = 5.0.0
+  nuget System.Configuration.ConfigurationManager >= 6.0.0 lowest_matching:true
+
+group Net462_FS6
+  framework: net462
+  source https://api.nuget.org/v3/index.json
+  storage: none
+
+  nuget FSharp.Core = 6.0.0
+  nuget System.Configuration.ConfigurationManager >= 6.0.0 lowest_matching:true

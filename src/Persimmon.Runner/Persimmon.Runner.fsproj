@@ -1,21 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>Persimmon.Runner</AssemblyName>
-    <TargetFrameworks>net45;netstandard1.6</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyOriginatorKeyFile>../../Persimmon.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)'=='netstandard1.6'">
-    <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
-  </PropertyGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="Writable.fs" />
-    <Compile Include="Formatter.fs" />
-    <Compile Include="Printer.fs" />
-    <Compile Include="Reporter.fs" />
+    <Compile Include="Output\Writable.fs" />
+    <Compile Include="Output\Formatter.fs" />
+    <Compile Include="Output\Printer.fs" />
+    <Compile Include="Output\Reporter.fs" />
+    <Compile Include="Console\Args.fs" />
+    <Compile Include="Console\RunnerStrategy.fs" />
+    <Compile Include="Console\Runner.fs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="paket.references" />

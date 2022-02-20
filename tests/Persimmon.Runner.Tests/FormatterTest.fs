@@ -13,7 +13,6 @@ open Persimmon.Output
 module Xml =
 
   let xsd = Path.Combine(__SOURCE_DIRECTORY__, @"..\..\paket-files\build\bluebird75\luaunit\junitxml\junit-jenkins.xsd")
-  let outFile uid = Path.Combine(__SOURCE_DIRECTORY__, @"..\..\temp\" + uid + ".xml")
 
   let validate tests = test {
     use reader = new StreamReader(xsd)
@@ -21,13 +20,13 @@ module Xml =
     schemas.Add("", XmlReader.Create(reader)) |> ignore
     let watch = Stopwatch()
     let formatter = Formatter.XmlFormatter.junitStyle watch
-    let filePath = Guid.NewGuid().ToString() |> outFile
-    let writer = new StreamWriter(filePath)
+    let memory = new MemoryStream()
+    use writer = new StreamWriter(memory)
     formatter.Format(
       Internals.TestRunnerImpl.runTests ignore Internals.TestRunnerImpl.asyncSequential (fun _ -> true) tests |> Async.RunSynchronously
     ).WriteTo(writer)
-    writer.Dispose()
-    let doc = XDocument.Load(filePath)
+    memory.Position <- 0
+    let doc = XDocument.Load(new StreamReader(memory))
     let mutable ex: (exn * string) option = None
     doc.Validate(schemas, ValidationEventHandler(fun _ e ->
       ex <- Some((e.Exception :> exn, e.Message)

@@ -8,28 +8,12 @@ open Persimmon
 module internal TestCollectorImpl =
 
   let publicTypes (asm: Assembly) =
-#if NETSTANDARD
-    asm.ExportedTypes
-    |> Seq.filter (fun typ ->
-      let typ = typ.GetTypeInfo()
-      typ.IsClass && not typ.IsGenericTypeDefinition
-    )
-#else
     asm.GetTypes()
     |> Seq.filter (fun typ -> typ.IsPublic && typ.IsClass && not typ.IsGenericTypeDefinition)
-#endif
 
   let private publicNestedTypes (typ: Type) =
-#if NETSTANDARD
-    typ.GetTypeInfo().DeclaredNestedTypes
-    |> Seq.choose (fun typ ->
-      if typ.IsNestedPublic && typ.IsClass && not typ.IsGenericTypeDefinition then
-        Some(typ.AsType())
-      else None)
-#else
     typ.GetNestedTypes()
     |> Seq.filter (fun typ -> typ.IsNestedPublic && typ.IsClass && not typ.IsGenericTypeDefinition)
-#endif
 
   /// Traverse test instances recursive.
   /// <param name="partialSuggest">Nested sequence children is true: symbol naming is pseudo.</param>
@@ -79,29 +63,15 @@ module internal TestCollectorImpl =
   }
 
   let typedefis<'T>(typ: Type) =
-#if NETSTANDARD
-    typ.GetTypeInfo().IsGenericType
-#else
     typ.IsGenericType
-#endif
     && typ.GetGenericTypeDefinition() = typedefof<'T>
 
   let (|SubTypeOf|_|) (matching: Type) (typ: Type) =
-#if NETSTANDARD
-    if matching.GetTypeInfo().IsAssignableFrom(typ.GetTypeInfo()) then Some typ else None
-#else
     if matching.IsAssignableFrom(typ) then Some typ else None
-#endif
   let (|ArrayType|_|) (typ: Type) = if typ.IsArray then Some (typ.GetElementType()) else None
   let (|GenericType|_|) (typ: Type) =
-#if NETSTANDARD
-    let info = typ.GetTypeInfo()
-    if info.IsGenericType then
-      Some (typ.GetGenericTypeDefinition(), info.GenericTypeArguments)
-#else
     if typ.IsGenericType then
       Some (typ.GetGenericTypeDefinition(), typ.GetGenericArguments())
-#endif
     else
       None
 
@@ -129,12 +99,7 @@ module internal TestCollectorImpl =
     collectPersimmonTests (fun () -> m.Invoke(null, [||])) m.ReturnType m.Name
 
   let private collectCategories (typ: Type) =
-#if NETSTANDARD
-    let info = typ.GetTypeInfo()
-    info.GetCustomAttributes(typeof<CategoryAttribute>, true)
-#else
     typ.GetCustomAttributes(typeof<CategoryAttribute>, true)
-#endif
     |> Seq.collect (fun attr -> (attr :?> CategoryAttribute).Categories)
     |> Seq.toArray
 
@@ -144,44 +109,22 @@ module internal TestCollectorImpl =
       // For properties (value binding):
       yield!
         typ
-#if NETSTANDARD
-          .GetTypeInfo().DeclaredProperties
-        |> Seq.filter (fun p ->
-          let m = p.GetMethod
-          (m <> null) && m.IsStatic && m.IsPublic
-            // Ignore setter only property / indexers
-            && p.CanRead && (p.GetIndexParameters() |> Array.isEmpty)
-        )
-#else
           .GetProperties(BindingFlags.Static ||| BindingFlags.Public)
         // Ignore setter only property / indexers
         |> Seq.filter (fun p -> p.CanRead && (p.GetGetMethod() <> null) && (p.GetIndexParameters() |> Array.isEmpty))
-#endif
         |> Seq.collect collectTestsFromProperty
       // For methods (function binding):
       yield!
         typ
-#if NETSTANDARD
-          .GetTypeInfo().DeclaredMethods
-        // Ignore getter methods / open generic methods / method has parameters
-        |> Seq.filter (fun m ->
-          m.IsStatic && m.IsPublic &&
-          not m.IsSpecialName && not m.IsGenericMethodDefinition && (m.GetParameters() |> Array.isEmpty)
-        )
-#else
           .GetMethods(BindingFlags.Static ||| BindingFlags.Public)
         // Ignore getter methods / open generic methods / method has parameters
         |> Seq.filter (fun m -> not m.IsSpecialName && not m.IsGenericMethodDefinition && (m.GetParameters() |> Array.isEmpty))
-#endif
         |> Seq.collect collectTestsFromMethod
       // For nested modules:
-#if NETSTANDARD
-#else
       for nestedType in publicNestedTypes typ do
         match collectTestsAsContext nestedType with
         | Some t -> yield t
         | None -> ()
-#endif
     }
   and private collectTestsAsContextImpl name (typ: Type) =
     let tests = collectTests typ |> Seq.toArray
